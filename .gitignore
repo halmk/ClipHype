@@ -1,2 +1,4 @@
-
-cliphype/cliphype/.env
+*.log
+*.pyc
+__pycache__/
+cliphype/.env
