@@ -2,3 +2,5 @@
 *.pyc
 __pycache__/
 cliphype/.env
+
+cliphype/cliphype/local_settings.py
