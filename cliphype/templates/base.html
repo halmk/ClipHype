@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+  <head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{% block head_title %}{% endblock %}</title>
+		<link rel="stylesheet" type="text/css" href="{% static 'app/css/bootstrap.min.css' %}">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.2/css/all.min.css">
+		<link rel="stylesheet" type="text/css" href="{% static 'app/css/style.css' %}">
+		<link rel="shortcut icon" type="image/png" href="{% static 'app/favicon.ico' %}"/>
+    {% block extra_head %}
+    {% endblock %}
+  </head>
+  <body class="bg-twitch-dark text-light">
+    {% block body %}
+		<!-- HEADER -->
+	<nav class="navbar navbar-expand-md navbar-white bg-dark navbar-clip shadow-sm">
+			<div class="container">
+				<a class="navbar-brand font-weight-bold text-light" href="/">CLIP HYPE<small class="ml-1">beta</small></a>
+				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-content">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbar-content">
+					<ul class="navbar-nav mr-auto d-inline">
+					</ul>
+						<ul class="navbar-nav">
+							<li class="navbar-item">
+							</li>
+						</ul>
+				</div>
+			</div>
+		</nav>
+			<!-- /HEADER -->
+    {% block content %}
+    {% endblock %}
+    {% endblock %}
+
+
+		<script src="{% static 'app/js/jquery-3.4.1.slim.min.js' %}"></script>
+		<script src="{% static 'app/js/bootstrap.bundle.min.js' %}"></script>
+		<script src="{% static 'app/js/vue.min.js' %}"></script>
+		<script src="https://momentjs.com/downloads/moment.js"></script>
+		<script src="https://unpkg.com/vuejs-paginate@latest"></script>
+		<script src="https://unpkg.com/vuejs-datepicker"></script>
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+    {% block extra_script %}
+    {% endblock %}
+  </body>
+</html>

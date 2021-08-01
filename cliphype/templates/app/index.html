@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+{% load static %}
+{% load socialaccount %}
+
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-149371719-1"></script>
+	<script>
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+
+	gtag('config', 'UA-149371719-1');
+	</script>
+	<script data-ad-client="ca-pub-7556965120005498" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Clips to Highlights video converter | ClipHype</title>
+	<link href="https://fonts.googleapis.com/css?family=M+PLUS+1p|Notable|Poppins&display=swap" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="{% static 'app/css/bootstrap.min.css' %}">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.2/css/all.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome-animation/0.2.1/font-awesome-animation.min.css">
+	<link rel="stylesheet" type="text/css" href="{% static 'app/css/style.css' %}">
+	<link rel="shortcut icon" type="image/png" href="{% static 'app/favicon.ico' %}"/>
+	<style>
+		body {
+			font-family: 'Poppins', sans-serif;
+		}
+    </style>
+</head>
+<body class="bg-light">
+<div id="app">
+    <!-- HEADER -->
+    <nav class="navbar navbar-expand navbar-white bg-white navbar-clip shadow-sm">
+    <div class="container">
+        <div class="mr-1">
+            <a class="navbar-brand font-weight-bold text-dark" href="/">CLIPHYPE<small class="ml-1 badge badge-light text-secondary">beta</small></a>
+        </div>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-content">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbar-content">
+            <ul class="navbar-nav mr-auto">
+				<li class="navbar-item p-1 rounded shadow bg-twitch"><a class="text-white font-weight-bold" href="{% url 'studio' %}">Studio</a></li>
+            </ul>
+                <ul class="navbar-nav">
+                    <li class="navbar-item">
+                        {% if user.is_authenticated %}
+                        <div class="font-weight-bold text-dark">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-default border dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <img src="{{ twitch_account.profile_image_url }}" class="rounded-circle" width="25">
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="ml-3 text-dark" href="{% url 'report' %}">Report</a></li>
+                                    <li><a class="ml-3 text-dark" href="{% url 'account_logout' %}">Logout</a></li>
+                                    <li><a class="ml-3 text-dark" href="{% url 'unlink' %}">Disconnect</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% else %}
+                        <a href="{% url 'account_login' %}" class="btn btn-primary">Login</a>
+                        {% endif %}
+                    </li>
+                </ul>
+        </div>
+    </div>
+</nav>
+<!-- /HEADER -->
+<!-- MAIN -->
+<div id="app">
+<div class="jumbotron">
+    <h1 class="display-2"><span class="text-twitch">Clips</span> to <span class="text-twitch">Highlights</span> video <span class="display-4 font-weight-bold">for <span class="bg-twitch text-light px-3 rounded shadow">Twitch</span></span></h1>
+    <hr class="my-4">
+    <a type="button" class="btn btn-lg btn-primary shadow" href="{% url 'account_login' %}">Sign in with Twitch</a>
+</div>
+
+<!--
+<div class="container py-3">
+    <h1>Features</h1>
+    <div class="row py-3 mt-4 shadow-sm">
+        <div class="col-md-6">
+            <h3>Select clips and transition</h3>
+        </div>
+        <div class="col-md-6">
+            <img src="{% static 'img/Twitch_Purple_RGB.png' %}" width="400px" alt="First feature">
+        </div>
+    </div>
+    <div class="row py-3 mt-4 shadow-sm">
+        <div class="col-md-6">
+            <img src="{% static 'img/Combo_Purple_RGB.png' %}" width="400px" alt="Second feature">
+        </div>
+        <div class="col-md-6">
+            <h3>Rich Transitions</h3>
+        </div>
+    </div>
+    <div class="row py-3 mt-4 shadow-sm">
+        <div class="col-md-6">
+            <h3>Automation Create Clips</h3>
+        </div>7
+        <div class="col-md-6">
+            <img src="{% static 'img/Twitch_White_RGB.png' %}" width="400px" class="bg-dark p-1" alt="Third feature">
+        </div>
+    </div>
+    <h1 class="py-3 mt-4">Usage</h1>
+    <div id="usage" class="carousel slide py-3 mt-4" data-ride="carousel" style="width:400px">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="{% static 'img/Twitch_White_RGB.png' %}" width="400px" alt="First slide">
+            </div>
+            <div class="carousel-item">
+                <img src="{% static 'img/Twitch_Purple_RGB.png' %}" width="400px" alt="Second slide">
+            </div>
+            <div class="carousel-item">
+                <img src="{% static 'img/Twitch_White_RGB.png' %}" width="400px" alt="Third slide">
+            </div>
+            <div class="carousel-item">
+                <img src="{% static 'img/Twitch_Purple_RGB.png' %}" width="400px" alt="Fourth slide">
+            </div>
+            <a class="carousel-control-prev" href="#usage" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#usage" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+    </div>
+    <button type="button" class="my-4 btn btn-lg btn-primary">Sign in</button>
+</div>
+-->
+</div>
+<!-- /MAIN -->
+<!-- FOOTER -->
+<footer class="py-4 bg-dark text-light">
+    <div class="container text-center">
+        <p><small class="font-weight-bold">Contact @</small>
+            <a href="https://twitter.com/HrmkJpn" target="_blank"><i class="fab fa-twitter-square ml-1" style="color:white; font-size: 1.5em"></i></a>
+        </p>
+    </div>
+    <div class="text-center">
+        <a href="{% url 'policy' %}" class="text-light font-weight-bold">Privacy Policy</a>
+    </div>
+</footer>
+<!-- /FOOTER -->
+</body>
+<script src="{% static 'app/js/jquery-3.4.1.slim.min.js' %}"></script>
+<script src="{% static 'app/js/bootstrap.bundle.min.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+<script src="https://momentjs.com/downloads/moment.js"></script>
+<script src="https://unpkg.com/vuejs-paginate@latest"></script>
+<script src="https://unpkg.com/vuejs-datepicker"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.529.0.min.js"></script>
+
+</html>
