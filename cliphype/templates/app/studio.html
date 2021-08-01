@@ -1,0 +1,509 @@
+{% extends "app/base.html" %}
+{% load static %}
+{% load socialaccount %}
+
+{% block head_title %}{{ user.username }} | ClipHype{% endblock %}
+
+{% block content %}
+<div class="container">
+    <label class="d-inline-flex mt-2 mb-3">
+        <h3 class="text-dark font-weight-bold">Streamer</h3>
+        <input type="text" v-model="streamerName" class="input-lg border rounded shadow-sm pl-2 py-1 ml-3" required>
+        <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getClientId">
+            GO
+        </button>
+    </label>
+
+    <!-- ARCHIVE AREA -->
+    <div class="p-3 shadow mb-4 bg-white section" id="archive">
+        <h2>
+            <a class="text-dark text-decoration-none font-weight-bold" role="button" href="#archive" data-toggle="tooltip" title="Click archive to show clips created during the stream" data-placement="right">
+            Channel Archive
+            </a>
+        </h2>
+    <div class="row justify-content-center text-white">
+            <paginate class="justify-content-center mt-4" v-model="videosCurrentPage"
+                    :page-count="getVideosPageCount"
+                    :page-range="0"
+                    :margin-pages="0"
+                    :click-handler="clickVideosCallback"
+                    :prev-text="'<'"
+                    :next-text="''"
+                    :break-view-text="''"
+                    :container-class="'pagination'"
+                    :prev-class="'page-item'"
+                    :prev-link-class="'page-link rounded-circle mt-3 mr-2 bg-light shadow-sm'"
+                    >
+            </paginate>
+        <div class="bg-dark m-1" v-for="item in getVideosItems">
+            <div class="card border-0 shadow">
+                <a href="#archive" v-on:click="setArchiveDate(item)">
+                <div class="card-img">
+                    <img class="" v-bind:src="item.thumbnail_url" width="200">
+                </div>
+                <div class="card-img-overlay archive-img text-white">
+                    <div class="card-text archive-text overflow-hidden">
+                        <span class="badge archive-title rounded p-1">[[ item.title ]]</span>
+                    </div>
+                        <div class="archive-bottom">
+                            <div class="badge archive-duration rounded">[[ item.duration ]]</div>
+                            <div class="badge archive-date rounded">[[ item.date ]]</div>
+                        </div>
+                </div>
+                </a>
+            </div>
+        </div>
+            <paginate class="justify-content-center mt-4" v-model="videosCurrentPage"
+                    :page-count="getVideosPageCount"
+                    :page-range="0"
+                    :margin-pages="0"
+                    :click-handler="clickVideosCallback"
+                    :prev-text="''"
+                    :next-text="'>'"
+                    :break-view-text="''"
+                    :container-class="'pagination'"
+                    :next-class="'page-item'"
+                    :next-link-class="'page-link rounded-circle mt-3 ml-2 bg-light shadow-sm'"
+                    >
+            </paginate>
+        </div>
+    </div>
+    <!-- /ARCHIVE AREA -->
+
+    <!-- CLIPS AREA -->
+    <div class="shadow section bg-white" id="clips">
+        <div class="row m-1">
+            <div class="col border-0">
+                <nav aria-label="Page navigation">
+                    <nav class="navbar navbar-dark text-dark">
+                        <div class="row">
+                            <button class="btn btn-outline-primary font-weight-bold" data-toggle="button" v-on:click="published = !published">Published</button>
+                            <button type="button" class="btn btn-success ml-2 font-weight-bold" v-on:click="getAfterClips">More</button>
+                            </div>
+                        <div class="row py-2">
+                        <datepicker
+                                v-model="datepickerStartedAt"
+                                :format="DatePickerFormat"
+                                name="datepickerStartedAt"
+                                class="d-inline-flex mr-2 py-1">
+                        </datepicker>
+                        <span class="text-center mt-2 font-weight-bold">~</span>
+                        <datepicker
+                                v-model="datepickerEndedAt"
+                                :format="DatePickerFormat"
+                                name="datepickerEndedAt"
+                                class="d-inline-flex ml-2 py-1">
+                        </datepicker>
+                            <button type="button" v-on:click="getClips" class="btn btn-primary ml-2 shadow-sm font-weight-bold">Search</button>
+                            </div>
+                    </nav>
+                <paginate class="justify-content-center" v-model="clipsCurrentPage"
+                    :page-count="getClipsPageCount"
+                    :page-range="3"
+                    :margin-pages="2"
+                    :click-handler="clickClipsCallback"
+                    :prev-text="'<'"
+                    :next-text="'>'"
+                    :container-class="'pagination'"
+                    :page-class="'page-item'"
+                    :prev-class="'page-item'"
+                    :next-class="'page-item'"
+                    :page-link-class="'page-link'"
+                    :prev-link-class="'page-link'"
+                    :next-link-class="'page-link'">
+                </paginate>
+                <div class="row">
+                        <div class="my-2 col-lg-6 col-xl-4" v-for="item in getClipsItems">
+                            <form action="{% url 'download' %}" method="post">
+                                {% csrf_token %}
+                            <div class="card border-0 rounded shadow bg-light">
+                                <div class="card border-0">
+                                    <a v-on:click="openClipModal(item.embed_url)" style="cursor: pointer">
+                                        <img class="card-img" v-bind:src="item.thumbnail_url">
+                                    <div class="card-img-overlay">
+                                        <p class="card-text text-white overflow-hidden text-title-parent">
+                                        <span class="text-title badge badge-dark px-1 font-weight-bold">[[ item.title ]]</span>
+                                    </p>
+                                        <div class="h-100 d-flex flex-column justify-content-end">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="text-white text-views rounded px-1 font-weight-bold">views:[[ item.view_count ]]</div>
+                                                <div class="text-white text-date rounded px-1 font-weight-bold">[[ item.created_at ]]</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </a>
+                                </div>
+                                <div class="card-body mt-1">
+                                    <button type="submit" class="btn btn-outline-success rounded shadow-sm" name="id" v-bind:value="item.id"><i class="fas fa-download" style="font-size: 1.0em"></i></button>
+                                    <button type="button" class="btn btn-outline-info rounded shadow-sm ml-2" v-on:click="appendClip(item)"><i class="fas fa-plus"></i></button>
+                                </div>
+                            </div>
+                            </form>
+                        </div>
+                        <div class="modal fade" id="clipModal" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                                <div class="modal-content bg-dark">
+                                    <div class="embed-responsive embed-responsive-16by9">
+                                    <iframe class="embed-responsive-item"
+                                                    v-bind:src="clipEmbedUrl"
+                                                    frameborder="0"
+                                                    scrolling="no">
+                                    </iframe>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                <paginate class="justify-content-center mt-3" v-model="clipsCurrentPage"
+                :page-count="getClipsPageCount"
+                :page-range="3"
+                :margin-pages="2"
+                :click-handler="clickClipsCallback"
+                :prev-text="'<'"
+                :next-text="'>'"
+                :container-class="'pagination'"
+                :page-class="'page-item'"
+                :prev-class="'page-item'"
+                :next-class="'page-item'"
+                :page-link-class="'page-link'"
+                :prev-link-class="'page-link'"
+                :next-link-class="'page-link'">
+                </paginate>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <!-- /CLIPS AREA -->
+
+    <!-- TIMELINE AREA -->
+    <section id="timeline">
+    <div class="p-3 my-4 shadow section bg-white">
+    <div class="row pt-2">
+        <div class="col pb-3">
+            <h2>
+                <a class="text-dark text-decoration-none font-weight-bold" role="button" href="#timeline" data-toggle="tooltip" title="Create a video from inserted clips" data-placement="right">
+                Clips to Highlight
+                </a>
+            </h2>
+            <span class="text-secondary ml-2 mb-1">
+                Press
+                <span class="btn btn-sm btn-outline-info rounded shadow-sm mx-1"><i class="fas fa-plus" style="font-size: 0.9em"></i></span>
+                button to add a clip
+            </span>
+            <p class="text-secondary mt-2">
+                <button class="btn btn-secondary ml-2" data-toggle="collapse" data-target="#timelineNote"
+                        aria-expand="false" aria-controls="digestNote">
+                    <i class="fas fa-exclamation-circle pt-1" style="font-size: 1.3em"></i>
+                    <span class="ml-1">Note</span>
+                </button>
+                <div class="collapse shadow-sm p-3 bg-light" id="timelineNote">
+                    <span class="d-block">・The digest video can be up to 5 minutes long.</span>
+                    <span class="d-block">・It takes more than several tens of minutes to complete the process.</span>
+                </div>
+            </p>
+        </div>
+    </div>
+        <div class="row px-3 pt-2 pb-3 m-1 shadow-sm rounded-lg bg-light">
+            <div class="col-12">
+            <p class="text-dark font-weight-bold">
+                <span>
+                    Current Clips : [[ timelineClips.length ]]
+                </span>
+                <span class="ml-2">
+                    <span v-bind:class="{ 'text-danger': playTimeExceeded }">
+                    Play time : [[ getClipsPlayTime ]]
+                    </span>
+                </span>
+                <!--
+                {% if not isGoogleConnect %}
+                <a href="{% provider_login_url "google" process="connect" %}">
+                    <button type="button" class="btn btn-danger">Youtube Connect</button>
+                </a>
+                {% endif %}
+                -->
+            </p>
+            </div>
+            <button type="button" class="btn btn-outline-dark mr-1 ml-4" v-on:click="prevClip">＜</button>
+            <div v-for="(item, index) in getTimelineItems" class="border border-secondary">
+                <div class="card border-0" v-on:mouseover="item.isHover = true" v-on:mouseleave="item.isHover = false">
+                    <div class="card-img">
+                        <img v-bind:src="item.thumbnail_url" width="120">
+                    </div>
+                    <div class="card-img-overlay">
+                        <span class="font-weight-bold font-italic text-light timelineIndex">[[ index + timelinePageIndex + 1 ]]</span>
+                        <div v-show="item.isHover">
+                            <a class="timelinePlay" v-on:click="openTimelineModal(item.embed_url)"><i class="far fa-play-circle text-light"></i></a>
+                            <a class="timelineRemove" v-on:click="removeTimelineClip(index)"><i class="fas fa-times-circle text-danger"></i></a>
+                            <a class="timelinePrev" v-on:click="movePrevTimelineClip(index)"><i class="fas fa-arrow-circle-left text-warning"></i></a>
+                            <a class="timelineNext" v-on:click="moveNextTimelineClip(index)"><i class="fas fa-arrow-circle-right text-warning"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-outline-dark ml-1" v-on:click="nextClip">＞</button>
+
+            <div class="modal fade" id="timelineModal" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div class="modal-content bg-dark">
+                        <div class="embed-responsive embed-responsive-16by9">
+                        <iframe class="embed-responsive-item"
+                                        v-bind:src="timelineEmbedUrl"
+                                        frameborder="0"
+                                        scrolling="no">
+                        </iframe>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- DIGEST OPTION -->
+        <div class="row p-3">
+                <div class="col-12 text-center mt-3">
+                    <label class="d-inline-flex">
+                        <h3 class="text-dark font-weight-bold">Title</h3>
+                        <input type="text" v-model="title" class="input-lg border rounded shadow-sm pl-2 py-1 ml-3" required>
+                    </label>
+                </div>
+                <div class="col-12 text-center pt-3">
+                    <div class="d-inline-flex">
+                        <h3 class="text-dark font-weight-bold">Transition</h3>
+                        <a href="https://gl-transitions.com/gallery" target="_blank"><h5 class="font-weight-bold ml-2 pt-2">Gallery</h5></a>
+                    </div>
+                </div>
+                <div class="col-12 text-center pt-3">
+                    <label class="d-inline-flex">
+                        <h4 class="text-dark font-weight-bold">Name</h4>
+                        <select class="form-control ml-3 px-3 shadow-sm border" v-model="transition">
+                            <option>Bounce</option>
+                            <option>BowTieHorizontal</option>
+                            <option>BowTieVertical</option>
+                            <option>ButterflyWaveScrawler</option>
+                            <option>CircleCrop</option>
+                            <option>ColourDistance</option>
+                            <option>CrazyParametricFun</option>
+                            <option>CrossZoom</option>
+                            <option>Directional</option>
+                            <option>DoomScreenTransition</option>
+                            <option>Dreamy</option>
+                            <option>DreamyZoom</option>
+                            <option>FilmBurn</option>
+                            <option>GlitchDisplace</option>
+                            <option>GlitchMemories</option>
+                            <option>GridFlip</option>
+                            <option>InvertedPageCurl</option>
+                            <option>LinearBlur</option>
+                            <option>Mosaic</option>
+                            <option>PolkaDotsCurtain</option>
+                            <option>Radial</option>
+                            <option>SimpleZoom</option>
+                            <option>StereoViewer</option>
+                            <option>Swirl</option>
+                            <option>TVStatic</option>
+                            <option>WaterDrop</option>
+                            <option>ZoomInCircles</option>
+                            <option>angular</option>
+                            <option>burn</option>
+                            <option>cannabisleaf</option>
+                            <option>circle</option>
+                            <option>circleopen</option>
+                            <option>colorphase</option>
+                            <option>crosshatch</option>
+                            <option>crosswarp</option>
+                            <option>cube</option>
+                            <option>directionalwarp</option>
+                            <option>directionalwipe</option>
+                            <option>displacement</option>
+                            <option>doorway</option>
+                            <option>fade</option>
+                            <option>fadecolor</option>
+                            <option>fadegrayscale</option>
+                            <option>flyeye</option>
+                            <option>heart</option>
+                            <option>hexagonalize</option>
+                            <option>kaleidoscope</option>
+                            <option>luma</option>
+                            <option>luminance_melt</option>
+                            <option>morph</option>
+                            <option>multiply_blend</option>
+                            <option>perlin</option>
+                            <option>pinwheel</option>
+                            <option>pixelize</option>
+                            <option>polar_function</option>
+                            <option>randomsquares</option>
+                            <option>ripple</option>
+                            <option>rotate_scale_fade</option>
+                            <option>squareswire</option>
+                            <option>squeeze</option>
+                            <option>swap</option>
+                            <option>undulatingBurnOut</option>
+                            <option>wind</option>
+                            <option>windowblinds</option>
+                            <option>windowslice</option>
+                            <option>wipeDown</option>
+                            <option>wipeLeft</option>
+                            <option>wipeRight</option>
+                            <option>wipeUp</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="col-12 text-center pt-3">
+                    <label class="d-inline-flex">
+                        <h4 class="text-dark font-weight-bold mr-3">Duration</h4>
+                        <input type="number" class="border shadow-sm px-2 rounded" v-model="duration" min="200" max="2000" step="100">
+                        <h6 class="text-dark font-weight-bold ml-1 pt-2">ms</h6>
+                    </label>
+                </div>
+                <div class="col-12 text-center py-3">
+                    <button class="btn btn-outline-primary btn-lg px-5 shadow-sm" v-bind:disabled="disabledCreateButton" v-on:click="postDigestInfo">
+                        CREATE
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- /DIGEST OPTION -->
+    </section>
+    <!-- /TIMELINE AREA -->
+
+    <!-- REQUESTED DIGEST AREA -->
+    <section id="digest">
+        <div class="row p-3 shadow section  bg-white">
+            <div class="col-12">
+                <h2 class="text-dark font-weight-bold">Highlight Videos</h2>
+            </div>
+            <div class="col-12">
+                <p class="text-secondary mt-2">
+                    <button class="btn btn-secondary ml-2" data-toggle="collapse" data-target="#digestNote"
+                            aria-expand="false" aria-controls="digestNote">
+                        <i class="fas fa-exclamation-circle pt-1" style="font-size: 1.3em"></i>
+                        <span class="ml-1">Note</span>
+                    </button>
+                    <div class="collapse shadow-sm p-3 bg-light" id="digestNote">
+                        <span class="d-block">・It takes more than several tens of minutes to complete the process.</span>
+                        <span class="d-block">・The video is available for 7 days after being requested.</span>
+                    </div>
+                </p>
+            </div>
+            <!-- DIGEST TABLE -->
+            <div class="table-responsive">
+            <table class="table m-2 table-hover shadow-sm">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Title</th>
+                        <th>Requested</th>
+                        <th>Status</th>
+                        <th>Download</th>
+                    </tr>
+                </thead>
+                    <tr v-for="highlight in getHighlightsItems">
+                        <td>
+                            [[ highlight.title ]]
+                        </td>
+                        <td>
+                            [[ formatRequested(highlight.created) ]]
+                        </td>
+                        <td>
+                            <div class="text-secondary" v-if="highlight.status == 'Pending'">
+                                <i class="fas fa-spinner faa-spin animated mr-1"></i>
+                                [[ highlight.status ]]
+                            </div>
+                            <div class="text-secondary" v-else-if="highlight.status == 'Processing'">
+                                <i class="fas fa-spinner faa-spin animated mr-1"></i>
+                                [[ highlight.status ]]
+                            </div>
+                            <div class="text-dark" v-else-if="highlight.status == 'Expired'">
+                                [[ highlight.status ]]
+                            </div>
+                            <div class="text-success font-weight-bold" v-else-if="highlight.status == 'Available'">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                [[ highlight.status ]]
+                            </div>
+                        </td>
+                        <td>
+                            <div class="" v-if="highlight.status == 'Available'">
+                                <a v-on:click="openDigestModal(highlight.task_id)" style="cursor: pointer">
+                                    <i class="fas fa-file-video faa-float animated shadow-sm text-twitch" style="font-size: 1.5em"></i>
+                                </a>
+                            </div>
+                            <div class="" v-else>
+                                -
+                            </div>
+                        </td>
+                    </tr>
+            </table>
+            </div>
+            <!-- /DIGEST TABLE -->
+        </div>
+        <div class="modal fade" id="digestModal" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div class="modal-content bg-dark">
+                        <div class="embed-responsive embed-responsive-16by9">
+                        <video class="embed-responsive-item" v-bind:src="digestUrl" controls>
+                        </video>
+                    </div>
+                    </div>
+                </div>
+            </div>
+    </section>
+    <!-- /REQUESTED DIGEST AREA -->
+
+    <!-- RECIEVED DIGESTS AREA -->
+    <section id="unrequested">
+        <div class="row p-3 my-4 shadow section bg-white">
+            <div class="col-12">
+                <h2 class="text-dark font-weight-bold">Highlights created by Followers</h2>
+            </div>
+            <!-- DIGEST TABLE -->
+            <div class="table-responsive">
+                <table class="table m-2 table-hover shadow-sm">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>Created</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    {% for digest in recieved_digests %}
+                    <tr>
+                        <td class="font-weight-bold">
+                            {{ digest.title }}
+                        </td>
+                        <td>
+                            {{ digest.created }}
+                        </td>
+                        <td>
+                            {{ digest.status }}
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" v-on:click="editRecievedHighlight('{{ digest.clips }}')">Edit</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <!-- /DIGEST TABLE -->
+        </div>
+    </section>
+    <!-- /RECIEVED DIGESTS AREA -->
+
+
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+    var token = "";
+    if (location.hash) {
+        token = location.hash.match(/access_token=(.*)&scope/)[1];
+        alert(`${location.hash}`);
+    }
+    const user_pk = "{{ request.user.pk }}";
+    const username = "{{ request.user.username }}";
+    const highlight_url = "{% url 'highlight-list' %}";
+    const task_url = "{% url 'task-list' %}";
+    const studio_url = "{% url 'studio' %}";
+    const api_url = "{% url 'twitch_api' %}";
+</script>
+<script src="{% static 'app/js/twitch-api.js' %}"></script>
+<script src="{% static 'app/js/studio.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+  <head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{% block head_title %}{% endblock %}</title>
+	    <link href="https://fonts.googleapis.com/css?family=M+PLUS+1p|Notable|Poppins&display=swap" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="{% static 'clips/css/bootstrap.min.css' %}">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.2/css/all.min.css">
+		<link rel="stylesheet" type="text/css" href="{% static 'clips/css/style.css' %}">
+        <link rel="shortcut icon" type="image/png" href="{% static 'clips/favicon.ico' %}"/>
+        <style>
+            body {
+                font-family: 'Poppins', sans-serif;
+            }
+        </style>
+    {% block extra_head %}
+    {% endblock %}
+  </head>
+  <body class="bg-dark">
+    {% block body %}
+		<!-- HEADER -->
+		<nav class="navbar navbar-expand-md navbar-dark bg-dark navbar-clip">
+			<div class="container text-light">
+					<a class="navbar-brand text-light font-weight-bold" href="/">CLIP HYPE<small class="text-muted ml-2">beta</small></a>
+			</div>
+		</nav>
+		<!-- /HEADER -->
+    {% block content %}
+    {% endblock %}
+        <!-- FOOTER -->
+        <footer class="py-4 bg-dark text-light">
+            <div class="text-center d-inline">
+                <p><small class="font-weight-bold">Contact @</small>
+                <a href="https://twitter.com/HrmkJpn" target="_blank"><i class="fab fa-twitter-square ml-1" style="color:white; font-size: 1.5em"></i></a>
+                <a href="https://streamelements.com/harumak1/tip" target="_blank" class="btn btn-outline-warning btn-sm ml-5 font-weight-bold">Donate<i class="fab fa-paypal ml-1"></i></a>
+                </p>
+            </div>
+            <div class="text-center">
+                <a href="{% url 'policy' %}" class="text-light font-weight-bold">Privacy Policy</a>
+            </div>
+        </footer>
+        <!-- /FOOTER -->
+    {% endblock %}
+
+
+		<script src="{% static 'clips/js/jquery-3.4.1.slim.min.js' %}"></script>
+		<script src="{% static 'clips/js/bootstrap.bundle.min.js' %}"></script>
+		<script src="{% static 'clips/js/vue.min.js' %}"></script>
+		<script src="https://momentjs.com/downloads/moment.js"></script>
+		<script src="https://unpkg.com/vuejs-paginate@latest"></script>
+		<script src="https://unpkg.com/vuejs-datepicker"></script>
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+    {% block extra_script %}
+    {% endblock %}
+  </body>
+</html>

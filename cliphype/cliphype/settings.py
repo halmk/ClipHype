@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.twitch',
     'allauth.socialaccount.providers.google',
+    'app.apps.AppConfig'
 ]
 
 MIDDLEWARE = [

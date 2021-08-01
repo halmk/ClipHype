@@ -2,5 +2,6 @@
 *.pyc
 __pycache__/
 cliphype/.env
-
 cliphype/cliphype/local_settings.py
+cliphype/dump.rdb
+cliphype/app/src/

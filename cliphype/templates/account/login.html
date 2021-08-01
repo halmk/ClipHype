@@ -1,0 +1,27 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load static %}
+{% load account socialaccount %}
+
+{% block head_title %}{% trans "Sign In" %} | ClipHype{% endblock %}
+
+{% block content %}
+<main>
+<div class="container text-dark mt-5">
+
+	<div class="p-3">
+	<div class="socialaccount_ballot text-center">
+			<a title="Twitch" class="badge rounded shadow px-5 py-4 d-inline bg-twitch"
+				 href="{% provider_login_url 'twitch' scope=scope auth_params=auth_params %}">
+				<span class="text-light mr-2" style="font-size: 20px">{% trans "LOGIN with " %}</span>
+				<img src="{% static 'img/Twitch_White_RGB.png' %}" width="100">
+			</a>
+	</div>
+	{% include "socialaccount/snippets/login_extra.html" %}
+	</div>
+
+</div>
+</main>
+
+{% endblock %}

@@ -1,0 +1,130 @@
+
+.section {
+    border-radius: 20px;
+}
+
+.bg-twitch {
+    background: #772CE8;
+}
+.bg-twitch-light {
+    background: #9147FF;
+}
+.bg-twitch-dark {
+    background: #2b2b5f;
+}
+.text-twitch-light {
+    color: #9147FF;
+}
+.text-twitch {
+    color: #772CE8;
+}
+.text-title-parent {
+    margin-top: -21px;
+    margin-left: -16px;
+}
+.text-title, .text-views, .text-date {
+    background-color: rgba(0,0,0,0.5);
+    margin-bottom: 7px;
+}
+.text-title {
+    font-size: 16px;
+}
+.text-views {
+    margin-left: -16px;
+    font-size: 14px;
+}
+.text-date {
+    margin-right: -18px;
+    font-size: 14px;
+}
+.card-body {
+    margin-top: -10px;
+}
+.card-title, .card-subtitle, .card-link {
+    margin-top: -5px;
+    margin-left: -10px;
+}
+.card-subtitle {
+    margin-top: -10px;
+    font-size: 12px;
+}
+.navbar-clip {
+    border-top: solid 0px #2b2b5f;
+    border-bottom: solid 1px #2b2b5f;
+}
+.streamer-img {
+    padding: 0;
+}
+.streamer-badge {
+    background-color: rgba(255,255,255,0.8);
+    margin: auto;
+    margin-bottom: 0;
+    position: absolute;
+    bottom: 0rem;
+    width: 100%;
+}
+.page-link {
+    border: 10px;
+}
+.archive-text {
+    margin-left: -15px;
+    margin-top: -15px;
+    font-size: 8px;
+}
+.archive-title {
+    background-color: rgba(0,0,0,0.5);
+}
+.archive-bottom {
+    margin: auto;
+    margin-bottom: 0;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+.archive-duration {
+    background-color: rgba(0,0,0,0.5);
+    margin-left: -15px;
+    font-size: 10px;
+}
+.archive-date {
+    background-color: rgba(0,0,0,0.5);
+    font-size: 10px;
+}
+.timelineIndex {
+    font-size: 1.4em;
+    position: absolute;
+    margin-bottom: -4px;
+    left: 43%;
+}
+.timelinePlay {
+    font-size: 1.4em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-top: -4px;
+    cursor: pointer;
+}
+.timelineRemove {
+    font-size: 1.4em;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: -4px;
+    cursor: pointer;
+}
+.timelinePrev {
+    font-size: 1.2em;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin-bottom: -4px;
+    cursor: pointer;
+}
+.timelineNext {
+    font-size: 1.2em;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-bottom: -4px;
+    cursor: pointer;
+}
