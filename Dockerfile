@@ -25,10 +25,13 @@ WORKDIR ${HOME}
 RUN apt-get install --no-install-recommends -y \
     python3.8 python3-pip python3.8-dev
 
+
 WORKDIR ${DEPLOY_DIR}
 
 # Install requirements
 ADD requirements.txt ${DEPLOY_DIR}
+RUN pip install -U pip
+RUN pip install -r requirements.txt
 
 # Execute commands when container started
 COPY ./docker_start.sh ${DEPLOY_DIR}
