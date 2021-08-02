@@ -20,15 +20,11 @@ RUN apt install -y mysql-server mysql-client redis libmysqlclient-dev tmux vim g
 
 # Install Python3.8
 RUN apt install -y wget build-essential zlib1g-dev libssl-dev libsqlite3-dev
-WORKDIR ${HOME}
-
 RUN apt-get install --no-install-recommends -y \
     python3.8 python3-pip python3.8-dev
 
-
-WORKDIR ${DEPLOY_DIR}
-
 # Install requirements
+WORKDIR ${DEPLOY_DIR}
 ADD requirements.txt ${DEPLOY_DIR}
 RUN pip install -U pip
 RUN pip install -r requirements.txt
