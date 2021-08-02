@@ -5,3 +5,5 @@ cliphype/.env
 cliphype/cliphype/local_settings.py
 cliphype/dump.rdb
 cliphype/app/src/
+cliphype/app/input/
+cliphype/app/output/
