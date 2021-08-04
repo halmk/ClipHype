@@ -15,6 +15,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django_celery_results.models import TaskResult
+from cliphype.settings import S3_BUCKET
 from app import aws_api, twitch_api
 from app.models import Contact, Digest
 from app.tasks import concat_clips_lambda
@@ -52,8 +53,6 @@ Studioページ
 
 
 def studio(request):
-    context = {}
-
     # ダイジェスト動画作成リクエスト
     if request.method == "POST" and request.body:
         # request.bodyのJSONをDictに変換する
@@ -90,12 +89,14 @@ def studio(request):
 
     # GETリクエスト
     elif request.method == 'GET':
+        context = {}
         s3_data = []
         digests = []
         user_pk = request.user.pk
         username = request.user.username
         logger.info(f'\nuser: {username}, request.user.pk: {request.user.pk}\n')
 
+        context['bucket_name'] = S3_BUCKET
         try:
             twitch_account = SocialAccount.objects.get(
                 user=user_pk, provider="Twitch")
