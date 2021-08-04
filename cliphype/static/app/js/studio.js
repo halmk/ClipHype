@@ -531,11 +531,11 @@ var app = new Vue({
       data = {
         "creator": username,
         "streamer": this.streamerName,
-        "video_title": this.title,
-        "video_length": this.videoLength,
+        "title": this.title,
+        "length": this.videoLength,
         "transition": this.transition,
         "duration": this.duration,
-        "clips_num": this.timelineClips.length,
+        "num_clips": this.timelineClips.length,
         "clips": this.timelineClips,
       }
       axios.post(studio_url, {data}, {
