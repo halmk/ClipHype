@@ -3,14 +3,13 @@ Vue.component('datepicker', vuejsDatepicker);
 
 const csrftoken = Cookies.get('csrftoken');
 
-var bucketName = 'cliphype';
 AWS.config.region = 'ap-northeast-1'; // リージョン
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
     IdentityPoolId: 'ap-northeast-1:9df84405-ad0f-4573-a202-3f5627cb64c9',
 });
 var s3 = new AWS.S3({
   apiVersion: '2006-03-01',
-  params: {Bucket: bucketName}
+  params: {Bucket: bucket_name}
 });
 
 
