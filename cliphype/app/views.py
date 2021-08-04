@@ -71,10 +71,15 @@ def studio(request):
         cont = Digest()
         cont.creator = request.user
         cont.streamer = data['streamer']
+        cont.title = data['title']
         cont.task_id = task_id
-        cont.video_key = f"digest/output/{data['creator']}/{task_id}.mp4"
-        cont.title = data['video_title']
+        cont.video_key = f"digest/output/{request.user.username}/{task_id}.mp4"
         cont.clips = ','.join([clip['id'] for clip in data['clips']])
+        cont.num_clips = data['num_clips']
+        cont.length = data['length']
+        cont.transition = data['transition']
+        cont.duration = data['duration']
+        cont.status = "Requested"
         cont.save()
 
         result = AsyncResult(task_id)

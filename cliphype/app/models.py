@@ -11,16 +11,24 @@ class Digest(models.Model):
     streamer = models.CharField(max_length=128)
     # 作成日時
     created = models.DateTimeField(default=timezone.now)
-    # 使われるクリップのIDをカンマ区切りで並べる
-    clips = models.TextField()
-    # Celeryによってランダムに生成されるタスクID
-    task_id = models.CharField(max_length=256, blank=True, null=True)
-    # リクエストされた日時 (期限切れなどに使う)
-    requested = models.DateTimeField(blank=True, null=True)
-    # S3に保存される動画へのパス
-    video_key = models.CharField(max_length=256, blank=True)
     # ダイジェストのタイトル
     title = models.CharField(max_length=256, blank=True)
+    # Celeryによってランダムに生成されるタスクID
+    task_id = models.CharField(max_length=256, blank=True, null=True)
+    # S3に保存される動画へのパス
+    video_key = models.CharField(max_length=256, blank=True)
+    # ハイライト動画のステータス
+    status = models.CharField(max_length=128, blank=True, null=True)
+    # クリップの再生時間の合計
+    length = models.IntegerField(blank=True, null=True)
+    # 使われるクリップのIDをカンマ区切りで並べる
+    clips = models.TextField()
+    # クリップの数
+    num_clips = models.IntegerField(blank=True, null=True)
+    # トランジションの種類
+    transition = models.CharField(max_length=128, blank=True, null=True)
+    # トランジションの長さ
+    duration = models.IntegerField(blank=True, null=True)
 
 
 class Contact(models.Model):
