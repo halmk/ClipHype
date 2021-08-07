@@ -1,6 +1,7 @@
 /* クリップをハイライト動画に変換し、S3にアップロードする */
 
 use std::env;
+use std::process::Command;
 
 use rusoto_core::{ByteStream, Region, HttpClient};
 use rusoto_credential::EnvironmentProvider;
@@ -55,6 +56,7 @@ async fn main() {
         ..Default::default()
     }).await.expect("Error while listing clip keys from S3.");
 
+    let mut clip_paths = vec![];
     for object in clip_objects.contents.unwrap() {
         let key = object.key.unwrap();
         let name = key.clone();
@@ -66,14 +68,26 @@ async fn main() {
             ..Default::default()
         }).await.unwrap();
         let mut reader = result.body.unwrap().into_async_read();
-        let mut file = File::create(format!("./clips/{}", name)).await.unwrap();
+        let path = format!("clips/{}", name);
+        let mut file = File::create(path.clone()).await.unwrap();
         tokio::io::copy(&mut reader, &mut file).await.unwrap();
+        clip_paths.push(path);
     }
 
     // ffmpeg-concatでハイライト動画を生成する
+    let clip_paths = clip_paths.join(" ");
+    let output = Command::new("ffmpeg-concat")
+        .arg(format!("-t {}", task.transition))
+        .arg(format!("-d {}", task.duration))
+        .arg("-C")
+        .arg(clip_paths)
+        .output()
+        .expect("Failed to execute ffmpeg-concat.");
+
+    println!("{}", output.stdout.iter().map(|ch| *ch as char).collect::<String>());
 
     // ハイライト動画をS3にアップロードする
-    let mut file = File::open("out/video.mp4").await.unwrap();
+    let mut file = File::open("out.mp4").await.unwrap();
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer).await.unwrap();
 
