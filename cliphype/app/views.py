@@ -72,6 +72,7 @@ def studio(request):
         cont.streamer = data['streamer']
         cont.title = data['title']
         cont.task_id = task_id
+        cont.bucket = S3_BUCKET
         cont.video_key = f"digest/output/{request.user.username}/{task_id}.mp4"
         cont.clips = ','.join([clip['id'] for clip in data['clips']])
         cont.num_clips = data['num_clips']
