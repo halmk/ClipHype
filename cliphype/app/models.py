@@ -15,6 +15,8 @@ class Digest(models.Model):
     title = models.CharField(max_length=256, blank=True)
     # Celeryによってランダムに生成されるタスクID
     task_id = models.CharField(max_length=256, blank=True, null=True)
+    # S3のバケット
+    bucket = models.CharField(max_length=128, blank=True)
     # S3に保存される動画へのパス
     video_key = models.CharField(max_length=256, blank=True)
     # ハイライト動画のステータス
@@ -29,6 +31,8 @@ class Digest(models.Model):
     transition = models.CharField(max_length=128, blank=True, null=True)
     # トランジションの長さ
     duration = models.IntegerField(blank=True, null=True)
+    # 動画生成に使用したインスタンスID
+    instance_id = models.CharField(max_length=256, blank=True)
 
 
 class Contact(models.Model):
