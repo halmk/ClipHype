@@ -12,10 +12,10 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # RDS settings
-RDS_HOST = os.environ('RDS_HOST')
-RDS_USER = os.environ('RDS_USER')
-RDS_PASSWORD = os.environ('RDS_PASSWORD')
-RDS_NAME = os.environ('RDS_NAME')
+RDS_HOST = os.environ['RDS_HOST']
+RDS_USER = os.environ['RDS_USER']
+RDS_PASSWORD = os.environ['RDS_PASSWORD']
+RDS_NAME = os.environ['RDS_NAME']
 
 try:
     conn = pymysql.connect(
@@ -46,13 +46,15 @@ def lambda_handler(event, context):
         logger.info(task)
 
     s3_client = boto3.client('s3')
+    input_prefix = f'digest/input/input_{task_id}/'
     response = s3_client.list_objects(
         Bucket=task['bucket'],
         Prefix=input_prefix
     )
     num_scaled_clips = len(response['Contents'])
 
-    if task['num_clips'] !== num_scaled_clips:
+    logger.info(f'current:{num_scaled_clips}, total:{task["num_clips"]}')
+    if task['num_clips'] != num_scaled_clips:
         return "clips are scaled yet."
 
     sqs_client = boto3.client('sqs')
