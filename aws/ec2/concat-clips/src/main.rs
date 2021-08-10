@@ -18,7 +18,6 @@ struct Highlight {
     video_key: String,
     transition: String,
     duration: String,
-    instance_id: String,
 }
 
 #[tokio::main]
@@ -35,12 +34,12 @@ async fn main() {
     let ec2_client = Ec2Client::new_with(HttpClient::new().unwrap(), provider.clone(), region.clone());
 
     // RDSから未処理のタスクを１つ抽出し、ステータスを更新する
-    let select_task_query = r"SELECT task_id, bucket, video_key, transition, duration, instance_id FROM app_digest WHERE status='Request instance'";
+    let select_task_query = r"SELECT task_id, bucket, video_key, transition, duration FROM app_digest WHERE status='Request instance'";
     let tasks = conn.query_map(
         select_task_query,
-        |(task_id, bucket, video_key, transition, duration, instance_id)| {
+        |(task_id, bucket, video_key, transition, duration)| {
             Highlight {
-                task_id, bucket, video_key, transition, duration, instance_id
+                task_id, bucket, video_key, transition, duration
             }
         }
     ).unwrap();
@@ -100,13 +99,20 @@ async fn main() {
     }).await.expect("Error while putting the highlight video.");
 
     // インスタンスを停止させる
+    let output = Command::new("curl")
+        .arg("http://169.254.169.254/latest/meta-data/instance-id")
+        .output()
+        .expect("Failed to get instance-id.");
+
+    let instance_id = output.stdout.iter().map(|ch| *ch as char).collect::<String>();
+
     ec2_client.cancel_spot_instance_requests(CancelSpotInstanceRequestsRequest {
         dry_run: None,
-        spot_instance_request_ids: vec![task.instance_id.clone()]
+        spot_instance_request_ids: vec![instance_id.clone()]
     }).await.expect("Error while canceling spot instance request.");
 
     ec2_client.terminate_instances(TerminateInstancesRequest {
         dry_run: None,
-        instance_ids: vec![task.instance_id.clone()]
+        instance_ids: vec![instance_id.clone()]
     }).await.expect("Error while terminating instance");
 }
