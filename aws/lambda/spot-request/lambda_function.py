@@ -5,19 +5,27 @@ import time
 import urllib.request
 import sys
 import logging
-import pymysql
+import pymysql.cursors
+
 
 # RDS settings
-RDS_HOST = os.environ('RDS_HOST')
-RDS_USER = os.environ('RDS_USER')
-RDS_PASSWORD = os.environ('RDS_PASSWORD')
-RDS_NAME = os.environ('RDS_NAME')
+RDS_HOST = os.environ['RDS_HOST']
+RDS_USER = os.environ['RDS_USER']
+RDS_PASSWORD = os.environ['RDS_PASSWORD']
+RDS_NAME = os.environ['RDS_NAME']
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 try:
-    conn = pymysql.connect(host=RDS_HOST, user=RDS_USER, passwd=RDS_PASSWORD, db=RDS_NAME, connect_timeout=5)
+    conn = pymysql.connect(
+        host=RDS_HOST,
+        user=RDS_USER,
+        passwd=RDS_PASSWORD,
+        db=RDS_NAME,
+        cursorclass=pymysql.cursors.DictCursor,
+        connect_timeout=5
+    )
 except pymysql.MySQLError as e:
     logger.error("ERROR: Unexpected error: Could not connect to MySQL instance.")
     logger.error(e)
@@ -25,6 +33,7 @@ except pymysql.MySQLError as e:
 
 logger.info("SUCCESS: Connection to RDS MySQL instance succeeded")
 
+# Instance settings
 SECURITY_GROUP = os.environ['SECURITY_GROUP']
 MY_KEY_PAIR = os.environ['MY_KEY_PAIR']
 AMI = os.environ['AMI']
@@ -41,15 +50,18 @@ def lambda_handler(event, context):
 
     # スポットリクエストを送る
     response = spot_request()
+
     # リクエストIDを取得
     request_id = response['SpotInstanceRequests'][0]['SpotInstanceRequestId']
     print(request_id)
 
     with conn.cursor() as cur:
-        cur.execute('UPDATE app_digest SET status="Request instance" WHERE task_id=%s', (task_id,))
+        sql = 'UPDATE `app_digest` SET `status`="Request instance" WHERE `task_id`=%s'
+        cur.execute(sql, (task_id))
     conn.commit()
 
     return "Requested spot instance to create a a highlight video"
+
 
 # スポットインスタンスリクエスト
 def spot_request():
@@ -93,9 +105,3 @@ def describe_instances(instance_id):
     )
 
     return response
-
-
-# S3からファイルをダウンロード
-def download_file(key, filename):
-    s3 = boto3.resource('s3')
-    s3.meta.client.download_file('cliphype', key, filename)
