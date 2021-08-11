@@ -1,8 +1,6 @@
 /* クリップをハイライト動画に変換し、S3にアップロードする */
 
 use std::env;
-use std::fs;
-use std::process::Command;
 
 use rusoto_core::{ByteStream, Region, HttpClient};
 use rusoto_credential::EnvironmentProvider;
@@ -10,6 +8,7 @@ use rusoto_s3::{S3, S3Client, GetObjectRequest, ListObjectsRequest, PutObjectReq
 use rusoto_ec2::{Ec2, Ec2Client, CancelSpotInstanceRequestsRequest, TerminateInstancesRequest};
 use tokio::io::AsyncReadExt;
 use tokio::fs::File;
+use tokio::process::Command;
 use mysql::*;
 use mysql::prelude::*;
 
@@ -56,7 +55,7 @@ async fn main() {
         ..Default::default()
     }).await.expect("Error while listing clip keys from S3.");
 
-    let mut clips_dir = env::home_dir().unwrap();
+    let mut clips_dir = dirs::home_dir().unwrap();
     clips_dir.push("clips/");
 
     let mut clip_paths = vec![];
@@ -80,23 +79,23 @@ async fn main() {
 
     // ffmpeg-concatでハイライト動画を生成する
     let clip_paths = clip_paths.join(" ");
-    let mut out_path = env::home_dir().unwrap();
+    let mut out_path = dirs::home_dir().unwrap();
     out_path.push("out.mp4");
     let out_path = out_path.into_os_string().into_string().unwrap();
     println!("{:?}", clip_paths);
     println!("{:?}", out_path);
 
-    let child = Command::new("ffmpeg-concat")
+    let output = Command::new("ffmpeg-concat")
         .arg(format!("-o {}", out_path))
         .arg(format!("-t {}", task.transition))
         .arg(format!("-d {}", task.duration))
         .arg("-C")
         .arg(clip_paths)
-        .spawn()
+        .output()
+        .await
         .expect("Failed to execute ffmpeg-concat.");
 
-    let result = child.wait().unwrap();
-    println!("{:?}", result);
+    println!("{:?}", output.stdout.iter().map(|ch| *ch as char).collect::<String>());
 
     // ハイライト動画をS3にアップロードする
     let mut file = File::open(out_path).await.unwrap();
@@ -115,6 +114,7 @@ async fn main() {
     let output = Command::new("curl")
         .arg("http://169.254.169.254/latest/meta-data/instance-id")
         .output()
+        .await
         .expect("Failed to get instance-id.");
 
     let instance_id = output.stdout.iter().map(|ch| *ch as char).collect::<String>();
