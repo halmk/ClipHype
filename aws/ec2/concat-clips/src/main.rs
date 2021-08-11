@@ -1,6 +1,7 @@
 /* クリップをハイライト動画に変換し、S3にアップロードする */
 
 use std::env;
+use std::path::PathBuf;
 
 use rusoto_core::{ByteStream, Region, HttpClient};
 use rusoto_credential::EnvironmentProvider;
@@ -55,10 +56,9 @@ async fn main() {
         ..Default::default()
     }).await.expect("Error while listing clip keys from S3.");
 
-    let mut clips_dir = dirs::home_dir().unwrap();
-    clips_dir.push("clips/");
+    let clips_dir = PathBuf::from("./clips/");
 
-    let mut clip_paths = vec![];
+    let mut clip_paths:Vec<String> = vec![];
     for object in clip_objects.contents.unwrap() {
         let key = object.key.unwrap();
         let name = key.clone();
@@ -74,30 +74,40 @@ async fn main() {
         path.push(name.clone());
         let mut file = File::create(path.clone()).await.unwrap();
         tokio::io::copy(&mut reader, &mut file).await.unwrap();
-        clip_paths.push(path.into_os_string().into_string().unwrap());
+        let path_str = path.into_os_string().into_string().unwrap();
+        clip_paths.push(path_str);
     }
 
     // ffmpeg-concatでハイライト動画を生成する
-    let clip_paths = clip_paths.join(" ");
-    let mut out_path = dirs::home_dir().unwrap();
-    out_path.push("out.mp4");
-    let out_path = out_path.into_os_string().into_string().unwrap();
+    let mut input_paths:Vec<&str> = clip_paths.iter().map(AsRef::as_ref).collect();
+    let out_file = "output/out.mp4";
     println!("{:?}", clip_paths);
-    println!("{:?}", out_path);
+    println!("{:?}", out_file);
 
-    let output = Command::new("ffmpeg-concat")
-        .arg(format!("-o {}", out_path))
-        .arg(format!("-t {}", task.transition))
-        .arg(format!("-d {}", task.duration))
-        .arg("-C")
-        .arg(clip_paths)
-        .output()
-        .await
-        .expect("Failed to execute ffmpeg-concat.");
+    let mut command = Command::new("xvfb-run");
 
+    let mut args = vec![];
+    args.push("-s");
+    args.push(r#"-ac -screen 0 1280x1024x24"#);
+    args.push("ffmpeg-concat");
+    args.push("-o");
+    args.push(out_file);
+    args.push("-t");
+    args.push(&task.transition);
+    args.push("-d");
+    args.push(&task.duration);
+    args.push("-C");
+    args.append(&mut input_paths);
+
+    command.current_dir("/home/ubuntu/").args(args);
+    println!("{:?}", command);
+
+    let output = command.output().await.expect("Failed to execute ffmpeg-concat");
     println!("{:?}", output.stdout.iter().map(|ch| *ch as char).collect::<String>());
 
     // ハイライト動画をS3にアップロードする
+    let mut out_path = dirs::home_dir().unwrap();
+    out_path.push("output/out.mp4");
     let mut file = File::open(out_path).await.unwrap();
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer).await.unwrap();
