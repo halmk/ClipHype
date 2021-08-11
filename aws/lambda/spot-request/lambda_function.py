@@ -34,7 +34,9 @@ except pymysql.MySQLError as e:
 logger.info("SUCCESS: Connection to RDS MySQL instance succeeded")
 
 # Instance settings
-SECURITY_GROUP = os.environ['SECURITY_GROUP']
+SECURITY_GROUP1 = os.environ['SECURITY_GROUP1']
+SECURITY_GROUP2 = os.environ['SECURITY_GROUP2']
+VOLUME_SIZE = int(os.environ['VOLUME_SIZE'])
 MY_KEY_PAIR = os.environ['MY_KEY_PAIR']
 AMI = os.environ['AMI']
 INSTANCE_TYPE = os.environ['INSTANCE_TYPE']
@@ -70,7 +72,20 @@ def spot_request():
         InstanceCount=1,
         LaunchSpecification={
             'SecurityGroupIds':[
-                SECURITY_GROUP,
+                SECURITY_GROUP1,
+                SECURITY_GROUP2
+            ],
+            'BlockDeviceMappings': [
+                {
+                    'DeviceName': '/dev/sda1',
+                    'Ebs': {
+                        'DeleteOnTermination': True,
+                        'SnapshotId': 'snap-0f7bae41ceba2f94b',
+                        'VolumeSize': VOLUME_SIZE,
+                        'VolumeType': 'gp2',
+                        'Encrypted': False
+                    }
+                }
             ],
             'KeyName': MY_KEY_PAIR,
             'ImageId': AMI,

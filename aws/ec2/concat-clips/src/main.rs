@@ -1,6 +1,7 @@
 /* クリップをハイライト動画に変換し、S3にアップロードする */
 
 use std::env;
+use std::fs;
 use std::process::Command;
 
 use rusoto_core::{ByteStream, Region, HttpClient};
@@ -55,6 +56,9 @@ async fn main() {
         ..Default::default()
     }).await.expect("Error while listing clip keys from S3.");
 
+    let mut clips_dir = env::home_dir().unwrap();
+    clips_dir.push("clips/");
+
     let mut clip_paths = vec![];
     for object in clip_objects.contents.unwrap() {
         let key = object.key.unwrap();
@@ -67,26 +71,35 @@ async fn main() {
             ..Default::default()
         }).await.unwrap();
         let mut reader = result.body.unwrap().into_async_read();
-        let path = format!("clips/{}", name);
+        let mut path = clips_dir.clone();
+        path.push(name.clone());
         let mut file = File::create(path.clone()).await.unwrap();
         tokio::io::copy(&mut reader, &mut file).await.unwrap();
-        clip_paths.push(path);
+        clip_paths.push(path.into_os_string().into_string().unwrap());
     }
 
     // ffmpeg-concatでハイライト動画を生成する
     let clip_paths = clip_paths.join(" ");
-    let output = Command::new("ffmpeg-concat")
+    let mut out_path = env::home_dir().unwrap();
+    out_path.push("out.mp4");
+    let out_path = out_path.into_os_string().into_string().unwrap();
+    println!("{:?}", clip_paths);
+    println!("{:?}", out_path);
+
+    let child = Command::new("ffmpeg-concat")
+        .arg(format!("-o {}", out_path))
         .arg(format!("-t {}", task.transition))
         .arg(format!("-d {}", task.duration))
         .arg("-C")
         .arg(clip_paths)
-        .output()
+        .spawn()
         .expect("Failed to execute ffmpeg-concat.");
 
-    println!("{}", output.stdout.iter().map(|ch| *ch as char).collect::<String>());
+    let result = child.wait().unwrap();
+    println!("{:?}", result);
 
     // ハイライト動画をS3にアップロードする
-    let mut file = File::open("out.mp4").await.unwrap();
+    let mut file = File::open(out_path).await.unwrap();
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer).await.unwrap();
 
