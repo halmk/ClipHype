@@ -132,11 +132,6 @@ async fn main() {
 
     let instance_id = output.stdout.iter().map(|ch| *ch as char).collect::<String>();
 
-    ec2_client.cancel_spot_instance_requests(CancelSpotInstanceRequestsRequest {
-        dry_run: None,
-        spot_instance_request_ids: vec![instance_id.clone()]
-    }).await.expect("Error while canceling spot instance request.");
-
     ec2_client.terminate_instances(TerminateInstancesRequest {
         dry_run: None,
         instance_ids: vec![instance_id.clone()]
