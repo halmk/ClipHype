@@ -56,7 +56,8 @@ async fn main() {
         ..Default::default()
     }).await.expect("Error while listing clip keys from S3.");
 
-    let clips_dir = PathBuf::from("./clips/");
+    let home_dir = dirs::home_dir().unwrap();
+    let clips_dir = PathBuf::from("clips/");
 
     let mut clip_paths:Vec<String> = vec![];
     for object in clip_objects.contents.unwrap() {
@@ -70,11 +71,13 @@ async fn main() {
             ..Default::default()
         }).await.unwrap();
         let mut reader = result.body.unwrap().into_async_read();
-        let mut path = clips_dir.clone();
-        path.push(name.clone());
-        let mut file = File::create(path.clone()).await.unwrap();
+        let mut abs_path = home_dir.clone();
+        let mut clip_path = clips_dir.clone();
+        clip_path.push(name.clone());
+        abs_path.push(clip_path.clone());
+        let mut file = File::create(abs_path.clone()).await.unwrap();
         tokio::io::copy(&mut reader, &mut file).await.unwrap();
-        let path_str = path.into_os_string().into_string().unwrap();
+        let path_str = clip_path.into_os_string().into_string().unwrap();
         clip_paths.push(path_str);
     }
 
