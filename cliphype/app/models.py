@@ -31,8 +31,6 @@ class Digest(models.Model):
     transition = models.CharField(max_length=128, blank=True, null=True)
     # トランジションの長さ
     duration = models.IntegerField(blank=True, null=True)
-    # 動画生成に使用したインスタンスID
-    instance_id = models.CharField(max_length=256, blank=True)
 
 
 class Contact(models.Model):
