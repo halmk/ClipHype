@@ -123,6 +123,9 @@ async fn main() {
         ..Default::default()
     }).await.expect("Error while putting the highlight video.");
 
+    let update_status_query = format!(r"UPDATE app_digest SET status='Uploaded' WHERE task_id='{}'", task.task_id);
+    conn.query_drop(update_status_query).unwrap();
+
     // インスタンスを停止させる
     let output = Command::new("curl")
         .arg("http://169.254.169.254/latest/meta-data/instance-id")
