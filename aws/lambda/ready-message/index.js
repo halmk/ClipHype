@@ -67,10 +67,10 @@ exports.handler = async (event, context) => {
 
     console.log(uploaded_data.Contents);
     console.log(`uploaded_data.Contents.length: ${uploaded_data.Contents.length}`);
-    console.log(`json_data.clips_num: ${json_data.clips_num}`);
+    console.log(`json_data.num_clips: ${json_data.num_clips}`);
 
     // フォルダ内のファイル数とJSONファイルに記しているクリップ数が一致しているかどうか
-    if(json_data.clips_num !== uploaded_data.Contents.length){
+    if(json_data.num_clips !== uploaded_data.Contents.length){
         console.log("まだクリップは揃っていません.");
         return 'まだクリップは揃っていません';
     }

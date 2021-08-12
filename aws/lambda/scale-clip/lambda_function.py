@@ -76,6 +76,9 @@ def lambda_handler(event, context):
     num_scaled_clips = len(scaled_objects['Contents'])
 
     status = f'Scaling clips {num_scaled_clips}/{task["num_clips"]}'
+    if num_scaled_clips == task["num_clips"]:
+        status = 'Request instance'
+
     logger.info(f'Update task status: {status}')
     with conn.cursor() as cur:
         sql = 'UPDATE `app_digest` SET `status`=%s WHERE `task_id`=%s'

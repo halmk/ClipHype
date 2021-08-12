@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use rusoto_core::{ByteStream, Region, HttpClient};
 use rusoto_credential::EnvironmentProvider;
 use rusoto_s3::{S3, S3Client, GetObjectRequest, ListObjectsRequest, PutObjectRequest};
-use rusoto_ec2::{Ec2, Ec2Client, CancelSpotInstanceRequestsRequest, TerminateInstancesRequest};
+use rusoto_ec2::{Ec2, Ec2Client, TerminateInstancesRequest};
 use tokio::io::AsyncReadExt;
 use tokio::fs::File;
 use tokio::process::Command;
