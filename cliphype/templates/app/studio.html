@@ -382,6 +382,7 @@
                         <span class="d-block">・The video is available for 7 days after being requested.</span>
                     </div>
                 </p>
+                <button class="btn btn-info" v-on:click="getHighlights"><i class="fas fa-sync"></i></button>
             </div>
             <!-- DIGEST TABLE -->
             <div class="table-responsive">
@@ -417,6 +418,10 @@
                                 <i class="fas fa-check-circle mr-1"></i>
                                 [[ highlight.status ]]
                             </div>
+                            <div class="text-secondary" v-else>
+                                <i class="fas fa-spinner faa-spin animated mr-1"></i>
+                                [[ highlight.status ]]
+                            </div>
                         </td>
                         <td>
                             <div class="" v-if="highlight.status == 'Available'">
@@ -445,58 +450,11 @@
             </div>
     </section>
     <!-- /REQUESTED DIGEST AREA -->
-
-    <!-- RECIEVED DIGESTS AREA -->
-    <section id="unrequested">
-        <div class="row p-3 my-4 shadow section bg-white">
-            <div class="col-12">
-                <h2 class="text-dark font-weight-bold">Highlights created by Followers</h2>
-            </div>
-            <!-- DIGEST TABLE -->
-            <div class="table-responsive">
-                <table class="table m-2 table-hover shadow-sm">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Title</th>
-                            <th>Created</th>
-                            <th>Status</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    {% for digest in recieved_digests %}
-                    <tr>
-                        <td class="font-weight-bold">
-                            {{ digest.title }}
-                        </td>
-                        <td>
-                            {{ digest.created }}
-                        </td>
-                        <td>
-                            {{ digest.status }}
-                        </td>
-                        <td>
-                            <button class="btn btn-primary" v-on:click="editRecievedHighlight('{{ digest.clips }}')">Edit</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </div>
-            <!-- /DIGEST TABLE -->
-        </div>
-    </section>
-    <!-- /RECIEVED DIGESTS AREA -->
-
-
 </div>
 {% endblock %}
 
 {% block extra_script %}
 <script>
-    var token = "";
-    if (location.hash) {
-        token = location.hash.match(/access_token=(.*)&scope/)[1];
-        alert(`${location.hash}`);
-    }
     const user_pk = "{{ request.user.pk }}";
     const username = "{{ request.user.username }}";
     const bucket_name = "{{ bucket_name }}";
