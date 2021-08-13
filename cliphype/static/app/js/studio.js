@@ -643,12 +643,6 @@ var app = new Vue({
           if (diff_hours >= 24 * 6) {
             this.$set(highlight,"status","Expired");
           }
-          else {
-            this.$set(highlight,"status",highlight.status);
-          }
-        }
-        else {
-          this.$set(highlight,"status","Pending");
         }
       }
     },
