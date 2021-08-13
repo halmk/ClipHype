@@ -382,6 +382,7 @@
                         <span class="d-block">・The video is available for 7 days after being requested.</span>
                     </div>
                 </p>
+                <button class="btn btn-info" v-on:click="getHighlights"><i class="fas fa-sync"></i></button>
             </div>
             <!-- DIGEST TABLE -->
             <div class="table-responsive">
@@ -415,6 +416,10 @@
                             </div>
                             <div class="text-success font-weight-bold" v-else-if="highlight.status == 'Available'">
                                 <i class="fas fa-check-circle mr-1"></i>
+                                [[ highlight.status ]]
+                            </div>
+                            <div class="text-secondary" v-else>
+                                <i class="fas fa-spinner faa-spin animated mr-1"></i>
                                 [[ highlight.status ]]
                             </div>
                         </td>
