@@ -10,13 +10,12 @@ from allauth.socialaccount.models import SocialApp
 
 logger = logging.getLogger(__name__)
 
-TWITCH = SocialApp.objects.all().filter(provider="Twitch").first()
-
 
 def getToken():
+    Twitch = SocialApp.objects.all().filter(provider="Twitch").first()
     params = {
-        'client_id': TWITCH.client_id,
-        'client_secret': TWITCH.secret,
+        'client_id': Twitch.client_id,
+        'client_secret': Twitch.secret,
         'grant_type': 'client_credentials'
     }
     res = requests.post('https://id.twitch.tv/oauth2/token', params=params)
@@ -26,16 +25,17 @@ def getToken():
 
 
 def getRequest(url, params, count=0):
+    Twitch = SocialApp.objects.all().filter(provider="Twitch").first()
     try:
-        twitch_token = SocialAppToken.objects.get(app=TWITCH)
+        twitch_token = SocialAppToken.objects.get(app=Twitch)
     except SocialAppToken.DoesNotExist as e:
         logger.debug(e)
         token = getToken()
-        twitch_token = SocialAppToken.objects.create(app=TWITCH, token=token)
+        twitch_token = SocialAppToken.objects.create(app=Twitch, token=token)
 
     logger.debug(f'\n{twitch_token.token}\n')
     headers = {
-        'Client-ID': TWITCH.client_id,
+        'Client-ID': Twitch.client_id,
         'Authorization': f'Bearer {twitch_token.token}'
     }
     response = requests.get(url, headers=headers, params=params)

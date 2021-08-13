@@ -25,7 +25,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # ファイルをsrcフォルダに保存する
 def save_clip(file):
-    print(f"実行ファイルのパス: {os.getcwd()}")
+    #print(f"実行ファイルのパス: {os.getcwd()}")
     path = SRC_DIR + file['name']
     file = file['file']
 

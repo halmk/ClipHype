@@ -3,14 +3,13 @@ Vue.component('datepicker', vuejsDatepicker);
 
 const csrftoken = Cookies.get('csrftoken');
 
-var bucketName = 'cliphype';
 AWS.config.region = 'ap-northeast-1'; // リージョン
 AWS.config.credentials = new AWS.CognitoIdentityCredentials({
     IdentityPoolId: 'ap-northeast-1:9df84405-ad0f-4573-a202-3f5627cb64c9',
 });
 var s3 = new AWS.S3({
   apiVersion: '2006-03-01',
-  params: {Bucket: bucketName}
+  params: {Bucket: bucket_name}
 });
 
 
@@ -531,11 +530,11 @@ var app = new Vue({
       data = {
         "creator": username,
         "streamer": this.streamerName,
-        "video_title": this.title,
-        "video_length": this.videoLength,
+        "title": this.title,
+        "length": this.videoLength,
         "transition": this.transition,
         "duration": this.duration,
-        "clips_num": this.timelineClips.length,
+        "num_clips": this.timelineClips.length,
         "clips": this.timelineClips,
       }
       axios.post(studio_url, {data}, {
@@ -566,7 +565,7 @@ var app = new Vue({
               return alert('error: ' + err.message);
             }
             var href = this.request.httpRequest.endpoint.href;
-            var bucketUrl = href + bucketName + '/';
+            var bucketUrl = href + bucket_name + '/';
             //console.log(bucketUrl);
             //console.log(data);
 
@@ -594,7 +593,7 @@ var app = new Vue({
             return console.log('error: ' + err.message);
           }
           var href = this.request.httpRequest.endpoint.href;
-          var bucketUrl = href + bucketName + '/';
+          var bucketUrl = href + bucket_name + '/';
           //console.log(bucketUrl);
           //console.log(data);
 
@@ -641,13 +640,9 @@ var app = new Vue({
           let diff = (current - requested) / 1000;
           //console.log(requested + ", " + current + " diff:" + diff + "(" + (diff/3600) +" hours)");
           let diff_hours = diff / 3600;
-          if (diff_hours <= 24 * 6)
-            this.$set(highlight,"status","Processing");
-          else
+          if (diff_hours >= 24 * 6) {
             this.$set(highlight,"status","Expired");
-        }
-        else {
-          this.$set(highlight,"status","Pending");
+          }
         }
       }
     },
@@ -700,7 +695,6 @@ var app = new Vue({
     this.setResponsiveItems();
     $('[data-toggle="tooltip"]').tooltip();
     this.userName = username;
-    this.token = token;
     this.siteUrl = location.hostname;
     TwitchAPI.apiUrl = api_url;
     TwitchAPI.clientId = this.Client_Id;

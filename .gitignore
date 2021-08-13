@@ -7,3 +7,5 @@ cliphype/dump.rdb
 cliphype/app/src/
 cliphype/app/input/
 cliphype/app/output/
+target/
+Cargo.lock

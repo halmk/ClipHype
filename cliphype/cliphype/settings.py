@@ -36,10 +36,13 @@ ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 # AWS
 ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
 SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+S3_BUCKET = env('S3_BUCKET')
+REGION_NAME = env('REGION_NAME')
 
 # Twitch
 CLIENT_ID = env('Twitch_CLIENT_ID')
 CLIENT_SECRET = env('Twitch_CLIENT_SECRET')
+
 
 # Application definition
 
