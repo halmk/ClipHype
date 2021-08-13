@@ -450,11 +450,6 @@
 
 {% block extra_script %}
 <script>
-    var token = "";
-    if (location.hash) {
-        token = location.hash.match(/access_token=(.*)&scope/)[1];
-        alert(`${location.hash}`);
-    }
     const user_pk = "{{ request.user.pk }}";
     const username = "{{ request.user.username }}";
     const bucket_name = "{{ bucket_name }}";
