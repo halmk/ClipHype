@@ -7,7 +7,7 @@ from django_celery_results.models import TaskResult
 class DigestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Digest
-        fields = ['creator', 'streamer', 'created', 'clips', 'task_id', 'bucket', 'video_key', 'title']
+        fields = ['creator', 'streamer', 'created', 'clips', 'task_id', 'bucket', 'video_key', 'title', 'status']
 
 
 class TaskResultSerializer(serializers.ModelSerializer):
