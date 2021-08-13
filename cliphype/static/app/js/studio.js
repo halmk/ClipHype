@@ -640,10 +640,12 @@ var app = new Vue({
           let diff = (current - requested) / 1000;
           //console.log(requested + ", " + current + " diff:" + diff + "(" + (diff/3600) +" hours)");
           let diff_hours = diff / 3600;
-          if (diff_hours <= 24 * 6)
-            this.$set(highlight,"status","Processing");
-          else
+          if (diff_hours >= 24 * 6) {
             this.$set(highlight,"status","Expired");
+          }
+          else {
+            this.$set(highlight,"status",highlight.status);
+          }
         }
         else {
           this.$set(highlight,"status","Pending");
@@ -699,7 +701,6 @@ var app = new Vue({
     this.setResponsiveItems();
     $('[data-toggle="tooltip"]').tooltip();
     this.userName = username;
-    this.token = token;
     this.siteUrl = location.hostname;
     TwitchAPI.apiUrl = api_url;
     TwitchAPI.clientId = this.Client_Id;
