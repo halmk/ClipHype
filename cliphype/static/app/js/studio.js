@@ -565,7 +565,7 @@ var app = new Vue({
               return alert('error: ' + err.message);
             }
             var href = this.request.httpRequest.endpoint.href;
-            var bucketUrl = href + bucketName + '/';
+            var bucketUrl = href + bucket_name + '/';
             //console.log(bucketUrl);
             //console.log(data);
 
@@ -593,7 +593,7 @@ var app = new Vue({
             return console.log('error: ' + err.message);
           }
           var href = this.request.httpRequest.endpoint.href;
-          var bucketUrl = href + bucketName + '/';
+          var bucketUrl = href + bucket_name + '/';
           //console.log(bucketUrl);
           //console.log(data);
 
