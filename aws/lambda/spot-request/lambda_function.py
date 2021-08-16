@@ -5,7 +5,6 @@ import time
 import urllib.request
 import sys
 import logging
-import pymysql.cursors
 
 
 logger = logging.getLogger()
@@ -24,18 +23,40 @@ SNAPSHOT_ID = os.environ['SNAPSHOT_ID']
 
 def lambda_handler(event, context):
     print(event['Records'][0]['body'])
-    # タスクIDを取得
     message = event['Records'][0]['body']
-    creator = message.split('/')[0]
-    task_id = message.split('/')[1]
+    bucket_name = message.split('/')[0]
+    creator = message.split('/')[1]
+    task_id = message.split('/')[2]
 
-    # スポットリクエストを送る
+    # download info json file from s3 corresponding to the received message
+    s3_client = boto3.client('s3')
+    info_key = f'digest/info/{task_id}.json'
+    response = s3_client.get_object(
+        Bucket=bucket,
+        Key=info_key
+    )
+    params = response['Body'].read()
+    params = params.decode('utf-8')
+    params = json.loads(params)
+    # update the status in params
+    params['status'] = 'Request instance'
+
+    info_path = '/tmp/info.json'
+    with open(info_path, 'w') as f:
+        json.dump(params,f,indent=4)
+
+    # upload (overwrite) the updated json file
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(bucket_name)
+    bucket.upload_file(info_path, info_key)
+
+    # send a spot request
     response = spot_request()
 
     return "Requested spot instance to create a a highlight video"
 
 
-# スポットインスタンスリクエスト
+# spot instance request
 def spot_request():
     client = boto3.client('ec2')
     response = client.request_spot_instances(
@@ -63,30 +84,6 @@ def spot_request():
         },
         SpotPrice=MAX_PRICE,
         Type='one-time',
-    )
-
-    return response
-
-
-# スポットインスタンスリクエストの詳細を取得
-def describe_spot_instance_requests(request_id):
-    client = boto3.client('ec2')
-    response = client.describe_spot_instance_requests(
-        SpotInstanceRequestIds=[
-            request_id,
-        ],
-    )
-
-    return response
-
-
-# インスタンスの詳細を取得
-def describe_instances(instance_id):
-    client = boto3.client('ec2')
-    response = client.describe_instances(
-        InstanceIds=[
-            instance_id,
-        ],
     )
 
     return response
