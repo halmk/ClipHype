@@ -10,6 +10,8 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+SQS_URL = os.environ['SQS_URL']
+
 
 def lambda_handler(event, context):
     bucket = event['Records'][0]['s3']['bucket']['name']
@@ -34,7 +36,7 @@ def lambda_handler(event, context):
     # get the number of processed input clips
     input_prefix = f'digest/input/input_{task_id}/'
     response = s3_client.list_objects(
-        Bucket=task['bucket'],
+        Bucket=bucket,
         Prefix=input_prefix
     )
     num_processed_clips = len(response['Contents'])
@@ -46,8 +48,8 @@ def lambda_handler(event, context):
 
     sqs_client = boto3.client('sqs')
     response = sqs_client.send_message(
-        QueueUrl=os.environ['SQS_URL'],
-        MessageBody=f'{creator}/{task_id}'
+        QueueUrl=SQS_URL,
+        MessageBody=f'{bucket}/{creator}/{task_id}'
     )
 
     return {
