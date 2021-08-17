@@ -22,7 +22,7 @@ def lambda_handler(event, context):
 
     s3_client = boto3.client('s3')
     # get the number of clips has to be processed
-    info_key = f'digest/info/{task_id}.json'
+    info_key = f'digest/info/{creator}/{task_id}.json'
     response = s3_client.get_object(
         Bucket=bucket,
         Key=info_key

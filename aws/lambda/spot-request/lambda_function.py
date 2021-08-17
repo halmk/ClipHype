@@ -30,9 +30,9 @@ def lambda_handler(event, context):
 
     # download info json file from s3 corresponding to the received message
     s3_client = boto3.client('s3')
-    info_key = f'digest/info/{task_id}.json'
+    info_key = f'digest/info/{creator}/{task_id}.json'
     response = s3_client.get_object(
-        Bucket=bucket,
+        Bucket=bucket_name,
         Key=info_key
     )
     params = response['Body'].read()
