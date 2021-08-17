@@ -14,9 +14,12 @@ def lambda_handler(event, context):
     logger.info(event['Records'][0]['s3']['object']['key'])
 
     # get parameters from s3 object key triggered
+    bucket_name = event['Records'][0]['s3']['bucket']['name']
     key = event['Records'][0]['s3']['object']['key']
     filename = key.split('/')[-1]
     creator = filename.split('_')[0]
+    num = filename.split('_')[1].split('.')[0]
+    num = int(num)-1
     task_id = key.split('_')[1].split('/')[0]
     logger.info(task_id)
 
@@ -24,7 +27,6 @@ def lambda_handler(event, context):
     bucket = s3.Bucket(bucket_name)
 
     s3_client = boto3.client('s3')
-
     json_key = f'digest/info/{creator}/{task_id}.json'
     response = s3_client.get_object(
         Bucket=bucket_name,
@@ -40,14 +42,13 @@ def lambda_handler(event, context):
     os.makedirs('/tmp/out/', exist_ok=True)
     clip_path = f'/tmp/src/{filename}'
 
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(task['bucket'])
     logger.info(f'Downloding clip...: {clip_path}, {key}')
     bucket.download_file(key, clip_path)
 
     # process draw-text to the clip
     out_path = f'/tmp/out/{filename}'
 
+    title = data['clips'][num-1]['title']
     fontsize = data['fontsize']
     fontcolor = data['fontcolor']
     borderw = data['borderw']
@@ -61,6 +62,7 @@ def lambda_handler(event, context):
     stream = ffmpeg.input(clip_path)
     stream_audio = stream.audio
     stream = ffmpeg.drawtext(stream,
+        text=title,
         fontsize=fontsize,
         fontcolor=fontcolor,
         borderw=borderw,
