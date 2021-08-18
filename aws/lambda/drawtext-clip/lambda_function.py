@@ -19,7 +19,7 @@ def lambda_handler(event, context):
     filename = key.split('/')[-1]
     creator = filename.split('_')[0]
     num = filename.split('_')[1].split('.')[0]
-    num = str(int(num))
+    num = int(num)
     task_id = key.split('_')[1].split('/')[0]
     logger.info(task_id)
 
@@ -48,11 +48,9 @@ def lambda_handler(event, context):
     # process draw-text to the clip
     out_path = f'/tmp/out/{filename}'
 
-    title = ""
     for clip in data['clips']:
         if clip['num'] == num:
             title = clip['title']
-            break
 
     fontsize = data['fontsize']
     fontcolor = data['fontcolor']
