@@ -20,6 +20,8 @@ INSTANCE_TYPE = os.environ['INSTANCE_TYPE']
 MAX_PRICE = os.environ['MAX_PRICE']
 SNAPSHOT_ID = os.environ['SNAPSHOT_ID']
 
+SQS_URL = os.environ['SQS_URL']
+
 
 def lambda_handler(event, context):
     print(event['Records'][0]['body'])
@@ -28,30 +30,15 @@ def lambda_handler(event, context):
     creator = message.split('/')[1]
     task_id = message.split('/')[2]
 
-    # download info json file from s3 corresponding to the received message
-    s3_client = boto3.client('s3')
-    info_key = f'digest/info/{creator}/{task_id}.json'
-    response = s3_client.get_object(
-        Bucket=bucket_name,
-        Key=info_key
-    )
-    params = response['Body'].read()
-    params = params.decode('utf-8')
-    params = json.loads(params)
-    # update the status in params
-    params['status'] = 'Request instance'
-
-    info_path = '/tmp/info.json'
-    with open(info_path, 'w') as f:
-        json.dump(params,f,indent=4)
-
-    # upload (overwrite) the updated json file
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(bucket_name)
-    bucket.upload_file(info_path, info_key)
-
     # send a spot request
     response = spot_request()
+
+    # send a ready message to sqs
+    sqs_client = boto3.client('sqs')
+    response = sqs_client.send_message(
+        QueueUrl=SQS_URL,
+        MessageBody=f'{task_id}'
+    )
 
     return "Requested spot instance to create a a highlight video"
 
