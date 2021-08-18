@@ -12,7 +12,11 @@ def concat_clips_lambda(data):
     task_id = concat_clips_lambda.request.id
     print(task_id)
     data['task_id'] = task_id
-    data['status'] = 'Requested'
+
+    num = 1
+    for clip in data['clips']:
+        clip['num'] = num
+        num += 1
 
     # JSONファイルに書き込み
     json_name = f"{data['creator']}_{task_id}.json"
