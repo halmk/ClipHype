@@ -4,8 +4,7 @@ import boto3
 import time
 import sys
 import logging
-import subprocess
-
+import ffmpeg
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -19,6 +18,8 @@ def lambda_handler(event, context):
     key = event['Records'][0]['s3']['object']['key']
     filename = key.split('/')[-1]
     creator = filename.split('_')[0]
+    num = filename.split('_')[1].split('.')[0]
+    num = int(num)
     task_id = key.split('_')[1].split('/')[0]
     logger.info(task_id)
 
@@ -26,7 +27,6 @@ def lambda_handler(event, context):
     bucket = s3.Bucket(bucket_name)
 
     s3_client = boto3.client('s3')
-
     json_key = f'digest/info/{creator}/{task_id}.json'
     response = s3_client.get_object(
         Bucket=bucket_name,
@@ -45,22 +45,43 @@ def lambda_handler(event, context):
     logger.info(f'Downloding clip...: {clip_path}, {key}')
     bucket.download_file(key, clip_path)
 
-    # process scale to the clip
+    # process draw-text to the clip
     out_path = f'/tmp/out/{filename}'
-    scale_args = ['ffmpeg', '-i', clip_path, '-r', '60', '-s', '1920x1080', out_path, '-y']
-    logger.info(f'Scaling clip...')
-    res = subprocess.call(scale_args)
+
+    for clip in data['clips']:
+        if clip['num'] == num:
+            title = clip['title']
+
+    fontsize = data['fontsize']
+    fontcolor = data['fontcolor']
+    borderw = data['borderw']
+    position = data['position']
+
+    p_y = position.split('-')[0]
+    p_x = position.split('-')[1]
+    x = "10" if p_x == "left" else "w-tw-10"
+    y = "10" if p_y == "top" else "h-th-10"
+
+    stream = ffmpeg.input(clip_path)
+    stream_audio = stream.audio
+    stream = ffmpeg.drawtext(stream,
+        text=title,
+        fontsize=fontsize,
+        fontcolor=fontcolor,
+        borderw=borderw,
+        x=x,
+        y=y,
+        fix_bounds=True
+    )
+    stream = ffmpeg.output(stream, stream_audio, out_path)
+    stream.run()
 
     # upload the processed clip
-    if data['is_drawtext']:
-        out_key = f'digest/scaled/scaled_{task_id}/{filename}'
-    else:
-        out_key = f'digest/input/input_{task_id}/{filename}'
-
+    out_key = f'digest/input/input_{task_id}/{filename}'
     logger.info(f'Uploading scaled clip...: {out_path}, {out_key}')
     bucket.upload_file(out_path, out_key)
 
     return {
         'statusCode': 200,
-        'body': json.dumps('Scaled clip. ')
+        'body': json.dumps('Draw-text clip. ')
     }
