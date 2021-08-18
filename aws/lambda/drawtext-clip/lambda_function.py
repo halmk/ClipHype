@@ -61,8 +61,8 @@ def lambda_handler(event, context):
 
     p_y = position.split('-')[0]
     p_x = position.split('-')[1]
-    x = "0" if p_x == "left" else "w-tw"
-    y = "0" if p_y == "top" else "h-th"
+    x = "10" if p_x == "left" else "w-tw-10"
+    y = "10" if p_y == "top" else "h-th-10"
 
     stream = ffmpeg.input(clip_path)
     stream_audio = stream.audio
