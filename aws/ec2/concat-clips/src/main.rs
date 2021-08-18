@@ -55,7 +55,7 @@ async fn main() {
     }).await.unwrap();
 
     // RDSから未処理のタスクを１つ抽出し、ステータスを更新する
-    let select_task_query = format!("SELECT task_id, bucket, video_key, transition, duration FROM app_digest WHERE task_id={}", task_id);
+    let select_task_query = format!("SELECT task_id, bucket, video_key, transition, duration FROM app_digest WHERE task_id='{}'", task_id);
     let tasks = conn.query_map(
         select_task_query,
         |(task_id, bucket, video_key, transition, duration)| {
