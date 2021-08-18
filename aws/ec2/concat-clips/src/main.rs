@@ -7,12 +7,15 @@ use rusoto_core::{ByteStream, Region, HttpClient};
 use rusoto_credential::EnvironmentProvider;
 use rusoto_s3::{S3, S3Client, GetObjectRequest, ListObjectsRequest, PutObjectRequest};
 use rusoto_ec2::{Ec2, Ec2Client, TerminateInstancesRequest};
+use rusoto_sqs::{Sqs, SqsClient, ReceiveMessageRequest, DeleteMessageRequest};
 use tokio::io::AsyncReadExt;
 use tokio::fs::File;
 use tokio::process::Command;
 use mysql::*;
 use mysql::prelude::*;
 
+
+#[derive(Debug, Clone)]
 struct Highlight {
     task_id: String,
     bucket: String,
@@ -32,10 +35,27 @@ async fn main() {
     let provider = EnvironmentProvider::default();
 
     let s3_client = S3Client::new_with(HttpClient::new().unwrap(), provider.clone(), region.clone());
+    let sqs_client = SqsClient::new_with(HttpClient::new().unwrap(), provider.clone(), region.clone());
     let ec2_client = Ec2Client::new_with(HttpClient::new().unwrap(), provider.clone(), region.clone());
 
+    // SQSからメッセージを受信する
+    let result = sqs_client.receive_message(ReceiveMessageRequest {
+        queue_url: env::var("SQS_URL").unwrap(),
+        max_number_of_messages: Some(1),
+        ..Default::default()
+    }).await.unwrap();
+
+    let message = result.messages.unwrap().first().unwrap().clone();
+    let task_id = message.body.unwrap();
+
+    // メッセージをSQSから削除
+    let _result = sqs_client.delete_message(DeleteMessageRequest {
+        queue_url: env::var("SQS_URL").unwrap(),
+        receipt_handle: message.receipt_handle.unwrap().clone(),
+    }).await.unwrap();
+
     // RDSから未処理のタスクを１つ抽出し、ステータスを更新する
-    let select_task_query = r"SELECT task_id, bucket, video_key, transition, duration FROM app_digest WHERE status='Request instance'";
+    let select_task_query = format!("SELECT task_id, bucket, video_key, transition, duration FROM app_digest WHERE task_id='{}'", task_id);
     let tasks = conn.query_map(
         select_task_query,
         |(task_id, bucket, video_key, transition, duration)| {
@@ -45,7 +65,7 @@ async fn main() {
         }
     ).unwrap();
 
-    let task = &tasks[0];
+    let task = tasks[0].clone();
     let update_status_query = format!(r"UPDATE app_digest SET status='Processing' WHERE task_id='{}'", task.task_id);
     conn.query_drop(update_status_query).unwrap();
 

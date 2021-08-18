@@ -45,16 +45,20 @@ var app = new Vue({
     timelineParPage: 4,
     timelinePageIndex: 0,
     timelineEmbedUrl: '',
-    clipsPlayTime: 0,
+    totalClipSeconds: 0,
     playTimeExceeded: false,
     highlights: [],
     digestUrl: '',
     taskId: '',
     title: '',
-    videoLength: 0,
     transition: 'fade',
     duration: 500,
     disabledCreateButton: true,
+    isDrawText: false,
+    fontsize: 64,
+    fontcolor: "white",
+    borderw: 1,
+    position: "top-left",
   },
 
   computed: {
@@ -98,8 +102,8 @@ var app = new Vue({
       return clips_id;
     },
 
-    getClipsPlayTime: function() {
-      let playtime = this.clipsPlayTime;
+    getTotalClipSeconds: function() {
+      let playtime = this.totalClipSeconds;
       let min = ('00' + Math.floor(playtime / 60)).slice(-2);
       let sec = ('00' + playtime % 60).slice(-2);
       return `${min}m ${sec}s`;
@@ -142,8 +146,8 @@ var app = new Vue({
       if(this.duration < 200) this.duration = 200;
     },
 
-    clipsPlayTime: function() {
-      if(this.clipsPlayTime > 300) {
+    totalClipSeconds: function() {
+      if(this.totalClipSeconds > 300) {
         this.playTimeExceeded = true;
         this.disabledCreateButton = true;
       }
@@ -418,7 +422,7 @@ var app = new Vue({
 
     editRecievedHighlight: function(clips) {
       this.timelineClips = [];
-      this.clipsPlayTime = 0;
+      this.totalClipSeconds = 0;
       clips = clips.split(',');
       for(let i=0; i<clips.length; i++) {
         console.log(clips[i]);
@@ -472,7 +476,7 @@ var app = new Vue({
 
       video.ondurationchange = function() {
         let playtime = parseInt(this.duration);
-        app.clipsPlayTime += playtime;
+        app.totalClipSeconds += playtime;
       }
     },
 
@@ -485,7 +489,7 @@ var app = new Vue({
 
       video.ondurationchange = function() {
         let playtime = parseInt(this.duration);
-        app.clipsPlayTime -= playtime;
+        app.totalClipSeconds -= playtime;
       }
     },
 
@@ -531,11 +535,16 @@ var app = new Vue({
         "creator": username,
         "streamer": this.streamerName,
         "title": this.title,
-        "length": this.videoLength,
+        "length": this.totalClipSeconds,
         "transition": this.transition,
         "duration": this.duration,
         "num_clips": this.timelineClips.length,
         "clips": this.timelineClips,
+        "is_drawtext": this.isDrawText,
+        "fontsize": this.fontsize,
+        "fontcolor": this.fontcolor,
+        "borderw": this.borderw,
+        "position": this.position
       }
       axios.post(studio_url, {data}, {
         headers: {

@@ -5,7 +5,6 @@ import time
 import urllib.request
 import sys
 import logging
-import pymysql.cursors
 
 
 logger = logging.getLogger()
@@ -21,21 +20,30 @@ INSTANCE_TYPE = os.environ['INSTANCE_TYPE']
 MAX_PRICE = os.environ['MAX_PRICE']
 SNAPSHOT_ID = os.environ['SNAPSHOT_ID']
 
+SQS_URL = os.environ['SQS_URL']
+
 
 def lambda_handler(event, context):
     print(event['Records'][0]['body'])
-    # タスクIDを取得
     message = event['Records'][0]['body']
-    creator = message.split('/')[0]
-    task_id = message.split('/')[1]
+    bucket_name = message.split('/')[0]
+    creator = message.split('/')[1]
+    task_id = message.split('/')[2]
 
-    # スポットリクエストを送る
+    # send a spot request
     response = spot_request()
+
+    # send a ready message to sqs
+    sqs_client = boto3.client('sqs')
+    response = sqs_client.send_message(
+        QueueUrl=SQS_URL,
+        MessageBody=f'{task_id}'
+    )
 
     return "Requested spot instance to create a a highlight video"
 
 
-# スポットインスタンスリクエスト
+# spot instance request
 def spot_request():
     client = boto3.client('ec2')
     response = client.request_spot_instances(
@@ -63,30 +71,6 @@ def spot_request():
         },
         SpotPrice=MAX_PRICE,
         Type='one-time',
-    )
-
-    return response
-
-
-# スポットインスタンスリクエストの詳細を取得
-def describe_spot_instance_requests(request_id):
-    client = boto3.client('ec2')
-    response = client.describe_spot_instance_requests(
-        SpotInstanceRequestIds=[
-            request_id,
-        ],
-    )
-
-    return response
-
-
-# インスタンスの詳細を取得
-def describe_instances(instance_id):
-    client = boto3.client('ec2')
-    response = client.describe_instances(
-        InstanceIds=[
-            instance_id,
-        ],
     )
 
     return response
