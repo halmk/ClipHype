@@ -19,6 +19,8 @@ var app = new Vue({
 
   data: {
     siteUrl: '',
+    follows: [],
+    userIds: [],
     clips: [],
     publishedClips: [],
     clipsParPage: 6,
@@ -192,6 +194,46 @@ var app = new Vue({
           console.log(error);
         })
     },
+
+    /* ユーザがフォローしているユーザの情報を取得する */
+    getUsersFollows: function() {
+      TwitchAPI.getFollows(this.clientId)
+        .then(function(response) {
+          //console.log("getUsersFollows↓");
+          //console.log(response);
+          app.follows = response['data']['data'];
+          app.userIds = [];
+          for(let i=0; i<response['data']['data'].length; i++){
+            app.userIds.push(response['data']['data'][i]['to_id']);
+          }
+        })
+        .catch(function(error) {
+          //console.log(error.response);
+        })
+    },
+
+
+    /* ユーザがフォローしているユーザのプロフィール画像とログインIDを取得する */
+    getUsers: function() {
+      TwitchAPI.getUsers(this.userIds)
+        .then(function(response) {
+          //console.log("getUsers↓");
+          //console.log(response);
+          app.users = response['data']['data'];
+          for(let i=0; i<response['data']['data'].length; i++){
+            if(response['data']['data'][i]['profile_image_url'] === ""){
+              app.$set(app.follows[i], "profile_image_url", 'https://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_70x70.png');
+            } else {
+              app.$set(app.follows[i], "profile_image_url", response['data']['data'][i]['profile_image_url']);
+            }
+            app.$set(app.follows[i], "login", response['data']['data'][i]['login']);
+          }
+        })
+        .catch(function(error) {
+          //console.log(error.response);
+        })
+    },
+
 
     /* 配信者のIDを指定して、その配信のクリップを取得する */
     getClips: function() {
