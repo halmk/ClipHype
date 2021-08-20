@@ -31,10 +31,31 @@ var TwitchAPI = {
 
     /* ストリーマの名前からストリーマIDを取得する */
     getClientId: async function(streamerName) {
-        url = 'https://api.twitch.tv/helix/users';
-        params = {
+        let url = 'https://api.twitch.tv/helix/users';
+        let params = {
             'login': streamerName
         };
+
+        return await this.getRequest(url, params);
+    },
+
+    /* ユーザがフォローしている配信者を取得する */
+    getFollows: async function(clientId) {
+        let url = 'https://api.twitch.tv/helix/follows';
+        let params = {
+            'from_id': clientId,
+            'first': 100
+        };
+
+        return await this.getRequest(url, params);
+    },
+
+    /* ユーザIDからユーザの情報を取得する */
+    getUsers: async function(userIds) {
+        let url = 'https://api.twitch.tv/helix/users';
+        let params = {
+            'id': userIds
+        }
 
         return await this.getRequest(url, params);
     },
