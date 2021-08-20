@@ -23,7 +23,6 @@ var app = new Vue({
     publishedClips: [],
     clipsParPage: 6,
     clipsCurrentPage: 1,
-    //Client_Id: 'rgcnhkl0imrqa2wci67vwihckdequf',
     Client_Id: '0d4wa7ktjah3cfu16uu4xdi9hwra4m',
     token: '',
     datepickerStartedAt: '2019-01-01',
@@ -170,6 +169,10 @@ var app = new Vue({
       return moment(value).format('YYYY-MM-DD');
     },
 
+    getEpochTime: function(dt) {
+      return moment(dt).unix();
+    },
+
     /*
        ----------------------
         Twitch API Requests
@@ -202,7 +205,8 @@ var app = new Vue({
             app.clips[i]['modal_target'] = '#' + app.clips[i]['modal_id'];
             app.clips[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
             app.clips[i]['modal'] = false;
-            app.clips[i]['created_at'] = app.customformat(app.clips[i]['created_at']);
+            app.clips[i]['created_date'] = app.customformat(app.clips[i]['created_at']);
+            app.clips[i]['created_epoch'] = app.getEpochTime(app.clips[i]['created_at']);
           }
           app.clipsAfter = response['data']['pagination']['cursor'];
           if(app.published) app.getPublishedClips();
@@ -442,6 +446,16 @@ var app = new Vue({
       return cmp;
     },
 
+    timelineCmpByEpoch: function(a, b) {
+      let cmp = 0;
+      if(a.created_epoch >= b.created_epoch) {
+        cmp = 1;
+      } else {
+        cmp = -1;
+      }
+      return cmp;
+    },
+
     appendClip: function(clip) {
       let timelineClip = JSON.parse(JSON.stringify(clip));
       let index = 0;
@@ -526,6 +540,10 @@ var app = new Vue({
       if(index !== this.timelineClips.length-1){
         this.timelineClips.splice(index, 2, this.timelineClips[index+1], this.timelineClips[index]);
       }
+    },
+
+    sortTimelineClipsByDatetime: function() {
+      this.timelineClips.sort(this.timelineCmpByEpoch);
     },
 
     /* ダイジェスト動画の情報をDjangoに渡す */
