@@ -127,7 +127,7 @@
                                         <div class="h-100 d-flex flex-column justify-content-end">
                                             <div class="d-flex justify-content-between">
                                                 <div class="text-white text-views rounded px-1 font-weight-bold">views:[[ item.view_count ]]</div>
-                                                <div class="text-white text-date rounded px-1 font-weight-bold">[[ item.created_at ]]</div>
+                                                <div class="text-white text-date rounded px-1 font-weight-bold">[[ item.created_date ]]</div>
                                             </div>
                                         </div>
                                     </div>
@@ -201,6 +201,11 @@
                     <span class="d-block">・It takes more than several tens of minutes to complete the process.</span>
                 </div>
             </p>
+            <div class="mt-2">
+                <button class="btn btn-info" v-on:click="sortTimelineClipsByDatetime">
+                    Sort by datetime
+                </button>
+            </div>
         </div>
     </div>
         <div class="row px-3 pt-2 pb-3 m-1 shadow-sm rounded-lg bg-light">
