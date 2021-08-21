@@ -189,7 +189,12 @@
                             </div>
                             <div class="card-body mt-1">
                                 <button type="submit" class="btn btn-outline-success rounded shadow-sm" name="id" v-bind:value="item.id"><i class="fas fa-download" style="font-size: 1.0em"></i></button>
-                                <button type="button" class="btn btn-outline-info rounded shadow-sm ml-2" v-on:click="appendClip(item)"><i class="fas fa-plus"></i></button>
+                                <button type="button" class="btn btn-outline-info rounded shadow-sm ml-2" v-on:click="appendClip(item)" v-if="!isSelectedClip(item)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button type="button" class="btn btn-info rounded shadow-sm ml-2" v-on:click="deleteClip(item)" v-else>
+                                    <i class="fas fa-check"></i>
+                                </button>
                             </div>
                         </div>
                         </form>
