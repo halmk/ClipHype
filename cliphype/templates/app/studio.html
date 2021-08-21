@@ -133,23 +133,23 @@
                         <div class="row">
                             <button class="btn btn-outline-primary font-weight-bold" data-toggle="button" v-on:click="published = !published">Published</button>
                             <button type="button" class="btn btn-success ml-2 font-weight-bold" v-on:click="getAfterClips">More</button>
-                            </div>
+                        </div>
                         <div class="row py-2">
-                        <datepicker
-                                v-model="datepickerStartedAt"
-                                :format="DatePickerFormat"
-                                name="datepickerStartedAt"
-                                class="d-inline-flex mr-2 py-1">
-                        </datepicker>
-                        <span class="text-center mt-2 font-weight-bold">~</span>
-                        <datepicker
-                                v-model="datepickerEndedAt"
-                                :format="DatePickerFormat"
-                                name="datepickerEndedAt"
-                                class="d-inline-flex ml-2 py-1">
-                        </datepicker>
+                            <datepicker
+                                    v-model="datepickerStartedAt"
+                                    :format="DatePickerFormat"
+                                    name="datepickerStartedAt"
+                                    class="d-inline-flex mr-2 py-1">
+                            </datepicker>
+                            <span class="text-center mt-2 font-weight-bold">~</span>
+                            <datepicker
+                                    v-model="datepickerEndedAt"
+                                    :format="DatePickerFormat"
+                                    name="datepickerEndedAt"
+                                    class="d-inline-flex ml-2 py-1">
+                            </datepicker>
                             <button type="button" v-on:click="getClips" class="btn btn-primary ml-2 shadow-sm font-weight-bold">Search</button>
-                            </div>
+                        </div>
                     </nav>
                 <paginate class="justify-content-center" v-model="clipsCurrentPage"
                     :page-count="getClipsPageCount"
@@ -167,46 +167,46 @@
                     :next-link-class="'page-link'">
                 </paginate>
                 <div class="row">
-                        <div class="my-2 col-lg-6 col-xl-4" v-for="item in getClipsItems">
-                            <form action="{% url 'download' %}" method="post">
-                                {% csrf_token %}
-                            <div class="card border-0 rounded shadow bg-light">
-                                <div class="card border-0">
-                                    <a v-on:click="openClipModal(item.embed_url)" style="cursor: pointer">
-                                        <img class="card-img" v-bind:src="item.thumbnail_url">
-                                    <div class="card-img-overlay">
-                                        <p class="card-text text-white overflow-hidden text-title-parent">
-                                        <span class="text-title badge badge-dark px-1 font-weight-bold">[[ item.title ]]</span>
-                                    </p>
-                                        <div class="h-100 d-flex flex-column justify-content-end">
-                                            <div class="d-flex justify-content-between">
-                                                <div class="text-white text-views rounded px-1 font-weight-bold">views:[[ item.view_count ]]</div>
-                                                <div class="text-white text-date rounded px-1 font-weight-bold">[[ item.created_date ]]</div>
-                                            </div>
+                    <div class="my-2 col-lg-6 col-xl-4" v-for="item in getClipsItems">
+                        <form action="{% url 'download' %}" method="post">
+                        {% csrf_token %}
+                        <div class="card border-0 rounded shadow bg-light">
+                            <div class="card border-0">
+                                <a v-on:click="openClipModal(item.embed_url)" style="cursor: pointer">
+                                    <img class="card-img" v-bind:src="item.thumbnail_url">
+                                <div class="card-img-overlay">
+                                    <p class="card-text text-white overflow-hidden text-title-parent">
+                                    <span class="text-title badge badge-dark px-1 font-weight-bold">[[ item.title ]]</span>
+                                </p>
+                                    <div class="h-100 d-flex flex-column justify-content-end">
+                                        <div class="d-flex justify-content-between">
+                                            <div class="text-white text-views rounded px-1 font-weight-bold">views:[[ item.view_count ]]</div>
+                                            <div class="text-white text-date rounded px-1 font-weight-bold">[[ item.created_date ]]</div>
                                         </div>
                                     </div>
-                                    </a>
                                 </div>
-                                <div class="card-body mt-1">
-                                    <button type="submit" class="btn btn-outline-success rounded shadow-sm" name="id" v-bind:value="item.id"><i class="fas fa-download" style="font-size: 1.0em"></i></button>
-                                    <button type="button" class="btn btn-outline-info rounded shadow-sm ml-2" v-on:click="appendClip(item)"><i class="fas fa-plus"></i></button>
-                                </div>
+                                </a>
                             </div>
-                            </form>
-                        </div>
-                        <div class="modal fade" id="clipModal" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                                <div class="modal-content bg-dark">
-                                    <div class="embed-responsive embed-responsive-16by9">
-                                    <iframe class="embed-responsive-item"
-                                                    v-bind:src="clipEmbedUrl"
-                                                    frameborder="0"
-                                                    scrolling="no">
-                                    </iframe>
-                                </div>
-                                </div>
+                            <div class="card-body mt-1">
+                                <button type="submit" class="btn btn-outline-success rounded shadow-sm" name="id" v-bind:value="item.id"><i class="fas fa-download" style="font-size: 1.0em"></i></button>
+                                <button type="button" class="btn btn-outline-info rounded shadow-sm ml-2" v-on:click="appendClip(item)"><i class="fas fa-plus"></i></button>
                             </div>
                         </div>
+                        </form>
+                    </div>
+                    <div class="modal fade" id="clipModal" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                            <div class="modal-content bg-dark">
+                                <div class="embed-responsive embed-responsive-16by9">
+                                <iframe class="embed-responsive-item"
+                                                v-bind:src="clipEmbedUrl"
+                                                frameborder="0"
+                                                scrolling="no">
+                                </iframe>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <paginate class="justify-content-center mt-3" v-model="clipsCurrentPage"
                 :page-count="getClipsPageCount"
