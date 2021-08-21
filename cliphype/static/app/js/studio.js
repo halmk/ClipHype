@@ -550,6 +550,30 @@ var app = new Vue({
       app.timelineClips.sort(app.timelineCmp);
     },
 
+    deleteClip: function(clip) {
+      let newTimelineClips = [];
+      for(let i=0 ;i<this.timelineClips.length; i++){
+        if(this.timelineClips[i]['id'] == clip['id']) {
+          this.subClipPlayTime(this.timelineClips[i]['thumbnail_url']);
+        } else {
+          newTimelineClips.push(this.timelineClips[i]);
+        }
+      }
+
+      this.timelineClips = [];
+      for(let i=0; i<newTimelineClips.length; i++) this.timelineClips.push(newTimelineClips[i]);
+    },
+
+    isSelectedClip: function(clip) {
+      //console.log(clip);
+      for(let i=0; i<this.timelineClips.length; i++){
+        //console.log(this.timelineClips[i]['id'], clip['id']);
+        if (this.timelineClips[i]['id'] == clip['id'])
+          return true;
+      }
+      return false;
+    },
+
     prevClip: function() {
       //console.log("先頭のインデックス: " + this.timelinePageIndex);
       if(this.timelinePageIndex !== 0){
@@ -595,7 +619,9 @@ var app = new Vue({
     },
 
     removeTimelineClip: function(index) {
+      //console.log(index);
       index += this.timelinePageIndex;
+      //console.log(index);
       this.subClipPlayTime(this.timelineClips[index]['thumbnail_url']);
 
       let newClips = [];
@@ -726,7 +752,7 @@ var app = new Vue({
         }
       })
       .then(function(response) {
-        console.log(response);
+        //console.log(response);
         app.highlights = response['data'];
         for(let i=0; i<app.highlights.length; i++) {
           app.getHighlightVideo(app.highlights[i]);
@@ -763,7 +789,7 @@ var app = new Vue({
         }
       })
       .then(function(response) {
-        console.log(response);
+        //console.log(response);
         highlight.hasHighlightTask = true;
       })
       .catch(function(error) {
@@ -805,7 +831,7 @@ var app = new Vue({
     $('[data-toggle="tooltip"]').tooltip();
     this.userName = username;
     if (this.userName.length != 0) {
-      console.log("login: " + this.userName);
+      //console.log("login: " + this.userName);
       this.getClientId();
       this.getHighlights();
     }
