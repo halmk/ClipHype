@@ -9,13 +9,67 @@
     <label class="d-inline-flex mt-2 mb-3">
         <h3 class="text-dark font-weight-bold">Streamer</h3>
         <input type="text" v-model="streamerName" class="input-lg border rounded shadow-sm pl-2 py-1 ml-3" required>
-        <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getClientId">
+        <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getStreamerId">
             GO
         </button>
     </label>
 
+    <!-- FOLLOWS CHANNEL -->
+    <div class="mt-2 section" id="follows" v-show="clientId.length !== 0">
+        <h1>
+            <a class="text-dark text-decoration-none font-weight-bold" tabindex="-1" href="#follows" data-toggle="tooltip" title="Click icon to show selected streamer's clips" data-placement="right">
+            Follow Chennels
+            </a>
+        </h1>
+        <div class="row justify-content-center my-2">
+            <paginate class="justify-content-center" v-model="followsCurrentPage"
+                    :page-count="getFollowsPageCount"
+                    :page-range="0"
+                    :margin-pages="0"
+                    :click-handler="clickFollowsCallback"
+                    :prev-text="'<'"
+                    :next-text="''"
+                    :break-view-text="''"
+                    :container-class="'pagination'"
+                    :prev-class="'page-item'"
+                    :prev-link-class="'page-link rounded-circle mt-3 mr-2 bg-light shadow-sm'"
+                    >
+            </paginate>
+        <div class="bg-secondary rounded ml-1" v-for="item in getFollowsItems">
+            <div class="card bg-light border-0">
+                <a v-on:click="streamerName = item.to_login; streamerId = item.to_id;" style="cursor: pointer">
+                <div class="card-img">
+                    <img class="rounded-circle img-fluid shadow" v-bind:src="item.profile_image_url" width="70">
+                </div>
+                <div class="card-img-overlay streamer-img">
+                    <div class="card-text">
+                        <span class="text-center text-secondary badge badge-pill badge-light shadow border border-secondary streamer-badge overflow-hidden font-weight-bold">
+                            [[ item.to_login ]]
+                        </span>
+                    </div>
+                </div>
+                </a>
+            </div>
+        </div>
+            <paginate class="justify-content-center" v-model="followsCurrentPage"
+                    :page-count="getFollowsPageCount"
+                    :page-range="0"
+                    :margin-pages="0"
+                    :click-handler="clickFollowsCallback"
+                    :prev-text="''"
+                    :next-text="'>'"
+                    :break-view-text="''"
+                    :container-class="'pagination'"
+                    :next-class="'page-item'"
+                    :next-link-class="'page-link rounded-circle mt-3 ml-2 bg-light shadow-sm'"
+                    >
+            </paginate>
+        </div>
+    </div>
+    <!-- /FOLLOWS CHANNEL -->
+
     <!-- ARCHIVE AREA -->
-    <div class="p-3 shadow mb-4 bg-white section" id="archive">
+    <div class="p-3 shadow mt-4 mb-4 bg-white section" id="archive">
         <h2>
             <a class="text-dark text-decoration-none font-weight-bold" role="button" href="#archive" data-toggle="tooltip" title="Click archive to show clips created during the stream" data-placement="right">
             Channel Archive
