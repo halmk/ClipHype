@@ -29,11 +29,11 @@ var TwitchAPI = {
         }
     },
 
-    /* ストリーマの名前からストリーマIDを取得する */
-    getClientId: async function(streamerName) {
+    /* 名前からIDを取得する */
+    getUserId: async function(name) {
         let url = 'https://api.twitch.tv/helix/users';
         let params = {
-            'login': streamerName
+            'login': name
         };
 
         return await this.getRequest(url, params);
@@ -41,7 +41,7 @@ var TwitchAPI = {
 
     /* ユーザがフォローしている配信者を取得する */
     getFollows: async function(clientId) {
-        let url = 'https://api.twitch.tv/helix/follows';
+        let url = 'https://api.twitch.tv/helix/users/follows';
         let params = {
             'from_id': clientId,
             'first': 100
