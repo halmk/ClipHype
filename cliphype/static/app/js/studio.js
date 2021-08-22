@@ -63,6 +63,7 @@ var app = new Vue({
     fontcolor: "white",
     borderw: 1,
     position: "top-left",
+    isFLTransition: false,
   },
 
   computed: {
@@ -670,7 +671,8 @@ var app = new Vue({
         "fontsize": this.fontsize,
         "fontcolor": this.fontcolor,
         "borderw": this.borderw,
-        "position": this.position
+        "position": this.position,
+        "fl_transition": this.isFLTransition
       }
       axios.post(studio_url, {data}, {
         headers: {
