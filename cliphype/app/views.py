@@ -79,6 +79,7 @@ def studio(request):
         cont.length = data['length']
         cont.transition = data['transition']
         cont.duration = data['duration']
+        cont.fl_transition = data['fl_transition']
         cont.status = "Requested"
         cont.save()
 
