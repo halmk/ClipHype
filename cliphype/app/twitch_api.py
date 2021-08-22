@@ -40,7 +40,7 @@ def getRequest(url, params, count=0):
     }
     response = requests.get(url, headers=headers, params=params)
     logger.debug(f'\n{response}\n')
-    if response.status_code != 200:
+    if response.status_code == 401:
         if count > 0:
             time.sleep(3)
         if count > 1:
