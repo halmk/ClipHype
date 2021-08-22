@@ -22,6 +22,7 @@ struct Highlight {
     video_key: String,
     transition: String,
     duration: String,
+    fl_transition: String,
 }
 
 #[tokio::main]
@@ -55,12 +56,12 @@ async fn main() {
     }).await.unwrap();
 
     // RDSから未処理のタスクを１つ抽出し、ステータスを更新する
-    let select_task_query = format!("SELECT task_id, bucket, video_key, transition, duration FROM app_digest WHERE task_id='{}'", task_id);
+    let select_task_query = format!("SELECT task_id, bucket, video_key, transition, duration, fl_transition FROM app_digest WHERE task_id='{}'", task_id);
     let tasks = conn.query_map(
         select_task_query,
         |(task_id, bucket, video_key, transition, duration)| {
             Highlight {
-                task_id, bucket, video_key, transition, duration
+                task_id, bucket, video_key, transition, duration, fl_transition
             }
         }
     ).unwrap();
@@ -101,8 +102,14 @@ async fn main() {
         clip_paths.push(path_str);
     }
 
-    // ffmpeg-concatでハイライト動画を生成する
     let mut input_paths:Vec<&str> = clip_paths.iter().map(AsRef::as_ref).collect();
+    // fl_trasition が true なら、前後に黒背景動画を挿入する
+    if fl_transition == "1" {
+        input_paths.insert(0, "clips/b1s.mp4");
+        input_paths.push("clips/b1s.mp4");
+    }
+
+    // ffmpeg-concatでハイライト動画を生成する
     let out_file = "output/out.mp4";
     println!("{:?}", clip_paths);
     println!("{:?}", out_file);
