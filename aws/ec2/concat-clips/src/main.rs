@@ -104,7 +104,7 @@ async fn main() {
 
     let mut input_paths:Vec<&str> = clip_paths.iter().map(AsRef::as_ref).collect();
     // fl_trasition が true なら、前後に黒背景動画を挿入する
-    if fl_transition == "1" {
+    if task.fl_transition == "1" {
         input_paths.insert(0, "clips/b1s.mp4");
         input_paths.push("clips/b1s.mp4");
     }
