@@ -31,6 +31,8 @@ class Digest(models.Model):
     transition = models.CharField(max_length=128, blank=True, null=True)
     # トランジションの長さ
     duration = models.IntegerField(blank=True, null=True)
+    # 最初と最後にトランジションをつけるかどうか
+    fl_transition = models.BooleanField(blank=True, null=True)
 
 
 class Contact(models.Model):

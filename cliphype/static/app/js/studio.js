@@ -19,12 +19,16 @@ var app = new Vue({
 
   data: {
     siteUrl: '',
+    clientId: '',
+    follows: [],
+    userIds: [],
+    followsLength: 0,
+    followsParPage: 6,
+    followsCurrentPage: 1,
     clips: [],
     publishedClips: [],
     clipsParPage: 6,
     clipsCurrentPage: 1,
-    //Client_Id: 'rgcnhkl0imrqa2wci67vwihckdequf',
-    Client_Id: '0d4wa7ktjah3cfu16uu4xdi9hwra4m',
     token: '',
     datepickerStartedAt: '2019-01-01',
     datepickerEndedAt: '2019-09-03',
@@ -59,9 +63,22 @@ var app = new Vue({
     fontcolor: "white",
     borderw: 1,
     position: "top-left",
+    isFLTransition: false,
   },
 
   computed: {
+    /* ページング内で表示するクリップを返す */
+    getFollowsItems: function() {
+      let current = this.followsCurrentPage * this.followsParPage;
+      let start = current - this.followsParPage;
+      return this.follows.slice(start, current);
+    },
+
+    /* ページングのページ数を返す */
+    getFollowsPageCount: function() {
+      return Math.ceil(this.follows.length / this.followsParPage);
+    },
+
     /* ページング内で表示するクリップを返す */
     getClipsItems: function() {
       let current = this.clipsCurrentPage * this.clipsParPage;
@@ -125,6 +142,10 @@ var app = new Vue({
       if (this.streamerId.length != 0) this.getClips();
     },
 
+    clientId: function() {
+      this.getFollows();
+    },
+
     /* 配信者のIDが変化したらクリップとアーカイブを読み込む */
     streamerId: function() {
       this.getClips();
@@ -165,9 +186,23 @@ var app = new Vue({
       this.clipsCurrentPage = Number(pageNum);
     },
 
+    /* ページネーションをクリックしたとき、ページ番号を更新 */
+    clickFollowsCallback: function(pageNum) {
+      this.followsCurrentPage = Number(pageNum);
+    },
+
+    /* ページネーションをクリックしたとき、ページ番号を更新 */
+    clickClipsCallback: function(pageNum) {
+      this.clipsCurrentPage = Number(pageNum);
+    },
+
     /* 文字列を'YYYY-MM-DD'に変換したものを返す */
     customformat: function(value) {
       return moment(value).format('YYYY-MM-DD');
+    },
+
+    getEpochTime: function(dt) {
+      return moment(dt).unix();
     },
 
     /*
@@ -177,18 +212,69 @@ var app = new Vue({
     */
 
     /* ストリーマの名前からストリーマIDを取得する */
-    getClientId: function() {
-      TwitchAPI.getClientId(this.streamerName)
+    getStreamerId: function() {
+      TwitchAPI.getUserId(this.streamerName)
         .then(function (response) {
-          //console.log("getClientId↓");
-          console.log(response);
-          //console.log(response['data']['data'][0]['id']);
           app.streamerId = response['data']['data'][0]['id'];
         })
         .catch(function (error) {
           console.log(error);
         })
     },
+
+    getClientId: function() {
+      TwitchAPI.getUserId(this.userName)
+        .then(function (response) {
+          app.clientId = response['data']['data'][0]['id'];
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+    },
+
+    /* ユーザがフォローしているユーザの情報を取得する */
+    getFollows: function() {
+      TwitchAPI.getFollows(this.clientId)
+        .then(function(response) {
+          //console.log("getUsersFollows↓");
+          //console.log(response);
+          app.follows = response['data']['data'];
+          app.userIds = [];
+          for(let i=0; i<app.follows.length; i++){
+            app.userIds.push(app.follows[i]['to_id']);
+          }
+          app.getUsers();
+        })
+        .catch(function(error) {
+          //console.log(error.response);
+        })
+    },
+
+
+    /* ユーザがフォローしているユーザのプロフィール画像とログインIDを取得する */
+    getUsers: function() {
+      TwitchAPI.getUsers(this.userIds)
+        .then(function(response) {
+          //console.log("getUsers↓");
+          //console.log(response);
+          let data = response['data']['data'];
+          for(let i=0; i<data.length; i++){
+            for(let j=0; j<app.follows.length; j++){
+              if(data[i]['id'] == app.follows[j]['to_id']) {
+                if(response['data']['data'][i]['profile_image_url'] === ""){
+                  app.$set(app.follows[j], "profile_image_url", 'https://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_70x70.png');
+                } else {
+                  app.$set(app.follows[j], "profile_image_url", response['data']['data'][i]['profile_image_url']);
+                }
+              }
+            }
+          }
+        })
+        .catch(function(error) {
+          //console.log(error.response);
+        })
+    },
+
 
     /* 配信者のIDを指定して、その配信のクリップを取得する */
     getClips: function() {
@@ -202,7 +288,8 @@ var app = new Vue({
             app.clips[i]['modal_target'] = '#' + app.clips[i]['modal_id'];
             app.clips[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
             app.clips[i]['modal'] = false;
-            app.clips[i]['created_at'] = app.customformat(app.clips[i]['created_at']);
+            app.clips[i]['created_date'] = app.customformat(app.clips[i]['created_at']);
+            app.clips[i]['created_epoch'] = app.getEpochTime(app.clips[i]['created_at']);
           }
           app.clipsAfter = response['data']['pagination']['cursor'];
           if(app.published) app.getPublishedClips();
@@ -442,6 +529,16 @@ var app = new Vue({
       return cmp;
     },
 
+    timelineCmpByEpoch: function(a, b) {
+      let cmp = 0;
+      if(a.created_epoch >= b.created_epoch) {
+        cmp = 1;
+      } else {
+        cmp = -1;
+      }
+      return cmp;
+    },
+
     appendClip: function(clip) {
       let timelineClip = JSON.parse(JSON.stringify(clip));
       let index = 0;
@@ -452,6 +549,30 @@ var app = new Vue({
       app.timelineClips.push(timelineClip);
       app.addClipPlayTime(timelineClip['thumbnail_url']);
       app.timelineClips.sort(app.timelineCmp);
+    },
+
+    deleteClip: function(clip) {
+      let newTimelineClips = [];
+      for(let i=0 ;i<this.timelineClips.length; i++){
+        if(this.timelineClips[i]['id'] == clip['id']) {
+          this.subClipPlayTime(this.timelineClips[i]['thumbnail_url']);
+        } else {
+          newTimelineClips.push(this.timelineClips[i]);
+        }
+      }
+
+      this.timelineClips = [];
+      for(let i=0; i<newTimelineClips.length; i++) this.timelineClips.push(newTimelineClips[i]);
+    },
+
+    isSelectedClip: function(clip) {
+      //console.log(clip);
+      for(let i=0; i<this.timelineClips.length; i++){
+        //console.log(this.timelineClips[i]['id'], clip['id']);
+        if (this.timelineClips[i]['id'] == clip['id'])
+          return true;
+      }
+      return false;
     },
 
     prevClip: function() {
@@ -499,7 +620,9 @@ var app = new Vue({
     },
 
     removeTimelineClip: function(index) {
+      //console.log(index);
       index += this.timelinePageIndex;
+      //console.log(index);
       this.subClipPlayTime(this.timelineClips[index]['thumbnail_url']);
 
       let newClips = [];
@@ -528,6 +651,10 @@ var app = new Vue({
       }
     },
 
+    sortTimelineClipsByDatetime: function() {
+      this.timelineClips.sort(this.timelineCmpByEpoch);
+    },
+
     /* ダイジェスト動画の情報をDjangoに渡す */
     postDigestInfo: function() {
       //console.log(csrftoken);
@@ -544,7 +671,8 @@ var app = new Vue({
         "fontsize": this.fontsize,
         "fontcolor": this.fontcolor,
         "borderw": this.borderw,
-        "position": this.position
+        "position": this.position,
+        "fl_transition": this.isFLTransition
       }
       axios.post(studio_url, {data}, {
         headers: {
@@ -626,7 +754,7 @@ var app = new Vue({
         }
       })
       .then(function(response) {
-        console.log(response);
+        //console.log(response);
         app.highlights = response['data'];
         for(let i=0; i<app.highlights.length; i++) {
           app.getHighlightVideo(app.highlights[i]);
@@ -663,7 +791,7 @@ var app = new Vue({
         }
       })
       .then(function(response) {
-        console.log(response);
+        //console.log(response);
         highlight.hasHighlightTask = true;
       })
       .catch(function(error) {
@@ -704,13 +832,15 @@ var app = new Vue({
     this.setResponsiveItems();
     $('[data-toggle="tooltip"]').tooltip();
     this.userName = username;
+    if (this.userName.length != 0) {
+      //console.log("login: " + this.userName);
+      this.getClientId();
+      this.getHighlights();
+    }
     this.siteUrl = location.hostname;
     TwitchAPI.apiUrl = api_url;
     TwitchAPI.clientId = this.Client_Id;
     TwitchAPI.token = this.token;
-    this.getHighlights();
-    //this.getClientId();
-    //this.getVideos();
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.setWindowWidth, false);
