@@ -619,6 +619,14 @@ var app = new Vue({
       $('#timelineModal').modal();
     },
 
+    openSelectedClipMenu: function(clip) {
+      clip.showMenu = true;
+    },
+
+    closeSelectedClipMenu: function(clip) {
+      clip.showMenu = false;
+    },
+
     removeTimelineClip: function(index) {
       //console.log(index);
       index += this.timelinePageIndex;

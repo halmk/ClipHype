@@ -297,11 +297,18 @@
                         <span class="font-weight-bold font-italic text-light timelineIndex">[[ index + timelinePageIndex + 1 ]]</span>
                         <div v-show="item.isHover">
                             <a class="timelinePlay" v-on:click="openTimelineModal(item.embed_url)"><i class="far fa-play-circle text-light"></i></a>
+                            <a class="timelineMenu" v-on:click="openSelectedClipMenu(item)"><i class="fas fa-ellipsis-v text-light"></i></a>
                             <a class="timelineRemove" v-on:click="removeTimelineClip(index)"><i class="fas fa-times-circle text-danger"></i></a>
                             <a class="timelinePrev" v-on:click="movePrevTimelineClip(index)"><i class="fas fa-arrow-circle-left text-warning"></i></a>
                             <a class="timelineNext" v-on:click="moveNextTimelineClip(index)"><i class="fas fa-arrow-circle-right text-warning"></i></a>
                         </div>
                     </div>
+                </div>
+                <div class="position-absolute" v-show="item.showMenu">
+                    <span class="badge bg-light">
+                        Title:
+                        <input class="input-sm border rounded shadow-sm" v-model="item.title">
+                    </span>
                 </div>
             </div>
             <button type="button" class="btn btn-outline-dark ml-1" v-on:click="nextClip">＞</button>
@@ -315,7 +322,7 @@
                                         frameborder="0"
                                         scrolling="no">
                         </iframe>
-                    </div>
+                        </div>
                     </div>
                 </div>
             </div>

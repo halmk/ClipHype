@@ -107,6 +107,15 @@
     margin-top: -4px;
     cursor: pointer;
 }
+.timelineMenu {
+    font-size: 1.2em;
+    color: white;
+    position: absolute;
+    top: 3px;
+    right: 1.4em;
+    margin-top: -4px;
+    cursor: pointer;
+}
 .timelineRemove {
     font-size: 1.4em;
     position: absolute;
