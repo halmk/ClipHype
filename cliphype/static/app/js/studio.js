@@ -168,7 +168,7 @@ var app = new Vue({
     },
 
     totalClipSeconds: function() {
-      if(this.totalClipSeconds > 300) {
+      if(this.totalClipSeconds > 600) {
         this.playTimeExceeded = true;
         this.disabledCreateButton = true;
       }
@@ -335,9 +335,10 @@ var app = new Vue({
           for(let i=0; i<response['data']['data'].length; i++){
             data[i]['modal_id'] = 'modal' + data[i]['id'];
             data[i]['modal_target'] = '#' + data[i]['modal_id'];
-            data[i]['embed_url'] += `&autoplay=false&parent=${this.siteUrl}`;
+            data[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
             data[i]['modal'] = false;
-            data[i]['created_at'] = app.customformat(data[i]['created_at']);
+            data[i]['created_date'] = app.customformat(data[i]['created_at']);
+            data[i]['created_epoch'] = app.getEpochTime(data[i]['created_at']);
           }
           //Array.prototype.push.apply(app.clips, data);
           for(let i=0; i<data.length; i++){
@@ -617,6 +618,17 @@ var app = new Vue({
     openTimelineModal: function(embed_url) {
       this.timelineEmbedUrl = embed_url;
       $('#timelineModal').modal();
+    },
+
+    clickSelectedClipMenu: function(clip) {
+      if (clip.showMenu) {
+        this.$set(clip, 'showMenu', false);
+      } else {
+        for(let i=0; i<this.timelineClips.length; i++) {
+          this.$set(this.timelineClips[i], 'showMenu', false);
+        }
+        this.$set(clip, 'showMenu', true);
+      }
     },
 
     removeTimelineClip: function(index) {
