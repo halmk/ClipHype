@@ -26,14 +26,16 @@ var app = new Vue({
     followsParPage: 6,
     followsCurrentPage: 1,
     clips: [],
+    published: false,
     publishedClips: [],
+    autoclipped: false,
+    autoClips: [],
     clipsParPage: 6,
     clipsCurrentPage: 1,
     token: '',
     datepickerStartedAt: '2019-01-01',
     datepickerEndedAt: '2019-09-03',
     DatePickerFormat: 'yyyy-MM-dd',
-    published: false,
     clipsAfter: '',
     username: '',
     streamerName: '',
@@ -84,12 +86,14 @@ var app = new Vue({
       let current = this.clipsCurrentPage * this.clipsParPage;
       let start = current - this.clipsParPage;
       if(this.published) return this.publishedClips.slice(start, current);
+      if(this.autoclipped) return this.autoClips.slice(start, current);
       else return this.clips.slice(start, current);
     },
 
     /* ページングのページ数を返す */
     getClipsPageCount: function() {
       if(this.published) return Math.ceil(this.publishedClips.length / this.clipsParPage);
+      if(this.autoclipped) return Math.ceil(this.autoClips.length / this.clipsParPage);
       else return Math.ceil(this.clips.length / this.clipsParPage);
     },
 
@@ -155,6 +159,10 @@ var app = new Vue({
     /* published が true になったとき、getPublishedClips() を呼び出す */
     published: function() {
       if(this.published) this.getPublishedClips();
+    },
+
+    autoclipped: function() {
+      if(this.autoclipped) this.getAutoClips();
     },
 
     width: function() {
@@ -404,7 +412,7 @@ var app = new Vue({
         ---------------------------------
     */
 
-    /* 現在Clipsにあるクリップからタイトルが設定されたものだけに絞り込む */
+    /* 現在Clipsにあるクリップからタイトルが設定されたものを新しい配列に格納する */
     getPublishedClips: function() {
       let publishedClips = [];
       for(let i=0; i<this.clips.length; i++){
@@ -423,6 +431,43 @@ var app = new Vue({
       this.clipsCurrentPage = 1;
     },
 
+    /* AutoClip API から自動生成されたクリップを取得する */
+    getAutoClips: function() {
+      this.autoClips = [];
+      axios.get(autoclip_url, {
+        params: {
+          'broadcaster_name': this.streamerName
+        }
+      })
+      .then(function(response) {
+        console.log(response);
+        let clip_ids = [];
+        for(let i=0; i<response['data'].length; i++) {
+          clip_ids.push(response['data'][i]['clip_id']);
+        }
+        TwitchAPI.getClipById(clip_ids.join())
+        .then(function (response) {
+          console.log(response);
+          app.autoClips = response['data']['data'];
+          for(let i=0; i<response['data']['data'].length; i++){
+            app.autoClips[i]['modal_id'] = 'modal' + app.autoClips[i]['id'];
+            app.autoClips[i]['modal_target'] = '#' + app.autoClips[i]['modal_id'];
+            app.autoClips[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
+            app.autoClips[i]['modal'] = false;
+            app.autoClips[i]['created_date'] = app.customformat(app.autoClips[i]['created_at']);
+            app.autoClips[i]['created_epoch'] = app.getEpochTime(app.autoClips[i]['created_at']);
+          }
+          app.autoClips.sort((a, b) => b['created_epoch'] - a['created_epoch']);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
+      this.clipsCurrentPage = 1;
+   },
 
     /* ページネーションをクリックしたとき、ページ番号を更新 */
     clickVideosCallback: function(pageNum) {
