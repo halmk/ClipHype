@@ -17,9 +17,9 @@ from django.utils import timezone
 from django_celery_results.models import TaskResult
 from cliphype.settings import S3_BUCKET
 from app import aws_api, twitch_api
-from app.models import Contact, Digest
+from app.models import Contact, Digest, AutoClip
 from app.tasks import concat_clips_lambda
-from app.serializers import DigestSerializer, TaskResultSerializer
+from app.serializers import DigestSerializer, TaskResultSerializer, AutoClipSerializer
 
 
 logger = logging.getLogger(__name__)
@@ -154,6 +154,17 @@ class TaskResultViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = TaskResult.objects.all()
     serializer_class = TaskResultSerializer
     filter_fields = ['task_id']
+
+
+'''
+AutoClipAPIを返す
+'''
+
+
+class AutoClipViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = AutoClip.objects.all()
+    serializer_class = AutoClipSerializer
+    filter_fields = ['broadcaster_name']
 
 
 '''
