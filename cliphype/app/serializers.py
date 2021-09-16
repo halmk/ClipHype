@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from app.models import Digest
+from app.models import Digest, AutoClip
 from django_celery_results.models import TaskResult
 
 
@@ -14,3 +14,9 @@ class TaskResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskResult
         fields = ['task_id', 'task_name', 'status']
+
+
+class AutoClipSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AutoClip
+        fields = '__all__'
