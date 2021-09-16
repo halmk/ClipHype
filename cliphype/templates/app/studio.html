@@ -6,13 +6,17 @@
 
 {% block content %}
 <div class="container">
-    <label class="d-inline-flex mt-2 mb-3">
-        <h3 class="text-dark font-weight-bold">Streamer</h3>
-        <input type="text" v-model="streamerName" class="input-lg border rounded shadow-sm pl-2 py-1 ml-3" required>
-        <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getStreamerId">
-            GO
-        </button>
-    </label>
+    <!-- SEARCH STREAMER -->
+    <div class="section" id="search">
+        <label class="d-inline-flex mt-2 mb-3">
+            <h3 class="text-dark font-weight-bold">Streamer</h3>
+            <input type="text" v-model="streamerName" class="input-lg border rounded shadow-sm pl-2 py-1 ml-3" required>
+            <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getStreamerId">
+                GO
+            </button>
+        </label>
+    </div>
+    <!-- /SERACH STREAMER -->
 
     <!-- FOLLOWS CHANNEL -->
     <div class="mt-2 section" id="follows" v-show="clientId.length !== 0">
@@ -132,6 +136,7 @@
                     <nav class="navbar navbar-dark text-dark">
                         <div class="row">
                             <button class="btn btn-outline-primary font-weight-bold" data-toggle="button" v-on:click="published = !published">Published</button>
+                            <button class="btn btn-outline-primary ml-2 font-weight-bold" data-toggle="button" v-on:click="autoclipped = !autoclipped">AutoClipped</button>
                             <button type="button" class="btn btn-success ml-2 font-weight-bold" v-on:click="getAfterClips">More</button>
                         </div>
                         <div class="row py-2">
@@ -573,6 +578,7 @@
     const bucket_name = "{{ bucket_name }}";
     const highlight_url = "{% url 'highlight-list' %}";
     const task_url = "{% url 'task-list' %}";
+    const autoclip_url = "{% url 'autoclip-list' %}";
     const studio_url = "{% url 'studio' %}";
     const api_url = "{% url 'twitch_api' %}";
 </script>

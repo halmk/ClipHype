@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.fields.related import create_many_to_many_intermediary_model
 from django.utils import timezone
 from django.contrib.auth.models import User
 from allauth.socialaccount.models import SocialApp
@@ -47,3 +48,14 @@ class SocialAppToken(models.Model):
     token = models.TextField()
     token_secret = models.TextField(blank=True)
     expires_at = models.DateTimeField(blank=True, null=True)
+
+
+class AutoClip(models.Model):
+    clip_id = models.CharField(max_length=128)
+    url = models.CharField(max_length=128)
+    embed_url = models.CharField(max_length=128)
+    broadcaster_id = models.CharField(max_length=128)
+    broadcaster_name = models.CharField(max_length=128)
+    creator_id = models.CharField(max_length=128)
+    creator_name = models.CharField(max_length=128)
+    created_at = models.CharField(max_length=128)
