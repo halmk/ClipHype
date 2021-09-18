@@ -51,6 +51,7 @@ var app = new Vue({
     timelineParPage: 4,
     timelinePageIndex: 0,
     timelineEmbedUrl: '',
+    selectedClipModalIndex: 0,
     totalClipSeconds: 0,
     playTimeExceeded: false,
     highlights: [],
@@ -592,6 +593,12 @@ var app = new Vue({
       //console.log(response);
       timelineClip['isHover'] = false;
       timelineClip['index'] = index;
+      var embed_url = timelineClip['embed_url'];
+      var embed_url = embed_url.split("&");
+      embed_url[1] = "autoplay=true";
+      embed_url.push("preload=auto");
+      timelineClip['embed_url'] = embed_url.join("&");
+
       app.timelineClips.push(timelineClip);
       app.addClipPlayTime(timelineClip['thumbnail_url']);
       app.timelineClips.sort(app.timelineCmp);
@@ -660,9 +667,20 @@ var app = new Vue({
       }
     },
 
-    openTimelineModal: function(embed_url) {
+    openTimelineModal: function(embed_url, index) {
       this.timelineEmbedUrl = embed_url;
+      this.selectedClipModalIndex = index;
       $('#timelineModal').modal();
+    },
+
+    openPrevSelectedClip: function() {
+      this.selectedClipModalIndex = Math.max(0, this.selectedClipModalIndex-1);
+      this.timelineEmbedUrl = this.timelineClips[this.selectedClipModalIndex].embed_url;
+    },
+
+    openNextSelectedClip: function() {
+      this.selectedClipModalIndex = Math.min(this.timelineClips.length-1, this.selectedClipModalIndex+1);
+      this.timelineEmbedUrl = this.timelineClips[this.selectedClipModalIndex].embed_url;
     },
 
     clickSelectedClipMenu: function(clip) {
