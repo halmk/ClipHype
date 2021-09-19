@@ -137,6 +137,13 @@ var app = new Vue({
       let start = 0;
       let end = this.highlights.length;
       return this.highlights.slice(start,end);
+    },
+
+    formattedEditableTime: function() {
+      let hours = Math.floor(this.selectedClipEditableTime/(60*60));
+      let minutes = Math.floor((this.selectedClipEditableTime%(60*60))/60);
+      let seconds = Math.floor(this.selectedClipEditableTime%60);
+      return ('00' + hours).slice(-2) + 'h' + ('00' + minutes).slice(-2) + 'm' + ('00' + seconds).slice(-2) + 's';
     }
   },
 
@@ -400,7 +407,8 @@ var app = new Vue({
             app.clips[i]['modal_target'] = '#' + app.clips[i]['modal_id'];
             app.clips[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
             app.clips[i]['modal'] = false;
-            app.clips[i]['created_at'] = app.customformat(app.clips[i]['created_at']);
+            app.clips[i]['created_date'] = app.customformat(app.clips[i]['created_at']);
+            app.clips[i]['created_epoch'] = app.getEpochTime(app.clips[i]['created_at']);
           }
           app.clipsAfter = response['data']['pagination']['cursor'];
           if(app.published) app.getPublishedClips();
@@ -689,10 +697,18 @@ var app = new Vue({
     },
 
     calcEditableTime: function() {
-      var created = this.timelineClips[this.selectedClipModalIndex].created_epoch;
-      var after24h = created + 60*60*24;
-      var current = moment().unix();
-      console.log(created, after24h, current, after24h-current);
+      if (this.timelineClips.length !== 0) {
+        var created = this.timelineClips[this.selectedClipModalIndex].created_epoch;
+        var after24h = created + 60*60*24;
+        var current = moment().unix();
+        console.log(created, after24h, current, after24h-current);
+        var editableTimeSeconds = after24h - current;
+        this.selectedClipEditableTime = Math.max(0,editableTimeSeconds);
+      }
+    },
+
+    calcEditableTimeInterval: function() {
+      setInterval(this.calcEditableTime, 200);
     },
 
     clickSelectedClipMenu: function(clip) {
@@ -924,6 +940,7 @@ var app = new Vue({
       this.getClientId();
       this.getHighlights();
     }
+    this.calcEditableTimeInterval();
     this.siteUrl = location.hostname;
     TwitchAPI.apiUrl = api_url;
     TwitchAPI.clientId = this.Client_Id;
