@@ -327,9 +327,9 @@
                                     [[ selectedClipModalIndex+1 ]]
                                 </span>
                             </div>
-                            <a class="ml-3 btn bg-success" v-bind:href="selectedClipEditURL" target="_blank">
+                            <a class="ml-3 btn bg-success" v-bind:href="selectedClipEditURL" v-show="selectedClipEditableTime !== 0" target="_blank">
                                 <i class="fas fa-cut"></i>
-                                <span class="ml-2">[[ selectedClipEditableTime ]]</span>
+                                <span class="ml-2">[[ formattedEditableTime ]]</span>
                             </a>
                         </div>
                         <div class="embed-responsive embed-responsive-16by9">
