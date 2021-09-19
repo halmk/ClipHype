@@ -52,6 +52,8 @@ var app = new Vue({
     timelinePageIndex: 0,
     timelineEmbedUrl: '',
     selectedClipModalIndex: 0,
+    selectedClipEditURL: '',
+    selectedClipEditableTime: '',
     totalClipSeconds: 0,
     playTimeExceeded: false,
     highlights: [],
@@ -670,17 +672,27 @@ var app = new Vue({
     openTimelineModal: function(embed_url, index) {
       this.timelineEmbedUrl = embed_url;
       this.selectedClipModalIndex = index;
+      this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
       $('#timelineModal').modal();
     },
 
     openPrevSelectedClip: function() {
       this.selectedClipModalIndex = Math.max(0, this.selectedClipModalIndex-1);
       this.timelineEmbedUrl = this.timelineClips[this.selectedClipModalIndex].embed_url;
+      this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
     },
 
     openNextSelectedClip: function() {
       this.selectedClipModalIndex = Math.min(this.timelineClips.length-1, this.selectedClipModalIndex+1);
       this.timelineEmbedUrl = this.timelineClips[this.selectedClipModalIndex].embed_url;
+      this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
+    },
+
+    calcEditableTime: function() {
+      var created = this.timelineClips[this.selectedClipModalIndex].created_epoch;
+      var after24h = created + 60*60*24;
+      var current = moment().unix();
+      console.log(created, after24h, current, after24h-current);
     },
 
     clickSelectedClipMenu: function(clip) {
