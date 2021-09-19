@@ -127,7 +127,7 @@ var app = new Vue({
     },
 
     getTotalClipSeconds: function() {
-      let playtime = this.totalClipSeconds;
+      let playtime = Math.floor(this.totalClipSeconds);
       let min = ('00' + Math.floor(playtime / 60)).slice(-2);
       let sec = ('00' + playtime % 60).slice(-2);
       return `${min}m ${sec}s`;
@@ -327,7 +327,7 @@ var app = new Vue({
           response['data']['data'][0]['isHover'] = false;
           response['data']['data'][0]['index'] = index;
           app.timelineClips.push(response['data']['data'][0]);
-          app.addClipPlayTime(response['data']['data'][0]['thumbnail_url']);
+          app.totalClipSeconds += response['data']['data'][0]['duration'];
           app.timelineClips.sort(app.timelineCmp);
         })
         .catch(function (error) {
@@ -609,16 +609,16 @@ var app = new Vue({
       embed_url.push("preload=auto");
       timelineClip['embed_url'] = embed_url.join("&");
 
-      app.timelineClips.push(timelineClip);
-      app.addClipPlayTime(timelineClip['thumbnail_url']);
-      app.timelineClips.sort(app.timelineCmp);
+      this.timelineClips.push(timelineClip);
+      this.totalClipSeconds += timelineClip.duration;
+      this.timelineClips.sort(app.timelineCmp);
     },
 
     deleteClip: function(clip) {
       let newTimelineClips = [];
       for(let i=0 ;i<this.timelineClips.length; i++){
         if(this.timelineClips[i]['id'] == clip['id']) {
-          this.subClipPlayTime(this.timelineClips[i]['thumbnail_url']);
+          this.totalClipSeconds -= this.timelineClips[i]['duration'];
         } else {
           newTimelineClips.push(this.timelineClips[i]);
         }
@@ -648,32 +648,6 @@ var app = new Vue({
     nextClip: function() {
       if(this.timelinePageIndex !== Math.max(this.timelineClips.length-this.timelineParPage, 0)){
         this.timelinePageIndex += 1;
-      }
-    },
-
-    addClipPlayTime: function(clipThumbnail) {
-      let key = clipThumbnail.split('-preview-')[0]
-      let file = key + ".mp4"
-      //console.log(file);
-      let video = document.createElement('video');
-      video.src = file;
-
-      video.ondurationchange = function() {
-        let playtime = parseInt(this.duration);
-        app.totalClipSeconds += playtime;
-      }
-    },
-
-    subClipPlayTime: function(clipThumbnail) {
-      let key = clipThumbnail.split('-preview-')[0]
-      let file = key + ".mp4"
-      //console.log(file);
-      let video = document.createElement('video');
-      video.src = file;
-
-      video.ondurationchange = function() {
-        let playtime = parseInt(this.duration);
-        app.totalClipSeconds -= playtime;
       }
     },
 
@@ -726,7 +700,7 @@ var app = new Vue({
       //console.log(index);
       index += this.timelinePageIndex;
       //console.log(index);
-      this.subClipPlayTime(this.timelineClips[index]['thumbnail_url']);
+      this.totalClipSeconds -= this.timelineClips[index]['duration'];
 
       let newClips = [];
       for(let i=0; i<this.timelineClips.length; i++){
