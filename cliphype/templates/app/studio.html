@@ -303,9 +303,9 @@
                         <div v-show="item.isHover">
                             <a class="timelinePlay" v-on:click="openTimelineModal(item.embed_url, index + timelinePageIndex)"><i class="far fa-play-circle text-light"></i></a>
                             <a class="timelineMenu" v-on:click="clickSelectedClipMenu(item)"><i class="fas fa-ellipsis-v text-light"></i></a>
-                            <a class="timelineRemove" v-on:click="removeTimelineClip(index)"><i class="fas fa-times-circle text-danger"></i></a>
-                            <a class="timelinePrev" v-on:click="movePrevTimelineClip(index)"><i class="fas fa-arrow-circle-left text-warning"></i></a>
-                            <a class="timelineNext" v-on:click="moveNextTimelineClip(index)"><i class="fas fa-arrow-circle-right text-warning"></i></a>
+                            <a class="timelineRemove" v-on:click="removeTimelineClip(index + timelinePageIndex)"><i class="fas fa-times-circle text-danger"></i></a>
+                            <a class="timelinePrev" v-on:click="movePrevTimelineClip(index + timelinePageIndex)"><i class="fas fa-arrow-circle-left text-warning"></i></a>
+                            <a class="timelineNext" v-on:click="moveNextTimelineClip(index + timelinePageIndex)"><i class="fas fa-arrow-circle-right text-warning"></i></a>
                         </div>
                     </div>
                 </div>
@@ -330,6 +330,9 @@
                             <a class="ml-3 btn bg-success" v-bind:href="selectedClipEditURL" v-show="selectedClipEditableTime !== 0" target="_blank">
                                 <i class="fas fa-cut"></i>
                                 <span class="ml-2">[[ formattedEditableTime ]]</span>
+                            </a>
+                            <a class="timelineModalRemove mt-1 mr-2" v-on:click="removeTimelineClipModal(selectedClipModalIndex)">
+                                <i class="fas fa-trash-alt text-danger"></i>
                             </a>
                         </div>
                         <div class="embed-responsive embed-responsive-16by9">
