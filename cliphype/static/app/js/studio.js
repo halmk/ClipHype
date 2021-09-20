@@ -705,6 +705,21 @@ var app = new Vue({
       for(let i=0; i<newClips.length; i++) this.timelineClips.push(newClips[i]);
       if (this.timelineClips.length === 0) {
         this.timelineEmbedUrl = '';
+      }
+      this.calcTotalClipSeconds();
+    },
+
+    removeTimelineClipModal: function(index) {
+      let newClips = [];
+      for(let i=0; i<this.timelineClips.length; i++){
+        if(index === i) continue;
+        newClips.push(this.timelineClips[i]);
+      }
+
+      this.timelineClips = [];
+      for(let i=0; i<newClips.length; i++) this.timelineClips.push(newClips[i]);
+      if (this.timelineClips.length === 0) {
+        this.timelineEmbedUrl = '';
         $('#timelineModal').modal('hide');
       }
       else {
