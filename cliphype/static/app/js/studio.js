@@ -51,6 +51,9 @@ var app = new Vue({
     timelineParPage: 4,
     timelinePageIndex: 0,
     timelineEmbedUrl: '',
+    selectedClipModalIndex: 0,
+    selectedClipEditURL: '',
+    selectedClipEditableTime: '',
     totalClipSeconds: 0,
     playTimeExceeded: false,
     highlights: [],
@@ -124,7 +127,7 @@ var app = new Vue({
     },
 
     getTotalClipSeconds: function() {
-      let playtime = this.totalClipSeconds;
+      let playtime = Math.floor(this.totalClipSeconds);
       let min = ('00' + Math.floor(playtime / 60)).slice(-2);
       let sec = ('00' + playtime % 60).slice(-2);
       return `${min}m ${sec}s`;
@@ -134,6 +137,13 @@ var app = new Vue({
       let start = 0;
       let end = this.highlights.length;
       return this.highlights.slice(start,end);
+    },
+
+    formattedEditableTime: function() {
+      let hours = Math.floor(this.selectedClipEditableTime/(60*60));
+      let minutes = Math.floor((this.selectedClipEditableTime%(60*60))/60);
+      let seconds = Math.floor(this.selectedClipEditableTime%60);
+      return ('00' + hours).slice(-2) + 'h' + ('00' + minutes).slice(-2) + 'm' + ('00' + seconds).slice(-2) + 's';
     }
   },
 
@@ -317,7 +327,7 @@ var app = new Vue({
           response['data']['data'][0]['isHover'] = false;
           response['data']['data'][0]['index'] = index;
           app.timelineClips.push(response['data']['data'][0]);
-          app.addClipPlayTime(response['data']['data'][0]['thumbnail_url']);
+          app.calcTotalClipSeconds();
           app.timelineClips.sort(app.timelineCmp);
         })
         .catch(function (error) {
@@ -397,7 +407,8 @@ var app = new Vue({
             app.clips[i]['modal_target'] = '#' + app.clips[i]['modal_id'];
             app.clips[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
             app.clips[i]['modal'] = false;
-            app.clips[i]['created_at'] = app.customformat(app.clips[i]['created_at']);
+            app.clips[i]['created_date'] = app.customformat(app.clips[i]['created_at']);
+            app.clips[i]['created_epoch'] = app.getEpochTime(app.clips[i]['created_at']);
           }
           app.clipsAfter = response['data']['pagination']['cursor'];
           if(app.published) app.getPublishedClips();
@@ -592,23 +603,28 @@ var app = new Vue({
       //console.log(response);
       timelineClip['isHover'] = false;
       timelineClip['index'] = index;
-      app.timelineClips.push(timelineClip);
-      app.addClipPlayTime(timelineClip['thumbnail_url']);
-      app.timelineClips.sort(app.timelineCmp);
+      var embed_url = timelineClip['embed_url'];
+      var embed_url = embed_url.split("&");
+      embed_url[1] = "autoplay=true";
+      embed_url.push("preload=auto");
+      timelineClip['embed_url'] = embed_url.join("&");
+
+      this.timelineClips.push(timelineClip);
+      this.calcTotalClipSeconds();
+      this.timelineClips.sort(app.timelineCmp);
     },
 
     deleteClip: function(clip) {
       let newTimelineClips = [];
       for(let i=0 ;i<this.timelineClips.length; i++){
-        if(this.timelineClips[i]['id'] == clip['id']) {
-          this.subClipPlayTime(this.timelineClips[i]['thumbnail_url']);
-        } else {
+        if(this.timelineClips[i]['id'] !== clip['id']) {
           newTimelineClips.push(this.timelineClips[i]);
         }
       }
 
       this.timelineClips = [];
       for(let i=0; i<newTimelineClips.length; i++) this.timelineClips.push(newTimelineClips[i]);
+      this.calcTotalClipSeconds();
     },
 
     isSelectedClip: function(clip) {
@@ -634,35 +650,37 @@ var app = new Vue({
       }
     },
 
-    addClipPlayTime: function(clipThumbnail) {
-      let key = clipThumbnail.split('-preview-')[0]
-      let file = key + ".mp4"
-      //console.log(file);
-      let video = document.createElement('video');
-      video.src = file;
-
-      video.ondurationchange = function() {
-        let playtime = parseInt(this.duration);
-        app.totalClipSeconds += playtime;
-      }
-    },
-
-    subClipPlayTime: function(clipThumbnail) {
-      let key = clipThumbnail.split('-preview-')[0]
-      let file = key + ".mp4"
-      //console.log(file);
-      let video = document.createElement('video');
-      video.src = file;
-
-      video.ondurationchange = function() {
-        let playtime = parseInt(this.duration);
-        app.totalClipSeconds -= playtime;
-      }
-    },
-
-    openTimelineModal: function(embed_url) {
+    openTimelineModal: function(embed_url, index) {
       this.timelineEmbedUrl = embed_url;
+      this.selectedClipModalIndex = index;
+      this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
       $('#timelineModal').modal();
+    },
+
+    openPrevSelectedClip: function() {
+      this.selectedClipModalIndex = Math.max(0, this.selectedClipModalIndex-1);
+      this.timelineEmbedUrl = this.timelineClips[this.selectedClipModalIndex].embed_url;
+      this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
+    },
+
+    openNextSelectedClip: function() {
+      this.selectedClipModalIndex = Math.min(this.timelineClips.length-1, this.selectedClipModalIndex+1);
+      this.timelineEmbedUrl = this.timelineClips[this.selectedClipModalIndex].embed_url;
+      this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
+    },
+
+    calcEditableTime: function() {
+      if (this.timelineClips.length !== 0) {
+        var created = this.timelineClips[this.selectedClipModalIndex].created_epoch;
+        var after24h = created + 60*60*24;
+        var current = moment().unix();
+        var editableTimeSeconds = after24h - current;
+        this.selectedClipEditableTime = Math.max(0,editableTimeSeconds);
+      }
+    },
+
+    calcEditableTimeInterval: function() {
+      setInterval(this.calcEditableTime, 200);
     },
 
     clickSelectedClipMenu: function(clip) {
@@ -677,11 +695,6 @@ var app = new Vue({
     },
 
     removeTimelineClip: function(index) {
-      //console.log(index);
-      index += this.timelinePageIndex;
-      //console.log(index);
-      this.subClipPlayTime(this.timelineClips[index]['thumbnail_url']);
-
       let newClips = [];
       for(let i=0; i<this.timelineClips.length; i++){
         if(index === i) continue;
@@ -690,10 +703,34 @@ var app = new Vue({
 
       this.timelineClips = [];
       for(let i=0; i<newClips.length; i++) this.timelineClips.push(newClips[i]);
+      if (this.timelineClips.length === 0) {
+        this.timelineEmbedUrl = '';
+      }
+      this.calcTotalClipSeconds();
+    },
+
+    removeTimelineClipModal: function(index) {
+      let newClips = [];
+      for(let i=0; i<this.timelineClips.length; i++){
+        if(index === i) continue;
+        newClips.push(this.timelineClips[i]);
+      }
+
+      this.timelineClips = [];
+      for(let i=0; i<newClips.length; i++) this.timelineClips.push(newClips[i]);
+      if (this.timelineClips.length === 0) {
+        this.timelineEmbedUrl = '';
+        $('#timelineModal').modal('hide');
+      }
+      else {
+        index = Math.min(this.timelineClips.length-1, index);
+        this.selectedClipModalIndex = index;
+        this.timelineEmbedUrl = this.timelineClips[index]['embed_url'];
+      }
+      this.calcTotalClipSeconds();
     },
 
     movePrevTimelineClip: function(index) {
-      index += this.timelinePageIndex;
       this.timelineClips[index]['isHover'] = false;
       if(index !== 0){
         this.timelineClips.splice(index-1, 2, this.timelineClips[index], this.timelineClips[index-1]);
@@ -701,7 +738,6 @@ var app = new Vue({
     },
 
     moveNextTimelineClip: function(index) {
-      index += this.timelinePageIndex;
       this.timelineClips[index]['isHover'] = false;
       if(index !== this.timelineClips.length-1){
         this.timelineClips.splice(index, 2, this.timelineClips[index+1], this.timelineClips[index]);
@@ -710,6 +746,14 @@ var app = new Vue({
 
     sortTimelineClipsByDatetime: function() {
       this.timelineClips.sort(this.timelineCmpByEpoch);
+    },
+
+    calcTotalClipSeconds: function() {
+      var total = 0;
+      for(let i=0; i<this.timelineClips.length; i++){
+        total += this.timelineClips[i]['duration'];
+      }
+      this.totalClipSeconds = total;
     },
 
     /* ダイジェスト動画の情報をDjangoに渡す */
@@ -894,6 +938,7 @@ var app = new Vue({
       this.getClientId();
       this.getHighlights();
     }
+    this.calcEditableTimeInterval();
     this.siteUrl = location.hostname;
     TwitchAPI.apiUrl = api_url;
     TwitchAPI.clientId = this.Client_Id;
