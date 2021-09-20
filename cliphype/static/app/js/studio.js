@@ -164,6 +164,7 @@ var app = new Vue({
     streamerId: function() {
       this.getClips();
       this.getVideos();
+      this.clipsCurrentPage = 1;
     },
 
     /* published が true になったとき、getPublishedClips() を呼び出す */
@@ -216,7 +217,7 @@ var app = new Vue({
 
     /* 文字列を'YYYY-MM-DD'に変換したものを返す */
     customformat: function(value) {
-      return moment(value).format('YYYY-MM-DD');
+      return moment(value).format('YYYY-MM-DD HH:mm');
     },
 
     getEpochTime: function(dt) {
@@ -251,46 +252,49 @@ var app = new Vue({
     },
 
     /* ユーザがフォローしているユーザの情報を取得する */
-    getFollows: function() {
-      TwitchAPI.getFollows(this.clientId)
-        .then(function(response) {
-          //console.log("getUsersFollows↓");
-          //console.log(response);
-          app.follows = response['data']['data'];
-          app.userIds = [];
-          for(let i=0; i<app.follows.length; i++){
-            app.userIds.push(app.follows[i]['to_id']);
-          }
-          app.getUsers();
-        })
-        .catch(function(error) {
-          //console.log(error.response);
-        })
+    getFollows: async function() {
+      let followsAfter = '';
+      do {
+        let response = await TwitchAPI.getAfterFollows(this.clientId, followsAfter);
+        console.log(response);
+        for(let i=0; i<response['data']['data'].length; i++){
+          this.follows.push(response['data']['data'][i]);
+        }
+        followsAfter = response['data']['pagination']['cursor'];
+        console.log(followsAfter);
+      } while(followsAfter)
+
+      console.log(this.follows);
+      this.userIds = [];
+      for(let i=0; i<app.follows.length; i++){
+        this.userIds.push(this.follows[i]['to_id']);
+      }
+
+      this.getUsers();
     },
 
 
     /* ユーザがフォローしているユーザのプロフィール画像とログインIDを取得する */
-    getUsers: function() {
-      TwitchAPI.getUsers(this.userIds)
-        .then(function(response) {
-          //console.log("getUsers↓");
-          //console.log(response);
-          let data = response['data']['data'];
-          for(let i=0; i<data.length; i++){
-            for(let j=0; j<app.follows.length; j++){
-              if(data[i]['id'] == app.follows[j]['to_id']) {
-                if(response['data']['data'][i]['profile_image_url'] === ""){
-                  app.$set(app.follows[j], "profile_image_url", 'https://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_70x70.png');
-                } else {
-                  app.$set(app.follows[j], "profile_image_url", response['data']['data'][i]['profile_image_url']);
-                }
+    getUsers: async function() {
+      var c = 50;
+      var start = 0;
+      while(start < this.userIds.length) {
+        let userIdsSub = this.userIds.slice(start, start+c);
+        let response = await TwitchAPI.getUsers(userIdsSub);
+        let data = response['data']['data'];
+        for(let i=0; i<data.length; i++){
+          for(let j=0; j<this.follows.length; j++){
+            if(data[i]['id'] == this.follows[j]['to_id']) {
+              if(response['data']['data'][i]['profile_image_url'] === ""){
+                this.$set(this.follows[j], "profile_image_url", 'https://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_70x70.png');
+              } else {
+                this.$set(this.follows[j], "profile_image_url", response['data']['data'][i]['profile_image_url']);
               }
             }
           }
-        })
-        .catch(function(error) {
-          //console.log(error.response);
-        })
+        }
+        start += c;
+      }
     },
 
 
@@ -443,40 +447,39 @@ var app = new Vue({
     },
 
     /* AutoClip API から自動生成されたクリップを取得する */
-    getAutoClips: function() {
+    getAutoClips: async function() {
       this.autoClips = [];
-      axios.get(autoclip_url, {
+      var response = await axios.get(autoclip_url, {
         params: {
           'broadcaster_name': this.streamerName
         }
-      })
-      .then(function(response) {
-        console.log(response);
-        let clip_ids = [];
-        for(let i=0; i<response['data'].length; i++) {
-          clip_ids.push(response['data'][i]['clip_id']);
-        }
-        TwitchAPI.getClipById(clip_ids.join())
-        .then(function (response) {
-          console.log(response);
-          app.autoClips = response['data']['data'];
-          for(let i=0; i<response['data']['data'].length; i++){
-            app.autoClips[i]['modal_id'] = 'modal' + app.autoClips[i]['id'];
-            app.autoClips[i]['modal_target'] = '#' + app.autoClips[i]['modal_id'];
-            app.autoClips[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
-            app.autoClips[i]['modal'] = false;
-            app.autoClips[i]['created_date'] = app.customformat(app.autoClips[i]['created_at']);
-            app.autoClips[i]['created_epoch'] = app.getEpochTime(app.autoClips[i]['created_at']);
-          }
-          app.autoClips.sort((a, b) => b['created_epoch'] - a['created_epoch']);
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-      })
-      .catch(function(error) {
-        console.log(error);
       });
+      console.log(response);
+      let clip_ids = [];
+      for(let i=0; i<response['data'].length; i++) {
+        clip_ids.push(response['data'][i]['clip_id']);
+      }
+      var autoclips = [];
+      var c = 50;
+      var start = 0;
+      while(start < clip_ids.length) {
+        var clip_ids_sub = clip_ids.slice(start, start+c);
+        var response = await TwitchAPI.getClipById(clip_ids_sub.join());
+        console.log(response);
+        var data = response['data']['data'];
+        for(let i=0; i<response['data']['data'].length; i++){
+          data[i]['modal_id'] = 'modal' + data[i]['id'];
+          data[i]['modal_target'] = '#' + data[i]['modal_id'];
+          data[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
+          data[i]['modal'] = false;
+          data[i]['created_date'] = app.customformat(data[i]['created_at']);
+          data[i]['created_epoch'] = app.getEpochTime(data[i]['created_at']);
+          autoclips.push(data[i]);
+        }
+        start += c;
+      }
+      app.autoClips = autoclips;
+      app.autoClips.sort((a, b) => b['created_epoch'] - a['created_epoch']);
       this.clipsCurrentPage = 1;
    },
 
@@ -525,6 +528,7 @@ var app = new Vue({
       //console.log("開始時刻: " + startDate);
       //console.log("終了時刻: "+ endDate);
       this.getArchiveClips();
+      this.clipsCurrentPage = 1;
       //this.datepickerStartedAt = startMoment.format("YYYY-MM-DD");
       //this.datepickerEndedAt = endMoment.format("YYYY-MM-DD");
     },
