@@ -185,8 +185,8 @@
                                 </p>
                                     <div class="h-100 d-flex flex-column justify-content-end">
                                         <div class="d-flex justify-content-between">
-                                            <div class="text-white text-views rounded px-1 font-weight-bold">views:[[ item.view_count ]]</div>
-                                            <div class="text-white text-date rounded px-1 font-weight-bold">[[ item.created_date ]]</div>
+                                            <div class="mb-1 text-white text-views rounded px-1 font-weight-bold">views:[[ item.view_count ]]</div>
+                                            <div class="mb-1 text-white text-date rounded px-1 font-weight-bold">[[ item.created_date ]]</div>
                                         </div>
                                     </div>
                                 </div>
@@ -323,7 +323,7 @@
                     <div class="modal-content bg-black">
                         <div class="d-inline-flex my-1">
                             <div class="d-flex align-items-center badge bg-dark px-3 ml-2 rounded-pill">
-                                <span class="px-3 font-weight-bold text-light" style="font-size: 20px;">
+                                <span class="px-3 py-1 font-weight-bold text-light" style="font-size: 20px;">
                                     [[ selectedClipModalIndex+1 ]]
                                 </span>
                             </div>
@@ -357,7 +357,7 @@
     <section id="options">
         <div class="p-3 my-4 shadow section bg-white">
             <div class="row p-3">
-                <div class="col-8">
+                <div class="col-lg-8">
                 <div class="bg-light p-3 rounded shadow-sm">
                     <h3 class="text-dark font-weight-bold">Title</h3>
                     <input type="text" v-model="title" class="input-lg border rounded shadow-sm py-1" required>
@@ -490,7 +490,7 @@
                 </div>
                 </div>
                 </div>
-                <div class="col-4 d-flex align-items-center justify-content-center">
+                <div class="col-lg-4 d-flex align-items-center justify-content-center">
                     <button class="btn btn-outline-primary btn-lg py-4 px-5 shadow-sm" v-bind:disabled="disabledCreateButton" v-on:click="postDigestInfo">
                     CREATE
                     </button>
