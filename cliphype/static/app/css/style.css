@@ -143,3 +143,10 @@
     margin-bottom: -4px;
     cursor: pointer;
 }
+.timelineModalRemove{
+    font-size: 1.8em;
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+}
