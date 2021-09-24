@@ -26,14 +26,16 @@ var app = new Vue({
     followsParPage: 6,
     followsCurrentPage: 1,
     clips: [],
+    published: false,
     publishedClips: [],
+    autoclipped: false,
+    autoClips: [],
     clipsParPage: 6,
     clipsCurrentPage: 1,
     token: '',
     datepickerStartedAt: '2019-01-01',
     datepickerEndedAt: '2019-09-03',
     DatePickerFormat: 'yyyy-MM-dd',
-    published: false,
     clipsAfter: '',
     username: '',
     streamerName: '',
@@ -49,6 +51,9 @@ var app = new Vue({
     timelineParPage: 4,
     timelinePageIndex: 0,
     timelineEmbedUrl: '',
+    selectedClipModalIndex: 0,
+    selectedClipEditURL: '',
+    selectedClipEditableTime: '',
     totalClipSeconds: 0,
     playTimeExceeded: false,
     highlights: [],
@@ -84,12 +89,14 @@ var app = new Vue({
       let current = this.clipsCurrentPage * this.clipsParPage;
       let start = current - this.clipsParPage;
       if(this.published) return this.publishedClips.slice(start, current);
+      if(this.autoclipped) return this.autoClips.slice(start, current);
       else return this.clips.slice(start, current);
     },
 
     /* ページングのページ数を返す */
     getClipsPageCount: function() {
       if(this.published) return Math.ceil(this.publishedClips.length / this.clipsParPage);
+      if(this.autoclipped) return Math.ceil(this.autoClips.length / this.clipsParPage);
       else return Math.ceil(this.clips.length / this.clipsParPage);
     },
 
@@ -120,7 +127,7 @@ var app = new Vue({
     },
 
     getTotalClipSeconds: function() {
-      let playtime = this.totalClipSeconds;
+      let playtime = Math.floor(this.totalClipSeconds);
       let min = ('00' + Math.floor(playtime / 60)).slice(-2);
       let sec = ('00' + playtime % 60).slice(-2);
       return `${min}m ${sec}s`;
@@ -130,6 +137,13 @@ var app = new Vue({
       let start = 0;
       let end = this.highlights.length;
       return this.highlights.slice(start,end);
+    },
+
+    formattedEditableTime: function() {
+      let hours = Math.floor(this.selectedClipEditableTime/(60*60));
+      let minutes = Math.floor((this.selectedClipEditableTime%(60*60))/60);
+      let seconds = Math.floor(this.selectedClipEditableTime%60);
+      return ('00' + hours).slice(-2) + 'h' + ('00' + minutes).slice(-2) + 'm' + ('00' + seconds).slice(-2) + 's';
     }
   },
 
@@ -150,11 +164,16 @@ var app = new Vue({
     streamerId: function() {
       this.getClips();
       this.getVideos();
+      this.clipsCurrentPage = 1;
     },
 
     /* published が true になったとき、getPublishedClips() を呼び出す */
     published: function() {
       if(this.published) this.getPublishedClips();
+    },
+
+    autoclipped: function() {
+      if(this.autoclipped) this.getAutoClips();
     },
 
     width: function() {
@@ -168,7 +187,7 @@ var app = new Vue({
     },
 
     totalClipSeconds: function() {
-      if(this.totalClipSeconds > 300) {
+      if(this.totalClipSeconds > 600) {
         this.playTimeExceeded = true;
         this.disabledCreateButton = true;
       }
@@ -198,7 +217,7 @@ var app = new Vue({
 
     /* 文字列を'YYYY-MM-DD'に変換したものを返す */
     customformat: function(value) {
-      return moment(value).format('YYYY-MM-DD');
+      return moment(value).format('YYYY-MM-DD HH:mm');
     },
 
     getEpochTime: function(dt) {
@@ -233,46 +252,49 @@ var app = new Vue({
     },
 
     /* ユーザがフォローしているユーザの情報を取得する */
-    getFollows: function() {
-      TwitchAPI.getFollows(this.clientId)
-        .then(function(response) {
-          //console.log("getUsersFollows↓");
-          //console.log(response);
-          app.follows = response['data']['data'];
-          app.userIds = [];
-          for(let i=0; i<app.follows.length; i++){
-            app.userIds.push(app.follows[i]['to_id']);
-          }
-          app.getUsers();
-        })
-        .catch(function(error) {
-          //console.log(error.response);
-        })
+    getFollows: async function() {
+      let followsAfter = '';
+      do {
+        let response = await TwitchAPI.getAfterFollows(this.clientId, followsAfter);
+        console.log(response);
+        for(let i=0; i<response['data']['data'].length; i++){
+          this.follows.push(response['data']['data'][i]);
+        }
+        followsAfter = response['data']['pagination']['cursor'];
+        console.log(followsAfter);
+      } while(followsAfter)
+
+      console.log(this.follows);
+      this.userIds = [];
+      for(let i=0; i<app.follows.length; i++){
+        this.userIds.push(this.follows[i]['to_id']);
+      }
+
+      this.getUsers();
     },
 
 
     /* ユーザがフォローしているユーザのプロフィール画像とログインIDを取得する */
-    getUsers: function() {
-      TwitchAPI.getUsers(this.userIds)
-        .then(function(response) {
-          //console.log("getUsers↓");
-          //console.log(response);
-          let data = response['data']['data'];
-          for(let i=0; i<data.length; i++){
-            for(let j=0; j<app.follows.length; j++){
-              if(data[i]['id'] == app.follows[j]['to_id']) {
-                if(response['data']['data'][i]['profile_image_url'] === ""){
-                  app.$set(app.follows[j], "profile_image_url", 'https://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_70x70.png');
-                } else {
-                  app.$set(app.follows[j], "profile_image_url", response['data']['data'][i]['profile_image_url']);
-                }
+    getUsers: async function() {
+      var c = 50;
+      var start = 0;
+      while(start < this.userIds.length) {
+        let userIdsSub = this.userIds.slice(start, start+c);
+        let response = await TwitchAPI.getUsers(userIdsSub);
+        let data = response['data']['data'];
+        for(let i=0; i<data.length; i++){
+          for(let j=0; j<this.follows.length; j++){
+            if(data[i]['id'] == this.follows[j]['to_id']) {
+              if(response['data']['data'][i]['profile_image_url'] === ""){
+                this.$set(this.follows[j], "profile_image_url", 'https://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_70x70.png');
+              } else {
+                this.$set(this.follows[j], "profile_image_url", response['data']['data'][i]['profile_image_url']);
               }
             }
           }
-        })
-        .catch(function(error) {
-          //console.log(error.response);
-        })
+        }
+        start += c;
+      }
     },
 
 
@@ -309,7 +331,7 @@ var app = new Vue({
           response['data']['data'][0]['isHover'] = false;
           response['data']['data'][0]['index'] = index;
           app.timelineClips.push(response['data']['data'][0]);
-          app.addClipPlayTime(response['data']['data'][0]['thumbnail_url']);
+          app.calcTotalClipSeconds();
           app.timelineClips.sort(app.timelineCmp);
         })
         .catch(function (error) {
@@ -335,9 +357,10 @@ var app = new Vue({
           for(let i=0; i<response['data']['data'].length; i++){
             data[i]['modal_id'] = 'modal' + data[i]['id'];
             data[i]['modal_target'] = '#' + data[i]['modal_id'];
-            data[i]['embed_url'] += `&autoplay=false&parent=${this.siteUrl}`;
+            data[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
             data[i]['modal'] = false;
-            data[i]['created_at'] = app.customformat(data[i]['created_at']);
+            data[i]['created_date'] = app.customformat(data[i]['created_at']);
+            data[i]['created_epoch'] = app.getEpochTime(data[i]['created_at']);
           }
           //Array.prototype.push.apply(app.clips, data);
           for(let i=0; i<data.length; i++){
@@ -388,7 +411,8 @@ var app = new Vue({
             app.clips[i]['modal_target'] = '#' + app.clips[i]['modal_id'];
             app.clips[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
             app.clips[i]['modal'] = false;
-            app.clips[i]['created_at'] = app.customformat(app.clips[i]['created_at']);
+            app.clips[i]['created_date'] = app.customformat(app.clips[i]['created_at']);
+            app.clips[i]['created_epoch'] = app.getEpochTime(app.clips[i]['created_at']);
           }
           app.clipsAfter = response['data']['pagination']['cursor'];
           if(app.published) app.getPublishedClips();
@@ -403,7 +427,7 @@ var app = new Vue({
         ---------------------------------
     */
 
-    /* 現在Clipsにあるクリップからタイトルが設定されたものだけに絞り込む */
+    /* 現在Clipsにあるクリップからタイトルが設定されたものを新しい配列に格納する */
     getPublishedClips: function() {
       let publishedClips = [];
       for(let i=0; i<this.clips.length; i++){
@@ -422,6 +446,42 @@ var app = new Vue({
       this.clipsCurrentPage = 1;
     },
 
+    /* AutoClip API から自動生成されたクリップを取得する */
+    getAutoClips: async function() {
+      this.autoClips = [];
+      var response = await axios.get(autoclip_url, {
+        params: {
+          'broadcaster_name': this.streamerName
+        }
+      });
+      console.log(response);
+      let clip_ids = [];
+      for(let i=0; i<response['data'].length; i++) {
+        clip_ids.push(response['data'][i]['clip_id']);
+      }
+      var autoclips = [];
+      var c = 50;
+      var start = 0;
+      while(start < clip_ids.length) {
+        var clip_ids_sub = clip_ids.slice(start, start+c);
+        var response = await TwitchAPI.getClipById(clip_ids_sub.join());
+        console.log(response);
+        var data = response['data']['data'];
+        for(let i=0; i<response['data']['data'].length; i++){
+          data[i]['modal_id'] = 'modal' + data[i]['id'];
+          data[i]['modal_target'] = '#' + data[i]['modal_id'];
+          data[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
+          data[i]['modal'] = false;
+          data[i]['created_date'] = app.customformat(data[i]['created_at']);
+          data[i]['created_epoch'] = app.getEpochTime(data[i]['created_at']);
+          autoclips.push(data[i]);
+        }
+        start += c;
+      }
+      app.autoClips = autoclips;
+      app.autoClips.sort((a, b) => b['created_epoch'] - a['created_epoch']);
+      this.clipsCurrentPage = 1;
+   },
 
     /* ページネーションをクリックしたとき、ページ番号を更新 */
     clickVideosCallback: function(pageNum) {
@@ -468,6 +528,7 @@ var app = new Vue({
       //console.log("開始時刻: " + startDate);
       //console.log("終了時刻: "+ endDate);
       this.getArchiveClips();
+      this.clipsCurrentPage = 1;
       //this.datepickerStartedAt = startMoment.format("YYYY-MM-DD");
       //this.datepickerEndedAt = endMoment.format("YYYY-MM-DD");
     },
@@ -546,23 +607,28 @@ var app = new Vue({
       //console.log(response);
       timelineClip['isHover'] = false;
       timelineClip['index'] = index;
-      app.timelineClips.push(timelineClip);
-      app.addClipPlayTime(timelineClip['thumbnail_url']);
-      app.timelineClips.sort(app.timelineCmp);
+      var embed_url = timelineClip['embed_url'];
+      var embed_url = embed_url.split("&");
+      embed_url[1] = "autoplay=true";
+      embed_url.push("preload=auto");
+      timelineClip['embed_url'] = embed_url.join("&");
+
+      this.timelineClips.push(timelineClip);
+      this.calcTotalClipSeconds();
+      this.timelineClips.sort(app.timelineCmp);
     },
 
     deleteClip: function(clip) {
       let newTimelineClips = [];
       for(let i=0 ;i<this.timelineClips.length; i++){
-        if(this.timelineClips[i]['id'] == clip['id']) {
-          this.subClipPlayTime(this.timelineClips[i]['thumbnail_url']);
-        } else {
+        if(this.timelineClips[i]['id'] !== clip['id']) {
           newTimelineClips.push(this.timelineClips[i]);
         }
       }
 
       this.timelineClips = [];
       for(let i=0; i<newTimelineClips.length; i++) this.timelineClips.push(newTimelineClips[i]);
+      this.calcTotalClipSeconds();
     },
 
     isSelectedClip: function(clip) {
@@ -588,43 +654,51 @@ var app = new Vue({
       }
     },
 
-    addClipPlayTime: function(clipThumbnail) {
-      let key = clipThumbnail.split('-preview-')[0]
-      let file = key + ".mp4"
-      //console.log(file);
-      let video = document.createElement('video');
-      video.src = file;
-
-      video.ondurationchange = function() {
-        let playtime = parseInt(this.duration);
-        app.totalClipSeconds += playtime;
-      }
-    },
-
-    subClipPlayTime: function(clipThumbnail) {
-      let key = clipThumbnail.split('-preview-')[0]
-      let file = key + ".mp4"
-      //console.log(file);
-      let video = document.createElement('video');
-      video.src = file;
-
-      video.ondurationchange = function() {
-        let playtime = parseInt(this.duration);
-        app.totalClipSeconds -= playtime;
-      }
-    },
-
-    openTimelineModal: function(embed_url) {
+    openTimelineModal: function(embed_url, index) {
       this.timelineEmbedUrl = embed_url;
+      this.selectedClipModalIndex = index;
+      this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
       $('#timelineModal').modal();
     },
 
-    removeTimelineClip: function(index) {
-      //console.log(index);
-      index += this.timelinePageIndex;
-      //console.log(index);
-      this.subClipPlayTime(this.timelineClips[index]['thumbnail_url']);
+    openPrevSelectedClip: function() {
+      this.selectedClipModalIndex = Math.max(0, this.selectedClipModalIndex-1);
+      this.timelineEmbedUrl = this.timelineClips[this.selectedClipModalIndex].embed_url;
+      this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
+    },
 
+    openNextSelectedClip: function() {
+      this.selectedClipModalIndex = Math.min(this.timelineClips.length-1, this.selectedClipModalIndex+1);
+      this.timelineEmbedUrl = this.timelineClips[this.selectedClipModalIndex].embed_url;
+      this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
+    },
+
+    calcEditableTime: function() {
+      if (this.timelineClips.length !== 0) {
+        var created = this.timelineClips[this.selectedClipModalIndex].created_epoch;
+        var after24h = created + 60*60*24;
+        var current = moment().unix();
+        var editableTimeSeconds = after24h - current;
+        this.selectedClipEditableTime = Math.max(0,editableTimeSeconds);
+      }
+    },
+
+    calcEditableTimeInterval: function() {
+      setInterval(this.calcEditableTime, 200);
+    },
+
+    clickSelectedClipMenu: function(clip) {
+      if (clip.showMenu) {
+        this.$set(clip, 'showMenu', false);
+      } else {
+        for(let i=0; i<this.timelineClips.length; i++) {
+          this.$set(this.timelineClips[i], 'showMenu', false);
+        }
+        this.$set(clip, 'showMenu', true);
+      }
+    },
+
+    removeTimelineClip: function(index) {
       let newClips = [];
       for(let i=0; i<this.timelineClips.length; i++){
         if(index === i) continue;
@@ -633,10 +707,34 @@ var app = new Vue({
 
       this.timelineClips = [];
       for(let i=0; i<newClips.length; i++) this.timelineClips.push(newClips[i]);
+      if (this.timelineClips.length === 0) {
+        this.timelineEmbedUrl = '';
+      }
+      this.calcTotalClipSeconds();
+    },
+
+    removeTimelineClipModal: function(index) {
+      let newClips = [];
+      for(let i=0; i<this.timelineClips.length; i++){
+        if(index === i) continue;
+        newClips.push(this.timelineClips[i]);
+      }
+
+      this.timelineClips = [];
+      for(let i=0; i<newClips.length; i++) this.timelineClips.push(newClips[i]);
+      if (this.timelineClips.length === 0) {
+        this.timelineEmbedUrl = '';
+        $('#timelineModal').modal('hide');
+      }
+      else {
+        index = Math.min(this.timelineClips.length-1, index);
+        this.selectedClipModalIndex = index;
+        this.timelineEmbedUrl = this.timelineClips[index]['embed_url'];
+      }
+      this.calcTotalClipSeconds();
     },
 
     movePrevTimelineClip: function(index) {
-      index += this.timelinePageIndex;
       this.timelineClips[index]['isHover'] = false;
       if(index !== 0){
         this.timelineClips.splice(index-1, 2, this.timelineClips[index], this.timelineClips[index-1]);
@@ -644,7 +742,6 @@ var app = new Vue({
     },
 
     moveNextTimelineClip: function(index) {
-      index += this.timelinePageIndex;
       this.timelineClips[index]['isHover'] = false;
       if(index !== this.timelineClips.length-1){
         this.timelineClips.splice(index, 2, this.timelineClips[index+1], this.timelineClips[index]);
@@ -653,6 +750,14 @@ var app = new Vue({
 
     sortTimelineClipsByDatetime: function() {
       this.timelineClips.sort(this.timelineCmpByEpoch);
+    },
+
+    calcTotalClipSeconds: function() {
+      var total = 0;
+      for(let i=0; i<this.timelineClips.length; i++){
+        total += this.timelineClips[i]['duration'];
+      }
+      this.totalClipSeconds = total;
     },
 
     /* ダイジェスト動画の情報をDjangoに渡す */
@@ -842,6 +947,7 @@ var app = new Vue({
       this.getClientId();
       this.getHighlights();
     }
+    this.calcEditableTimeInterval();
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.setWindowWidth, false);

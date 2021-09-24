@@ -6,13 +6,17 @@
 
 {% block content %}
 <div class="container">
-    <label class="d-inline-flex mt-2 mb-3">
-        <h3 class="text-dark font-weight-bold">Streamer</h3>
-        <input type="text" v-model="streamerName" class="input-lg border rounded shadow-sm pl-2 py-1 ml-3" required>
-        <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getStreamerId">
-            GO
-        </button>
-    </label>
+    <!-- SEARCH STREAMER -->
+    <div class="section" id="search">
+        <label class="d-inline-flex mt-2 mb-3">
+            <h3 class="text-dark font-weight-bold">Streamer</h3>
+            <input type="text" v-model="streamerName" class="input-lg border rounded shadow-sm pl-2 py-1 ml-3" required>
+            <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getStreamerId">
+                GO
+            </button>
+        </label>
+    </div>
+    <!-- /SERACH STREAMER -->
 
     <!-- FOLLOWS CHANNEL -->
     <div class="mt-2 section" id="follows" v-show="clientId.length !== 0">
@@ -35,7 +39,7 @@
                     :prev-link-class="'page-link rounded-circle mt-3 mr-2 bg-light shadow-sm'"
                     >
             </paginate>
-        <div class="bg-secondary rounded ml-1" v-for="item in getFollowsItems">
+        <div class="bg-light rounded ml-1" v-for="item in getFollowsItems">
             <div class="card bg-light border-0">
                 <a v-on:click="streamerName = item.to_login; streamerId = item.to_id;" style="cursor: pointer">
                 <div class="card-img">
@@ -132,6 +136,7 @@
                     <nav class="navbar navbar-dark text-dark">
                         <div class="row">
                             <button class="btn btn-outline-primary font-weight-bold" data-toggle="button" v-on:click="published = !published">Published</button>
+                            <button class="btn btn-outline-primary ml-2 font-weight-bold" data-toggle="button" v-on:click="autoclipped = !autoclipped">AutoClipped</button>
                             <button type="button" class="btn btn-success ml-2 font-weight-bold" v-on:click="getAfterClips">More</button>
                         </div>
                         <div class="row py-2">
@@ -180,8 +185,8 @@
                                 </p>
                                     <div class="h-100 d-flex flex-column justify-content-end">
                                         <div class="d-flex justify-content-between">
-                                            <div class="text-white text-views rounded px-1 font-weight-bold">views:[[ item.view_count ]]</div>
-                                            <div class="text-white text-date rounded px-1 font-weight-bold">[[ item.created_date ]]</div>
+                                            <div class="mb-1 text-white text-views rounded px-1 font-weight-bold">views:[[ item.view_count ]]</div>
+                                            <div class="mb-1 text-white text-date rounded px-1 font-weight-bold">[[ item.created_date ]]</div>
                                         </div>
                                     </div>
                                 </div>
@@ -208,7 +213,7 @@
                                                 frameborder="0"
                                                 scrolling="no">
                                 </iframe>
-                            </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -275,7 +280,7 @@
                 </span>
                 <span class="ml-2">
                     <span v-bind:class="{ 'text-danger': playTimeExceeded }">
-                    Play time : [[ getTotalClipSeconds ]]
+                    Length : [[ getTotalClipSeconds ]]
                     </span>
                 </span>
                 <!--
@@ -296,26 +301,51 @@
                     <div class="card-img-overlay">
                         <span class="font-weight-bold font-italic text-light timelineIndex">[[ index + timelinePageIndex + 1 ]]</span>
                         <div v-show="item.isHover">
-                            <a class="timelinePlay" v-on:click="openTimelineModal(item.embed_url)"><i class="far fa-play-circle text-light"></i></a>
-                            <a class="timelineRemove" v-on:click="removeTimelineClip(index)"><i class="fas fa-times-circle text-danger"></i></a>
-                            <a class="timelinePrev" v-on:click="movePrevTimelineClip(index)"><i class="fas fa-arrow-circle-left text-warning"></i></a>
-                            <a class="timelineNext" v-on:click="moveNextTimelineClip(index)"><i class="fas fa-arrow-circle-right text-warning"></i></a>
+                            <a class="timelinePlay" v-on:click="openTimelineModal(item.embed_url, index + timelinePageIndex)"><i class="far fa-play-circle text-light"></i></a>
+                            <a class="timelineMenu" v-on:click="clickSelectedClipMenu(item)"><i class="fas fa-ellipsis-v text-light"></i></a>
+                            <a class="timelineRemove" v-on:click="removeTimelineClip(index + timelinePageIndex)"><i class="fas fa-times-circle text-danger"></i></a>
+                            <a class="timelinePrev" v-on:click="movePrevTimelineClip(index + timelinePageIndex)"><i class="fas fa-arrow-circle-left text-warning"></i></a>
+                            <a class="timelineNext" v-on:click="moveNextTimelineClip(index + timelinePageIndex)"><i class="fas fa-arrow-circle-right text-warning"></i></a>
                         </div>
                     </div>
+                </div>
+                <div class="position-absolute" v-show="item.showMenu">
+                    <span class="badge bg-light">
+                        Title:
+                        <input class="input-sm border rounded shadow-sm" v-model="item.title">
+                    </span>
                 </div>
             </div>
             <button type="button" class="btn btn-outline-dark ml-1" v-on:click="nextClip">＞</button>
 
             <div class="modal fade" id="timelineModal" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                    <div class="modal-content bg-dark">
+                    <div class="modal-content bg-black">
+                        <div class="d-inline-flex my-1">
+                            <div class="d-flex align-items-center badge bg-dark px-3 ml-2 rounded-pill">
+                                <span class="px-3 py-1 font-weight-bold text-light" style="font-size: 20px;">
+                                    [[ selectedClipModalIndex+1 ]]
+                                </span>
+                            </div>
+                            <a class="ml-3 btn bg-success" v-bind:href="selectedClipEditURL" v-show="selectedClipEditableTime !== 0" target="_blank">
+                                <i class="fas fa-cut"></i>
+                                <span class="ml-2">[[ formattedEditableTime ]]</span>
+                            </a>
+                            <a class="timelineModalRemove mt-1 mr-2" v-on:click="removeTimelineClipModal(selectedClipModalIndex)">
+                                <i class="fas fa-trash-alt text-danger"></i>
+                            </a>
+                        </div>
                         <div class="embed-responsive embed-responsive-16by9">
                         <iframe class="embed-responsive-item"
                                         v-bind:src="timelineEmbedUrl"
                                         frameborder="0"
                                         scrolling="no">
                         </iframe>
-                    </div>
+                        </div>
+                        <div class="mx-auto">
+                            <a class="mr-4 display-4" style="cursor: pointer;" v-on:click="openPrevSelectedClip"><i class="fas fa-angle-left text-light"></i></a>
+                            <a class="ml-4 display-4" style="cursor: pointer;" v-on:click="openNextSelectedClip"><i class="fas fa-angle-right text-light"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -327,7 +357,7 @@
     <section id="options">
         <div class="p-3 my-4 shadow section bg-white">
             <div class="row p-3">
-                <div class="col-8">
+                <div class="col-lg-8">
                 <div class="bg-light p-3 rounded shadow-sm">
                     <h3 class="text-dark font-weight-bold">Title</h3>
                     <input type="text" v-model="title" class="input-lg border rounded shadow-sm py-1" required>
@@ -460,7 +490,7 @@
                 </div>
                 </div>
                 </div>
-                <div class="col-4 d-flex align-items-center justify-content-center">
+                <div class="col-lg-4 d-flex align-items-center justify-content-center">
                     <button class="btn btn-outline-primary btn-lg py-4 px-5 shadow-sm" v-bind:disabled="disabledCreateButton" v-on:click="postDigestInfo">
                     CREATE
                     </button>
@@ -566,6 +596,7 @@
     const bucket_name = "{{ bucket_name }}";
     const highlight_url = "{% url 'highlight-list' %}";
     const task_url = "{% url 'task-list' %}";
+    const autoclip_url = "{% url 'autoclip-list' %}";
     const studio_url = "{% url 'studio' %}";
     const api_url = "{% url 'twitch_api' %}";
 </script>

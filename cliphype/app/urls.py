@@ -6,6 +6,7 @@ from . import views
 router = routers.DefaultRouter()
 router.register('highlights', views.DigestViewSet, basename='highlight')
 router.register('tasks', views.TaskResultViewSet, basename='task')
+router.register('autoclips', views.AutoClipViewSet, basename='autoclip')
 
 urlpatterns = [
     path('', views.index, name='index'),

@@ -50,6 +50,18 @@ var TwitchAPI = {
         return await this.getRequest(url, params);
     },
 
+    /* ユーザがフォローしている配信者を取得する */
+    getAfterFollows: async function(clientId, after) {
+        let url = 'https://api.twitch.tv/helix/users/follows';
+        let params = {
+            'from_id': clientId,
+            'first': 100,
+            'after': after
+        };
+
+        return await this.getRequest(url, params);
+    },
+
     /* ユーザIDからユーザの情報を取得する */
     getUsers: async function(userIds) {
         let url = 'https://api.twitch.tv/helix/users';
