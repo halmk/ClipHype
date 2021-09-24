@@ -936,6 +936,11 @@ var app = new Vue({
     this.datepickerStartedAt = m.add(-7, 'days').format('YYYY-MM-DD');
     this.setResponsiveItems();
     $('[data-toggle="tooltip"]').tooltip();
+    this.siteUrl = location.hostname;
+    TwitchAPI.apiUrl = api_url;
+    TwitchAPI.clientId = this.Client_Id;
+    TwitchAPI.token = this.token;
+
     this.userName = username;
     if (this.userName.length != 0) {
       //console.log("login: " + this.userName);
@@ -943,10 +948,6 @@ var app = new Vue({
       this.getHighlights();
     }
     this.calcEditableTimeInterval();
-    this.siteUrl = location.hostname;
-    TwitchAPI.apiUrl = api_url;
-    TwitchAPI.clientId = this.Client_Id;
-    TwitchAPI.token = this.token;
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.setWindowWidth, false);

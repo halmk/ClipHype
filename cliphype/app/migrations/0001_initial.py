@@ -12,6 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('socialaccount', '0004_auto_20210804_0022'),
     ]
 
     operations = [
