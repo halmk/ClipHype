@@ -18,7 +18,7 @@ from django_celery_results.models import TaskResult
 from cliphype.settings import S3_BUCKET
 from app import aws_api, twitch_api
 from app.models import Contact, Digest, AutoClip
-from app.tasks import concat_clips_lambda
+from app.tasks import concat_clips_lambda, upload_highlight_info
 from app.serializers import DigestSerializer, TaskResultSerializer, AutoClipSerializer
 
 
@@ -64,7 +64,7 @@ def studio(request):
         logger.info(f"\nHighlight is Requested by {data['creator']}.\n{data}\n")
 
         # タスクを非同期処理で実行する
-        task_id = concat_clips_lambda.delay(data)
+        task_id = upload_highlight_info.delay(data)
 
         # Digestテーブルに情報を格納する
         cont = Digest()
