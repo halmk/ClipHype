@@ -331,25 +331,6 @@ var app = new Vue({
         })
     },
 
-    /* クリップのIDを指定してクリップを取得する */
-    getClipById: function(clip_id, index) {
-      TwitchAPI.getClipById(clip_id)
-        .then(function (response) {
-          //console.log("getClipById↓:成功");
-          //console.log(response);
-          response['data']['data'][0]['isHover'] = false;
-          response['data']['data'][0]['index'] = index;
-          app.timelineClips.push(response['data']['data'][0]);
-          app.calcTotalClipSeconds();
-          app.timelineClips.sort(app.timelineCmp);
-        })
-        .catch(function (error) {
-          //console.log("getClipById:失敗");
-          //console.log(error);
-          //console.log(error.response);
-        })
-    },
-
     /* afterで指定されているクリップデータを追加で読み込む */
     getAfterClips: function() {
       //console.log("after : " + this.clipsAfter);
@@ -575,17 +556,6 @@ var app = new Vue({
         this.followsParPage = 3;
         this.timelineParPage = 2;
       }
-    },
-
-    editRecievedHighlight: function(clips) {
-      this.timelineClips = [];
-      this.totalClipSeconds = 0;
-      clips = clips.split(',');
-      for(let i=0; i<clips.length; i++) {
-        console.log(clips[i]);
-        this.getClipById(clips[i],i);
-      }
-      //console.log(this.timelineClips);
     },
 
     timelineCmp: function(a, b) {
@@ -921,6 +891,28 @@ var app = new Vue({
     formatRequested: function(requested) {
       let date = new Date(requested);
       return date.toLocaleString("ja");
+    },
+
+    restoreDigest: function(highlight) {
+      this.timelineClips = [];
+      this.totalClipSeconds = 0;
+      TwitchAPI.getClipById(highlight.clips)
+        .then(function(response) {
+          app.timelineClips = response['data']['data'];
+          for(let i=0; i<app.timelineClips.length; i++){
+            app.timelineClips[i]['isHover'] = false;
+            app.timelineClips[i]['index'] = i;
+            var embed_url = app.timelineClips[i]['embed_url'];
+            var embed_url = embed_url.split("&");
+            embed_url[1] = "autoplay=true";
+            embed_url.push("preload=auto");
+            app.timelineClips[i]['embed_url'] = embed_url.join("&");
+          }
+          app.calcTotalClipSeconds();
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
     },
 
     openClipModal: function(embedUrl) {
