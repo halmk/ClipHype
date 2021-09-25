@@ -535,6 +535,7 @@
                         <th>Title</th>
                         <th>Requested</th>
                         <th>Status</th>
+                        <th>Restore</th>
                         <th>Download</th>
                     </tr>
                 </thead>
@@ -565,6 +566,9 @@
                                 <i class="fas fa-spinner faa-spin animated mr-1"></i>
                                 [[ highlight.status ]]
                             </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-success" v-on:click="restoreDigest(highlight)"><i class="fas fa-edit"></i></button>
                         </td>
                         <td>
                             <div class="" v-if="highlight.status == 'Available'">
