@@ -54,6 +54,7 @@ var app = new Vue({
     selectedClipModalIndex: 0,
     selectedClipEditURL: '',
     selectedClipEditableTime: '',
+    selectedClipTitle: '',
     totalClipSeconds: 0,
     playTimeExceeded: false,
     highlights: [],
@@ -197,6 +198,14 @@ var app = new Vue({
       }
       if(this.timelineClips.length <= 1) this.disabledCreateButton = true;
     },
+
+    selectedClipTitle: function() {
+      this.timelineClips[this.selectedClipModalIndex].title = this.selectedClipTitle;
+    },
+
+    selectedClipModalIndex: function() {
+      this.selectedClipTitle = this.timelineClips[this.selectedClipModalIndex].title;
+    }
   },
 
   methods: {
@@ -657,6 +666,7 @@ var app = new Vue({
     openTimelineModal: function(embed_url, index) {
       this.timelineEmbedUrl = embed_url;
       this.selectedClipModalIndex = index;
+      this.selectedClipTitle = this.timelineClips[this.selectedClipModalIndex].title;
       this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
       $('#timelineModal').modal();
     },

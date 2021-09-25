@@ -8,12 +8,16 @@
 <div class="container">
     <!-- SEARCH STREAMER -->
     <div class="section" id="search">
-        <label class="d-inline-flex mt-2 mb-3">
-            <h3 class="text-dark font-weight-bold">Streamer</h3>
-            <input type="text" v-model="streamerName" class="input-lg border rounded shadow-sm pl-2 py-1 ml-3" required>
-            <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getStreamerId">
-                GO
-            </button>
+        <label class="row mt-2 mb-3">
+            <div class="col-sm-2">
+                <h3 class="text-dark font-weight-bold">Streamer</h3>
+            </div>
+            <div class="col-sm">
+                <input type="text" v-model="streamerName" class="input-lg border rounded shadow-sm pl-2 py-1" required>
+                <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getStreamerId">
+                    GO
+                </button>
+            </div>
         </label>
     </div>
     <!-- /SERACH STREAMER -->
@@ -326,6 +330,9 @@
                                 <span class="px-3 py-1 font-weight-bold text-light" style="font-size: 20px;">
                                     [[ selectedClipModalIndex+1 ]]
                                 </span>
+                            </div>
+                            <div class="ml-2">
+                                <input class="px-2 py-1 bg-dark text-light input-lg border rounded shadow-sm" v-model="selectedClipTitle">
                             </div>
                             <a class="ml-3 btn bg-success" v-bind:href="selectedClipEditURL" v-show="selectedClipEditableTime !== 0" target="_blank">
                                 <i class="fas fa-cut"></i>
