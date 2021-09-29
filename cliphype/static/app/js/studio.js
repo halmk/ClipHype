@@ -914,8 +914,12 @@ var app = new Vue({
             embed_url[1] = "autoplay=true";
             embed_url.push("preload=auto");
             timelineClips[i]['embed_url'] = embed_url.join("&");
-            app.timelineClips.push(timelineClips[i]);
           }
+          let clip_ids = highlight.clips.split(',');
+          for(let i=0; i<clip_ids.length; i++)
+            for(let j=0; j<timelineClips.length; j++)
+              if (clip_ids[i] == timelineClips[j]['id']) app.timelineClips.push(timelineClips[j]);
+
           app.calcTotalClipSeconds();
         })
         .catch(function(error) {
