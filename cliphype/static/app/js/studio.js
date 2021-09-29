@@ -709,6 +709,7 @@ var app = new Vue({
       else {
         index = Math.min(this.timelineClips.length-1, index);
         this.selectedClipModalIndex = index;
+        this.selectedClipTitle = this.timelineClips[index]['title'];
         this.timelineEmbedUrl = this.timelineClips[index]['embed_url'];
       }
       this.calcTotalClipSeconds();
@@ -894,19 +895,26 @@ var app = new Vue({
     },
 
     restoreDigest: function(highlight) {
-      this.timelineClips = [];
+      this.timelineClips.splice(-this.timelineClips.length);
       this.totalClipSeconds = 0;
       TwitchAPI.getClipById(highlight.clips)
         .then(function(response) {
-          app.timelineClips = response['data']['data'];
-          for(let i=0; i<app.timelineClips.length; i++){
-            app.timelineClips[i]['isHover'] = false;
-            app.timelineClips[i]['index'] = i;
-            var embed_url = app.timelineClips[i]['embed_url'];
+          let timelineClips = response['data']['data'];
+          for(let i=0; i<timelineClips.length; i++){
+            timelineClips[i]['modal_id'] = 'modal' + timelineClips[i]['id'];
+            timelineClips[i]['modal_target'] = '#' + timelineClips[i]['modal_id'];
+            timelineClips[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
+            timelineClips[i]['modal'] = false;
+            timelineClips[i]['created_date'] = app.customformat(timelineClips[i]['created_at']);
+            timelineClips[i]['created_epoch'] = app.getEpochTime(timelineClips[i]['created_at']);
+            timelineClips[i]['isHover'] = false;
+            timelineClips[i]['index'] = i;
+            var embed_url = timelineClips[i]['embed_url'];
             var embed_url = embed_url.split("&");
             embed_url[1] = "autoplay=true";
             embed_url.push("preload=auto");
-            app.timelineClips[i]['embed_url'] = embed_url.join("&");
+            timelineClips[i]['embed_url'] = embed_url.join("&");
+            app.timelineClips.push(timelineClips[i]);
           }
           app.calcTotalClipSeconds();
         })
