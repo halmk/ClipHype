@@ -7,4 +7,4 @@ nohup redis-server > ~/redis.log &
 nohup celery -A cliphype worker --loglevel=INFO --concurrency=1 > ~/celery.log &
 python3 manage.py makemigrations
 python3 manage.py migrate
-#/bin/bash
+/bin/bash

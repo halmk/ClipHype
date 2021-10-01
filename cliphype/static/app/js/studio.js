@@ -331,25 +331,6 @@ var app = new Vue({
         })
     },
 
-    /* クリップのIDを指定してクリップを取得する */
-    getClipById: function(clip_id, index) {
-      TwitchAPI.getClipById(clip_id)
-        .then(function (response) {
-          //console.log("getClipById↓:成功");
-          //console.log(response);
-          response['data']['data'][0]['isHover'] = false;
-          response['data']['data'][0]['index'] = index;
-          app.timelineClips.push(response['data']['data'][0]);
-          app.calcTotalClipSeconds();
-          app.timelineClips.sort(app.timelineCmp);
-        })
-        .catch(function (error) {
-          //console.log("getClipById:失敗");
-          //console.log(error);
-          //console.log(error.response);
-        })
-    },
-
     /* afterで指定されているクリップデータを追加で読み込む */
     getAfterClips: function() {
       //console.log("after : " + this.clipsAfter);
@@ -577,17 +558,6 @@ var app = new Vue({
       }
     },
 
-    editRecievedHighlight: function(clips) {
-      this.timelineClips = [];
-      this.totalClipSeconds = 0;
-      clips = clips.split(',');
-      for(let i=0; i<clips.length; i++) {
-        console.log(clips[i]);
-        this.getClipById(clips[i],i);
-      }
-      //console.log(this.timelineClips);
-    },
-
     timelineCmp: function(a, b) {
       let cmp = 0;
       if(a.index > b.index){
@@ -739,6 +709,7 @@ var app = new Vue({
       else {
         index = Math.min(this.timelineClips.length-1, index);
         this.selectedClipModalIndex = index;
+        this.selectedClipTitle = this.timelineClips[index]['title'];
         this.timelineEmbedUrl = this.timelineClips[index]['embed_url'];
       }
       this.calcTotalClipSeconds();
@@ -921,6 +892,39 @@ var app = new Vue({
     formatRequested: function(requested) {
       let date = new Date(requested);
       return date.toLocaleString("ja");
+    },
+
+    restoreDigest: function(highlight) {
+      this.timelineClips.splice(-this.timelineClips.length);
+      this.totalClipSeconds = 0;
+      TwitchAPI.getClipById(highlight.clips)
+        .then(function(response) {
+          let timelineClips = response['data']['data'];
+          for(let i=0; i<timelineClips.length; i++){
+            timelineClips[i]['modal_id'] = 'modal' + timelineClips[i]['id'];
+            timelineClips[i]['modal_target'] = '#' + timelineClips[i]['modal_id'];
+            timelineClips[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
+            timelineClips[i]['modal'] = false;
+            timelineClips[i]['created_date'] = app.customformat(timelineClips[i]['created_at']);
+            timelineClips[i]['created_epoch'] = app.getEpochTime(timelineClips[i]['created_at']);
+            timelineClips[i]['isHover'] = false;
+            timelineClips[i]['index'] = i;
+            var embed_url = timelineClips[i]['embed_url'];
+            var embed_url = embed_url.split("&");
+            embed_url[1] = "autoplay=true";
+            embed_url.push("preload=auto");
+            timelineClips[i]['embed_url'] = embed_url.join("&");
+          }
+          let clip_ids = highlight.clips.split(',');
+          for(let i=0; i<clip_ids.length; i++)
+            for(let j=0; j<timelineClips.length; j++)
+              if (clip_ids[i] == timelineClips[j]['id']) app.timelineClips.push(timelineClips[j]);
+
+          app.calcTotalClipSeconds();
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
     },
 
     openClipModal: function(embedUrl) {
