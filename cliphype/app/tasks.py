@@ -30,11 +30,9 @@ def concat_clips_lambda(data):
 
     # ファイルをダウンロード
     files = []
-    num = 1
     for clip in data['clips']:
         clip_id = clip['id']
-        filename = f"{data['creator']}_{num:02}.mp4"
-        num += 1
+        filename = f"{data['creator']}_{clip['num']:02}.mp4"
         file = twitch_api.downloadClip(clip_id, filename)
         files.append(file)
 
@@ -46,3 +44,25 @@ def concat_clips_lambda(data):
 
     # 格納したクリップをS3にアップロードする
     videos.upload_clips(task_id)
+
+@shared_task
+def upload_highlight_info(data):
+    task_id = concat_clips_lambda.request.id
+    print(task_id)
+    data['task_id'] = task_id
+
+    num = 1
+    for clip in data['clips']:
+        clip['num'] = num
+        num += 1
+
+    # JSONファイルに書き込み
+    json_name = f"{data['creator']}_{task_id}.json"
+    json_path = f"{videos.SRC_DIR}{json_name}"
+    videos.save_json(json_name, data)
+
+    # JSONファイルをS3にアップロード
+    json_key = f"digest/info/{data['creator']}/{task_id}.json"
+    print(f"Upload json file: {json_key}")
+    aws_api.upload_file(json_key, json_path)
+
