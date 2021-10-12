@@ -445,11 +445,11 @@ var app = new Vue({
         }
       });
       console.log(response);
+      let cont = response['data'];
       let clip_ids = [];
-      for(let i=0; i<response['data'].length; i++) {
-        clip_ids.push(response['data'][i]['clip_id']);
+      for(let i=0; i<cont.length; i++) {
+        clip_ids.push(cont[i]['clip_id']);
       }
-      var autoclips = [];
       var c = 50;
       var start = 0;
       while(start < clip_ids.length) {
@@ -464,11 +464,12 @@ var app = new Vue({
           data[i]['modal'] = false;
           data[i]['created_date'] = app.customformat(data[i]['created_at']);
           data[i]['created_epoch'] = app.getEpochTime(data[i]['created_at']);
-          autoclips.push(data[i]);
+          data[i]['hype'] = cont.find(el => el['clip_id'] == data[i]['id'])['hype'];
+          if (data[i]['hype']) data[i]['hype'] = data[i]['hype'].toFixed(2);
+          app.autoClips.push(data[i]);
         }
         start += c;
       }
-      app.autoClips = autoclips;
       app.autoClips.sort((a, b) => b['created_epoch'] - a['created_epoch']);
       this.clipsCurrentPage = 1;
    },

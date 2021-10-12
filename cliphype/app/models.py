@@ -59,3 +59,4 @@ class AutoClip(models.Model):
     creator_id = models.CharField(max_length=128)
     creator_name = models.CharField(max_length=128)
     created_at = models.CharField(max_length=128)
+    hype = models.FloatField(blank=True, null=True)

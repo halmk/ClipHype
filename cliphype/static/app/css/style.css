@@ -28,7 +28,7 @@
     margin-top: -18px;
     margin-left: -18px;
 }
-.text-title, .text-views, .text-date {
+.text-title, .text-views, .text-hype, .text-date {
     background-color: rgba(0,0,0,0.5);
 }
 .text-title {
@@ -36,6 +36,11 @@
 }
 .text-views {
     margin-left: -16px;
+    font-size: 14px;
+}
+.text-hype {
+    position: absolute;
+    margin-left: 44px;
     font-size: 14px;
 }
 .text-date {
