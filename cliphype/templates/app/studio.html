@@ -8,12 +8,16 @@
 <div class="container">
     <!-- SEARCH STREAMER -->
     <div class="section" id="search">
-        <label class="d-inline-flex mt-2 mb-3">
-            <h3 class="text-dark font-weight-bold">Streamer</h3>
-            <input type="text" v-model="streamerName" class="input-lg border rounded shadow-sm pl-2 py-1 ml-3" required>
-            <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getStreamerId">
-                GO
-            </button>
+        <label class="row mt-2 mb-3">
+            <div class="col-sm-2">
+                <h3 class="text-dark font-weight-bold">Streamer</h3>
+            </div>
+            <div class="col-sm">
+                <input type="text" v-model="streamerName" class="input-lg border rounded shadow-sm pl-2 py-1" required>
+                <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getStreamerId">
+                    GO
+                </button>
+            </div>
         </label>
     </div>
     <!-- /SERACH STREAMER -->
@@ -186,6 +190,7 @@
                                     <div class="h-100 d-flex flex-column justify-content-end">
                                         <div class="d-flex justify-content-between">
                                             <div class="mb-1 text-white text-views rounded px-1 font-weight-bold">views:[[ item.view_count ]]</div>
+                                            <div v-show="item.hype" class="mb-1 text-white text-hype rounded px-1 font-weight-bold">hype:[[ item.hype ]]</div>
                                             <div class="mb-1 text-white text-date rounded px-1 font-weight-bold">[[ item.created_date ]]</div>
                                         </div>
                                     </div>
@@ -267,7 +272,8 @@
             </p>
             <div class="mt-2">
                 <button class="btn btn-info" v-on:click="sortTimelineClipsByDatetime">
-                    Sort by datetime
+                    <i class="fas fa-sort-amount-down-alt"></i>
+                    <i class="far fa-clock"></i>
                 </button>
             </div>
         </div>
@@ -326,6 +332,9 @@
                                 <span class="px-3 py-1 font-weight-bold text-light" style="font-size: 20px;">
                                     [[ selectedClipModalIndex+1 ]]
                                 </span>
+                            </div>
+                            <div class="ml-2">
+                                <input class="px-2 py-1 bg-dark text-light input-lg border rounded shadow-sm" v-model="selectedClipTitle">
                             </div>
                             <a class="ml-3 btn bg-success" v-bind:href="selectedClipEditURL" v-show="selectedClipEditableTime !== 0" target="_blank">
                                 <i class="fas fa-cut"></i>
@@ -528,6 +537,7 @@
                         <th>Title</th>
                         <th>Requested</th>
                         <th>Status</th>
+                        <th>Restore</th>
                         <th>Download</th>
                     </tr>
                 </thead>
@@ -558,6 +568,11 @@
                                 <i class="fas fa-spinner faa-spin animated mr-1"></i>
                                 [[ highlight.status ]]
                             </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-outline-success" v-on:click="restoreDigest(highlight)">
+                                <i class="fas fa-wrench"></i>
+                            </button>
                         </td>
                         <td>
                             <div class="" v-if="highlight.status == 'Available'">
