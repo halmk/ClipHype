@@ -47,7 +47,7 @@ def concat_clips_lambda(data):
 
 @shared_task
 def upload_highlight_info(data):
-    task_id = concat_clips_lambda.request.id
+    task_id = upload_highlight_info.request.id
     print(task_id)
     data['task_id'] = task_id
 
