@@ -51,7 +51,10 @@
                 </div>
                 <div class="card-img-overlay streamer-img">
                     <div class="card-text">
-                        <span class="text-center text-secondary badge badge-pill badge-light shadow border border-secondary streamer-badge overflow-hidden font-weight-bold">
+                        <span class="position-absolute channel-count badge badge-pill badge-secondary text-light" v-show="item.autoclip_count>0">
+                            [[ item.autoclip_count ]]
+                        </span>
+                        <span class="position-absolute w-100 channel-badge text-center text-secondary badge badge-pill badge-light shadow border border-secondary overflow-hidden font-weight-bold">
                             [[ item.to_login ]]
                         </span>
                     </div>
