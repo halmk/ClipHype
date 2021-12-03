@@ -65,13 +65,12 @@
 .streamer-img {
     padding: 0;
 }
-.streamer-badge {
+.channel-count {
+    right: 0rem;
+}
+.channel-badge {
     background-color: rgba(255,255,255,0.8);
-    margin: auto;
-    margin-bottom: 0;
-    position: absolute;
     bottom: 0rem;
-    width: 100%;
 }
 .page-link {
     border: 10px;
