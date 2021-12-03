@@ -162,11 +162,12 @@ AutoClipAPIを返す
 
 class AutoClipFilter(filters.FilterSet):
     broadcaster_name = filters.CharFilter(field_name='broadcaster_name', lookup_expr='contains')
-    requested_at = filters.DateTimeFilter(lookup_expr='gte')
+    requested_at_gte = filters.DateTimeFilter(field_name='requested_at', lookup_expr='gte')
+    requested_at = filters.DateTimeFromToRangeFilter()
 
     class Meta:
         model = AutoClip
-        fields = ['broadcaster_name', 'requested_at']
+        fields = ['broadcaster_name', 'requested_at_gte', 'requested_at']
 
 
 class AutoClipViewSet(viewsets.ReadOnlyModelViewSet):
