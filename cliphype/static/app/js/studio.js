@@ -152,9 +152,11 @@ var app = new Vue({
     /* 指定日時が変化したらクリップを読み込む */
     datepickerStartedAt: function() {
       if (this.streamerId.length != 0) this.getClips();
+      if (this.autoclipped) this.getAutoClips();
     },
     datepickerEndedAt: function() {
       if (this.streamerId.length != 0) this.getClips();
+      if (this.autoclipped) this.getAutoClips();
     },
 
     clientId: function() {
@@ -165,6 +167,7 @@ var app = new Vue({
     streamerId: function() {
       this.getClips();
       this.getVideos();
+      if(this.autoclipped) this.getAutoClips();
       this.clipsCurrentPage = 1;
     },
 
@@ -445,7 +448,9 @@ var app = new Vue({
       this.autoClips = [];
       var response = await axios.get(autoclip_url, {
         params: {
-          'broadcaster_name': this.streamerName
+          'broadcaster_name': this.streamerName,
+          'requested_at_after': this.datepickerStartedAt,
+          'requested_at_before': this.datepickerEndedAt,
         }
       });
       console.log(response);
@@ -483,7 +488,7 @@ var app = new Vue({
     getAutoClipsByDateTime: function(requested_at) {
       axios.get(autoclip_url, {
         params: {
-          'requested_at': requested_at
+          'requested_at_gte': requested_at
         }
       }).then(function(response) {
         console.log(response);
