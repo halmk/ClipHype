@@ -3,8 +3,8 @@ import logging
 import time
 from datetime import datetime
 import ast
-import django_filters
-from rest_framework import viewsets, filters
+from django_filters import rest_framework as filters
+from rest_framework import viewsets
 
 from allauth.socialaccount.models import SocialAccount
 from celery.result import AsyncResult
@@ -160,11 +160,19 @@ class TaskResultViewSet(viewsets.ReadOnlyModelViewSet):
 AutoClipAPIを返す
 '''
 
+class AutoClipFilter(filters.FilterSet):
+    broadcaster_name = filters.CharFilter(field_name='broadcaster_name', lookup_expr='contains')
+    requested_at = filters.DateTimeFilter(lookup_expr='gte')
+
+    class Meta:
+        model = AutoClip
+        fields = ['broadcaster_name', 'requested_at']
+
 
 class AutoClipViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = AutoClip.objects.all()
     serializer_class = AutoClipSerializer
-    filter_fields = ['broadcaster_name']
+    filter_class = AutoClipFilter
 
 
 '''
