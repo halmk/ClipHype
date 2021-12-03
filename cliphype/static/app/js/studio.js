@@ -165,6 +165,7 @@ var app = new Vue({
     streamerId: function() {
       this.getClips();
       this.getVideos();
+      if(this.autoclipped) this.getAutoClips();
       this.clipsCurrentPage = 1;
     },
 
