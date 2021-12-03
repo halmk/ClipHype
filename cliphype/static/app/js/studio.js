@@ -280,6 +280,10 @@ var app = new Vue({
       }
 
       this.getUsers();
+      let requested_at = moment();
+      requested_at.add(-1, "Day");
+      requested_at = requested_at.format("YYYY-MM-DDTHH:mm");
+      this.getAutoClipsByDateTime(requested_at);
     },
 
 
@@ -472,7 +476,31 @@ var app = new Vue({
       }
       app.autoClips.sort((a, b) => b['created_epoch'] - a['created_epoch']);
       this.clipsCurrentPage = 1;
-   },
+    },
+
+
+    /* 指定日時範囲に作成されたAutoClipを取得する */
+    getAutoClipsByDateTime: function(requested_at) {
+      axios.get(autoclip_url, {
+        params: {
+          'requested_at': requested_at
+        }
+      }).then(function(response) {
+        console.log(response);
+        for(let j=0; j<app.follows.length; j++) app.follows[j]['autoclip_count'] = 0;
+        data = response['data'];
+        for(let i=0; i<data.length; i++){
+          for(let j=0; j<app.follows.length; j++){
+            if(data[i]['broadcaster_name'] == app.follows[j]['to_login']) {
+              app.follows[j]['autoclip_count'] += 1;
+            }
+          }
+        }
+      }).catch(function(error) {
+        console.log(error);
+      });
+    },
+
 
     /* ページネーションをクリックしたとき、ページ番号を更新 */
     clickVideosCallback: function(pageNum) {
