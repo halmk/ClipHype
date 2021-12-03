@@ -58,5 +58,5 @@ class AutoClip(models.Model):
     broadcaster_name = models.CharField(max_length=128)
     creator_id = models.CharField(max_length=128)
     creator_name = models.CharField(max_length=128)
-    requested_at = models.DateTimeField(auto_now_add=True, null=True)
+    requested_at = models.DateTimeField(default=timezone.now)
     hype = models.FloatField(blank=True, null=True)
