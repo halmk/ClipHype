@@ -52,10 +52,14 @@ def lambda_handler(event, context):
         with open(save_filepath, 'wb') as f:
             f.write(response.content)
 
-        # upload a downloaded clip to S3
+        # upload the downloaded clip to S3
         out_key = f'digest/src/src_{task_id}/{clip_filename}'
-        logger.info(f'Uploading scaled clip...: {save_filepath}, {out_key}')
+        logger.info(f'Uploading the downloaded clip...: {save_filepath}, {out_key}')
         bucket.upload_file(save_filepath, out_key)
+
+        # remove the downloaded clip from disk
+        os.remove(save_filepath)
+
 
     return {
         'statusCode': 200,
