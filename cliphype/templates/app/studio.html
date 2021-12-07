@@ -51,9 +51,9 @@
                 </div>
                 <div class="card-img-overlay streamer-img">
                     <div class="card-text">
-                        <span class="position-absolute channel-count badge badge-pill badge-secondary text-light" v-show="item.autoclip_count>0">
+                        <button type="button" class="position-absolute channel-count badge badge-pill badge-secondary text-light" v-show="item.autoclip_count>0" data-toggle="tooltip" data-placement="right" title="The number of auto generated clips in 24 hours">
                             [[ item.autoclip_count ]]
-                        </span>
+                        </button>
                         <span class="position-absolute w-100 channel-badge text-center text-secondary badge badge-pill badge-light shadow border border-secondary overflow-hidden font-weight-bold">
                             [[ item.to_login ]]
                         </span>
