@@ -178,7 +178,6 @@ var app = new Vue({
 
     autoclipped: function() {
       if(this.autoclipped) {
-        this.datepickerEndedAt = moment().format('YYYY-MM-DDTHH:mm:SS');
         this.datepickerStartedAt = moment().add(-1, 'Day').format('YYYY-MM-DDTHH:mm:SS');
       }
     },
