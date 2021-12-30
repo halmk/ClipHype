@@ -33,8 +33,6 @@
     {% endblock %}
 </head>
 <body class="bg-light">
-{% block body %}
-<div id="app" v-cloak>
 	<!-- HEADER -->
 	<nav class="navbar navbar-expand navbar-white bg-white navbar-clip shadow-sm">
     <div class="container">
@@ -78,9 +76,8 @@
 
 	<!-- MAIN -->
 	<main class="bg-light my-3">
-    {% block content %}
-
-    {% endblock %}
+	{% block content %}
+	{% endblock %}
 	</main>
     <!-- /MAIN -->
 
@@ -96,12 +93,10 @@
 		</div>
 	</footer>
     <!-- /FOOTER -->
-    {% endblock %}
-</div>
 
 <script src="{% static 'app/js/jquery-3.4.1.slim.min.js' %}"></script>
 <script src="{% static 'app/js/bootstrap.bundle.min.js' %}"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+<script src="{% static 'app/js/vue.min.js' %}"></script>
 <script src="https://momentjs.com/downloads/moment.js"></script>
 <script src="https://unpkg.com/vuejs-paginate@latest"></script>
 <script src="https://unpkg.com/vuejs-datepicker"></script>
@@ -111,6 +106,5 @@
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.529.0.min.js"></script>
 {% block extra_script %}
 {% endblock %}
-
 </body>
 </html>
