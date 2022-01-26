@@ -29,30 +29,7 @@ logger = logging.getLogger(__name__)
     フォローしているチャンネルのクリップの表示、ダウンロードができる
 '''
 
-
 def index(request):
-    context = {}
-    try:
-        user_pk = request.user.pk
-        twitch_account = SocialAccount.objects.get(
-            user=user_pk, provider="Twitch")
-        logger.info(f'\ntwitch_account: {twitch_account}\n')
-        print(twitch_account.extra_data)
-        extra_data = twitch_account.extra_data
-        context['twitch_account'] = extra_data
-
-    except Exception as e:
-        logger.warning(f'\nTwitch - {e}')
-
-    return render(request, 'app/index.html', context)
-
-
-'''
-Studioページ
-'''
-
-
-def studio(request):
     # ダイジェスト動画作成リクエスト
     if request.method == "POST" and request.body:
         # request.bodyのJSONをDictに変換する
@@ -87,7 +64,7 @@ def studio(request):
         logger.info(
             f'\nresult: {result} result.state: {result.state} : {result.ready()}\n')
 
-        return HttpResponseRedirect(reverse('studio'))
+        return HttpResponseRedirect(reverse('index'))
 
     # GETリクエスト
     elif request.method == 'GET':
@@ -108,7 +85,7 @@ def studio(request):
         except Exception as e:
             logger.warning(f'\nTwitch {e}')
 
-        return render(request, 'app/studio.html', context)
+        return render(request, 'app/index.html', context)
 
 
 '''
