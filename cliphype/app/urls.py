@@ -10,7 +10,6 @@ router.register('autoclips', views.AutoClipViewSet, basename='autoclip')
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('studio', views.studio, name='studio'),
     path('twitchapi', views.twitch_api_request, name='twitch_api'),
     path('download', views.download_clip, name='download'),
     path('report', views.report, name='report'),
