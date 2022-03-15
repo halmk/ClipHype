@@ -5,11 +5,6 @@ var TwitchAPI = {
     token: '',
     is_token: false,
 
-    /* 文字列を'YYYY-MM-DD'に変換したものを返す */
-    customformat: function(value) {
-        return moment(value).format('YYYY-MM-DD');
-    },
-
     getRequest: async function(url, params) {
         if (this.is_token) {
             return await axios.get(url, {
@@ -77,8 +72,8 @@ var TwitchAPI = {
         let url = 'https://api.twitch.tv/helix/clips';
         let params = {
             'broadcaster_id': streamerId,
-            'started_at': this.customformat(datepickerStartedAt) + 'T00:00:00Z', // RFC3339 format (ex:'2019-08-31T00:00:00Z')
-            'ended_at': this.customformat(datepickerEndedAt) + 'T00:00:00Z',     // RFC3339 format
+            'started_at': datepickerStartedAt, // RFC3339 format (ex:'2019-08-31T00:00:00Z')
+            'ended_at': datepickerEndedAt,     // RFC3339 format
             'first': 27,
         };
 
@@ -100,8 +95,8 @@ var TwitchAPI = {
         let url = 'https://api.twitch.tv/helix/clips';
         let params = {
             'broadcaster_id': streamerId,
-            'started_at': this.customformat(datepickerStartedAt) + 'T00:00:00Z', // RFC3339 format (ex:'2019-08-31T00:00:00Z')
-            'ended_at': this.customformat(datepickerEndedAt) + 'T00:00:00Z',     // RFC3339 format
+            'started_at': datepickerStartedAt, // RFC3339 format (ex:'2019-08-31T00:00:00Z')
+            'ended_at': datepickerEndedAt,     // RFC3339 format
             'first': 27,
             'after': clipsAfter,
         };
