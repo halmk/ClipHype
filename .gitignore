@@ -10,3 +10,5 @@ cliphype/app/input/
 cliphype/app/output/
 target/
 Cargo.lock
+node_modules/
+

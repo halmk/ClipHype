@@ -151,12 +151,16 @@ var app = new Vue({
   watch: {
     /* 指定日時が変化したらクリップを読み込む */
     datepickerStartedAt: function() {
-      if (this.streamerId.length != 0) this.getClips();
-      if (this.autoclipped) this.getAutoClips();
+      if (this.streamerId.length != 0) {
+        this.getClips();
+        this.getAutoClips();
+      }
     },
     datepickerEndedAt: function() {
-      if (this.streamerId.length != 0) this.getClips();
-      if (this.autoclipped) this.getAutoClips();
+      if (this.streamerId.length != 0) {
+        this.getClips();
+        this.getAutoClips();
+      }
     },
 
     clientId: function() {
@@ -167,19 +171,13 @@ var app = new Vue({
     streamerId: function() {
       this.getClips();
       this.getVideos();
-      if(this.autoclipped) this.getAutoClips();
+      this.getAutoClips();
       this.clipsCurrentPage = 1;
     },
 
     /* published が true になったとき、getPublishedClips() を呼び出す */
     published: function() {
       if(this.published) this.getPublishedClips();
-    },
-
-    autoclipped: function() {
-      if(this.autoclipped) {
-        this.datepickerStartedAt = moment().add(-1, 'Day').format('YYYY-MM-DDTHH:mm:SS');
-      }
     },
 
     width: function() {
@@ -288,7 +286,7 @@ var app = new Vue({
       let requested_at = moment();
       requested_at.add(-1, "Day");
       requested_at = requested_at.format("YYYY-MM-DDTHH:mm");
-      this.getAutoClipsByDateTime(requested_at);
+      this.getCountAutoClips(requested_at);
     },
 
 
@@ -318,6 +316,7 @@ var app = new Vue({
 
     /* 配信者のIDを指定して、その配信のクリップを取得する */
     getClips: function() {
+      console.log("getClips params: ", this.streamerId, this.datepickerStartedAt, this.datepickerEndedAt);
       TwitchAPI.getClips(this.streamerId, this.datepickerStartedAt, this.datepickerEndedAt)
         .then(function (response) {
           //console.log("getClips↓:成功");
@@ -448,6 +447,7 @@ var app = new Vue({
     /* AutoClip API から自動生成されたクリップを取得する */
     getAutoClips: async function() {
       this.autoClips = [];
+      console.log("getAutoClips params: ", this.streamerName, this.datepickerStartedAt, this.datepickerEndedAt);
       var response = await axios.get(autoclip_url, {
         params: {
           'broadcaster_name': this.streamerName,
@@ -487,7 +487,7 @@ var app = new Vue({
 
 
     /* 指定日時範囲に作成されたAutoClipを取得する */
-    getAutoClipsByDateTime: function(requested_at) {
+    getCountAutoClips: function(requested_at) {
       axios.get(autoclip_url, {
         params: {
           'requested_at_gte': requested_at
@@ -543,20 +543,14 @@ var app = new Vue({
       //console.log(hour +"h"+ min +"m"+ sec +"s");
 
       let m = moment(created_at);
-      let fm = "YYYY-MM-DDTHH:mm:ss";
-      let startDate = created_at;
-      m.add({hours:hour-9,minutes:min,seconds:sec});
-      let endMoment = m;
-      let endDate = m.format(fm) + 'Z';
+      let startMoment = m;
+      this.datepickerStartedAt = startMoment.toISOString();
 
-      this.archiveStartDate = startDate;
-      this.archiveEndDate = endDate;
-      //console.log("開始時刻: " + startDate);
-      //console.log("終了時刻: "+ endDate);
-      this.getArchiveClips();
+      m.add({hours:hour,minutes:min,seconds:sec});
+      let endMoment = m;
+      this.datepickerEndedAt = endMoment.toISOString();
+
       this.clipsCurrentPage = 1;
-      //this.datepickerStartedAt = startMoment.format("YYYY-MM-DD");
-      //this.datepickerEndedAt = endMoment.format("YYYY-MM-DD");
     },
 
 
@@ -982,8 +976,8 @@ var app = new Vue({
   },
   mounted() {
     let m = moment();
-    this.datepickerEndedAt = m.add(1,'days').format('YYYY-MM-DD');
-    this.datepickerStartedAt = m.add(-7, 'days').format('YYYY-MM-DD');
+    this.datepickerEndedAt = m.add(1,'days').toISOString();
+    this.datepickerStartedAt = m.add(-7, 'days').toISOString();
     this.setResponsiveItems();
     $('[data-toggle="tooltip"]').tooltip();
     this.siteUrl = location.hostname;
