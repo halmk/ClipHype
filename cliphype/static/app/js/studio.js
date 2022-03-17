@@ -171,7 +171,7 @@ var app = new Vue({
     streamerId: function() {
       this.getClips();
       this.getVideos();
-      if(this.autoclipped) this.getAutoClips();
+      this.getAutoClips();
       this.clipsCurrentPage = 1;
     },
 
@@ -179,14 +179,6 @@ var app = new Vue({
     published: function() {
       if(this.published) this.getPublishedClips();
     },
-
-    /*
-    autoclipped: function() {
-      if(this.autoclipped) {
-        this.datepickerStartedAt = moment().add(-1, 'Day').format('YYYY-MM-DDTHH:mm:SS');
-      }
-    },
-    */
 
     width: function() {
       this.setResponsiveItems();
@@ -294,7 +286,7 @@ var app = new Vue({
       let requested_at = moment();
       requested_at.add(-1, "Day");
       requested_at = requested_at.format("YYYY-MM-DDTHH:mm");
-      this.getAutoClipsByDateTime(requested_at);
+      this.getCountAutoClips(requested_at);
     },
 
 
@@ -455,6 +447,7 @@ var app = new Vue({
     /* AutoClip API から自動生成されたクリップを取得する */
     getAutoClips: async function() {
       this.autoClips = [];
+      console.log("getAutoClips params: ", this.streamerName, this.datepickerStartedAt, this.datepickerEndedAt);
       var response = await axios.get(autoclip_url, {
         params: {
           'broadcaster_name': this.streamerName,
@@ -494,7 +487,7 @@ var app = new Vue({
 
 
     /* 指定日時範囲に作成されたAutoClipを取得する */
-    getAutoClipsByDateTime: function(requested_at) {
+    getCountAutoClips: function(requested_at) {
       axios.get(autoclip_url, {
         params: {
           'requested_at_gte': requested_at
