@@ -191,15 +191,11 @@ var app = new Vue({
     },
 
     totalClipSeconds: function() {
-      if(this.totalClipSeconds > 600) {
+      if(this.totalClipSeconds > 600)
         this.playTimeExceeded = true;
-        this.disabledCreateButton = true;
-      }
-      else {
+      else
         this.playTimeExceeded = false;
-        this.disabledCreateButton = false;
-      }
-      if(this.timelineClips.length <= 1) this.disabledCreateButton = true;
+      this.evalCanCreateHighlights();
     },
 
     selectedClipTitle: function() {
@@ -236,6 +232,28 @@ var app = new Vue({
       return moment(dt).unix();
     },
 
+    formatDatepickerStartedAt() {
+      let m = moment(this.datepickerStartedAt);
+      m.set({'hour': 0, 'minute': 0, 'second': 0, 'millisecond': 0});
+      this.datepickerStartedAt = m.toISOString();
+      console.log(this.datepickerStartedAt);
+    },
+
+    formatDatepickerEndedAt() {
+      let m = moment(this.datepickerEndedAt);
+      m.set({'hour': 23, 'minute': 59, 'second': 59, 'millisecond': 0});
+      this.datepickerEndedAt = m.toISOString();
+      console.log(this.datepickerEndedAt);
+    },
+
+    evalCanCreateHighlights() {
+      if(this.userName.length > 0 && this.timelineClips.length > 1 && !this.playTimeExceeded && this.title.length > 0) {
+        this.disabledCreateButton = false;
+      } else {
+        this.disabledCreateButton = true;
+      }
+    },
+
     /*
        ----------------------
         Twitch API Requests
@@ -268,15 +286,15 @@ var app = new Vue({
       let followsAfter = '';
       do {
         let response = await TwitchAPI.getAfterFollows(this.clientId, followsAfter);
-        console.log(response);
+        //console.log(response);
         for(let i=0; i<response['data']['data'].length; i++){
           this.follows.push(response['data']['data'][i]);
         }
         followsAfter = response['data']['pagination']['cursor'];
-        console.log(followsAfter);
+        //console.log(followsAfter);
       } while(followsAfter)
 
-      console.log(this.follows);
+      //console.log(this.follows);
       this.userIds = [];
       for(let i=0; i<app.follows.length; i++){
         this.userIds.push(this.follows[i]['to_id']);
@@ -320,7 +338,7 @@ var app = new Vue({
       TwitchAPI.getClips(this.streamerId, this.datepickerStartedAt, this.datepickerEndedAt)
         .then(function (response) {
           //console.log("getClips↓:成功");
-          console.log(response);
+          //console.log(response);
           app.clips = response['data']['data'];
           for(let i=0; i<response['data']['data'].length; i++){
             app.clips[i]['modal_id'] = 'modal' + app.clips[i]['id'];
@@ -378,7 +396,7 @@ var app = new Vue({
       TwitchAPI.getVideos(this.streamerId)
         .then(function(response) {
           //console.log("getVideos↓");
-          console.log(response);
+          //console.log(response);
           app.videos = response['data']['data'];
           for(let i=0; i<response['data']['data'].length; i++){
             let thumbnailUrl = app.videos[i]['thumbnail_url'];
@@ -455,7 +473,7 @@ var app = new Vue({
           'requested_at_before': this.datepickerEndedAt,
         }
       });
-      console.log(response);
+      //console.log(response);
       let cont = response['data'];
       let clip_ids = [];
       for(let i=0; i<cont.length; i++) {
@@ -466,7 +484,7 @@ var app = new Vue({
       while(start < clip_ids.length) {
         var clip_ids_sub = clip_ids.slice(start, start+c);
         var response = await TwitchAPI.getClipById(clip_ids_sub.join());
-        console.log(response);
+        //console.log(response);
         var data = response['data']['data'];
         for(let i=0; i<response['data']['data'].length; i++){
           data[i]['modal_id'] = 'modal' + data[i]['id'];
@@ -493,7 +511,7 @@ var app = new Vue({
           'requested_at_gte': requested_at
         }
       }).then(function(response) {
-        console.log(response);
+        //console.log(response);
         for(let j=0; j<app.follows.length; j++) app.follows[j]['autoclip_count'] = 0;
         data = response['data'];
         for(let i=0; i<data.length; i++){

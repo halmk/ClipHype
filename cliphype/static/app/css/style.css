@@ -2,6 +2,9 @@
     display: none;
 }
 
+ul {
+  list-style: none;
+}
 .section {
     border-radius: 20px;
 }
