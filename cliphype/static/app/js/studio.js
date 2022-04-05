@@ -191,15 +191,11 @@ var app = new Vue({
     },
 
     totalClipSeconds: function() {
-      if(this.totalClipSeconds > 600) {
+      if(this.totalClipSeconds > 600)
         this.playTimeExceeded = true;
-        this.disabledCreateButton = true;
-      }
-      else {
+      else
         this.playTimeExceeded = false;
-        this.disabledCreateButton = false;
-      }
-      if(this.timelineClips.length <= 1) this.disabledCreateButton = true;
+      this.evalCanCreateHighlights();
     },
 
     selectedClipTitle: function() {
@@ -248,6 +244,14 @@ var app = new Vue({
       m.set({'hour': 23, 'minute': 59, 'second': 59, 'millisecond': 0});
       this.datepickerEndedAt = m.toISOString();
       console.log(this.datepickerEndedAt);
+    },
+
+    evalCanCreateHighlights() {
+      if(this.userName.length > 0 && this.timelineClips.length > 1 && !this.playTimeExceeded && this.title.length > 0) {
+        this.disabledCreateButton = false;
+      } else {
+        this.disabledCreateButton = true;
+      }
     },
 
     /*
