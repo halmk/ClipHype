@@ -165,7 +165,7 @@ def download_clip(request):
 
     clip_file = twitch_api.downloadClip(clip_id, None)
 
-    response = HttpResponse(clip_file['file'], content_type='audio/mp4')
+    response = HttpResponse(clip_file['file'], content_type='video/mp4')
     response['Content-Disposition'] = f'attachment; filename="{clip_file["name"]}"'
     return response
 
