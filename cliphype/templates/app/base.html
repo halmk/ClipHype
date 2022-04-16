@@ -68,16 +68,30 @@
 				</ul>
         </div>
     </div>
-</nav>
+	</nav>
 	<!-- /HEADER -->
 
+	<!-- NOTES -->
+	<div id="notes" v-cloak>
+    <nav v-for="note in notes" :key="note.message" v-show="note.message.length !== 0" class="navbar navbar-dark border" v-bind:class="[note.bg]">
+        <div class="container-fluid">
+            <span class="navbar-text text-light mx-auto">
+                [[ note.message ]]
+            </span>
+            <div class="d-flex">
+                <button class="btn font-weight-bold" v-bind:class="[note.btn]" type="button" @click="note.message = ''">×</button>
+            </div>
+        </div>
+    </nav>
+	</div>
+	<!-- /NOTES -->
 
 	<!-- MAIN -->
 	<main class="bg-light my-3">
 	{% block content %}
 	{% endblock %}
 	</main>
-    <!-- /MAIN -->
+	<!-- /MAIN -->
 
 	<!-- FOOTER -->
 	<footer class="py-4 bg-dark text-light">
@@ -90,19 +104,26 @@
 			<a href="{% url 'policy' %}" class="text-light font-weight-bold">Privacy Policy</a>
 		</div>
 	</footer>
-    <!-- /FOOTER -->
+	<!-- /FOOTER -->
 
-<script src="{% static 'app/js/jquery-3.4.1.slim.min.js' %}"></script>
-<script src="{% static 'app/js/bootstrap.bundle.min.js' %}"></script>
-<script src="{% static 'app/js/vue.min.js' %}"></script>
-<script src="https://momentjs.com/downloads/moment.js"></script>
-<script src="https://unpkg.com/vuejs-paginate@latest"></script>
-<script src="https://unpkg.com/vuejs-datepicker"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
-<script src="https://sdk.amazonaws.com/js/aws-sdk-2.529.0.min.js"></script>
-{% block extra_script %}
-{% endblock %}
+	<script src="{% static 'app/js/jquery-3.4.1.slim.min.js' %}"></script>
+	<script src="{% static 'app/js/bootstrap.bundle.min.js' %}"></script>
+	<script src="{% static 'app/js/vue.min.js' %}"></script>
+	<script src="https://momentjs.com/downloads/moment.js"></script>
+	<script src="https://unpkg.com/vuejs-paginate@latest"></script>
+	<script src="https://unpkg.com/vuejs-datepicker"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.529.0.min.js"></script>
+	<script>
+    var notes = [];
+    {% for note in notes %}
+        [[ notes.push({'message': "{{ note.message }}", 'status': "{{ note.status }}"})]]
+    {% endfor %}
+	</script>
+	<script src="{% static 'app/js/report.js' %}"></script>
+	{% block extra_script %}
+	{% endblock %}
 </body>
 </html>
