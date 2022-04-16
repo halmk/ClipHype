@@ -177,39 +177,37 @@ def download_clip(request):
 
 def report(request):
     context = {}
+    context['notes'] = []
+    # ユーザが認証されていない場合はログイン画面に遷移させる
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('account_login'))
+    try:
+        user_pk = request.user.pk
+        twitch_account = SocialAccount.objects.get(
+            user=user_pk, provider="Twitch")
+        logger.info(f'\ntwitch_account: {twitch_account}')
+        print(twitch_account.extra_data)
+        extra_data = twitch_account.extra_data
+        context['twitch_account'] = extra_data
+        login_id = extra_data['login']
+    except Exception as e:
+        logger.warning(f'\nTwitch - {e}')
+
     if request.method == 'GET':
-        # ユーザが認証されていない場合はログイン画面に遷移させる
-        if not request.user.is_authenticated:
-            return HttpResponseRedirect(reverse('account_login'))
-
-        try:
-            user_pk = request.user.pk
-            twitch_account = SocialAccount.objects.get(
-                user=user_pk, provider="Twitch")
-            logger.info(f'\ntwitch_account: {twitch_account}')
-            print(twitch_account.extra_data)
-            extra_data = twitch_account.extra_data
-            context['twitch_account'] = extra_data
-            login_id = extra_data['login']
-
-        except Exception as e:
-            logger.warning(f'\nTwitch - {e}')
-
         return render(request, 'app/report.html', context)
     else:
         user = User.objects.get(username=request.user.username)
         title = request.POST['title']
         content = request.POST['content']
-
         logger.info(f'user:{user}, title:{title}, content:{content}')
-
         contact = Contact()
         contact.user = user
         contact.title = title
         contact.content = content
         contact.save()
+        context['notes'].append({'message': 'Thank you for the report!!', 'status':'success'})
 
-        return HttpResponseRedirect(reverse('report'))
+        return render(request, 'app/report.html', context)
 
 
 '''
