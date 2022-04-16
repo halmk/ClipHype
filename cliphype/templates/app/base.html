@@ -72,8 +72,18 @@
 	<!-- /HEADER -->
 
 	<!-- NOTES -->
-	{% block notes %}
-	{% endblock %}
+	<div id="notes" v-cloak>
+    <nav v-for="note in notes" :key="note.message" v-show="note.message.length !== 0" class="navbar navbar-dark border" v-bind:class="[note.bg]">
+        <div class="container-fluid">
+            <span class="navbar-text text-light mx-auto">
+                [[ note.message ]]
+            </span>
+            <div class="d-flex">
+                <button class="btn font-weight-bold" v-bind:class="[note.btn]" type="button" @click="note.message = ''">×</button>
+            </div>
+        </div>
+    </nav>
+	</div>
 	<!-- /NOTES -->
 
 	<!-- MAIN -->
@@ -106,6 +116,13 @@
 	<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
 	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.529.0.min.js"></script>
+	<script>
+    var notes = [];
+    {% for note in notes %}
+        [[ notes.push({'message': "{{ note.message }}", 'status': "{{ note.status }}"})]]
+    {% endfor %}
+	</script>
+	<script src="{% static 'app/js/report.js' %}"></script>
 	{% block extra_script %}
 	{% endblock %}
 </body>
