@@ -68,16 +68,20 @@
 				</ul>
         </div>
     </div>
-</nav>
+	</nav>
 	<!-- /HEADER -->
 
+	<!-- NOTES -->
+	{% block notes %}
+	{% endblock %}
+	<!-- /NOTES -->
 
 	<!-- MAIN -->
 	<main class="bg-light my-3">
 	{% block content %}
 	{% endblock %}
 	</main>
-    <!-- /MAIN -->
+	<!-- /MAIN -->
 
 	<!-- FOOTER -->
 	<footer class="py-4 bg-dark text-light">
@@ -90,19 +94,19 @@
 			<a href="{% url 'policy' %}" class="text-light font-weight-bold">Privacy Policy</a>
 		</div>
 	</footer>
-    <!-- /FOOTER -->
+	<!-- /FOOTER -->
 
-<script src="{% static 'app/js/jquery-3.4.1.slim.min.js' %}"></script>
-<script src="{% static 'app/js/bootstrap.bundle.min.js' %}"></script>
-<script src="{% static 'app/js/vue.min.js' %}"></script>
-<script src="https://momentjs.com/downloads/moment.js"></script>
-<script src="https://unpkg.com/vuejs-paginate@latest"></script>
-<script src="https://unpkg.com/vuejs-datepicker"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
-<script src="https://sdk.amazonaws.com/js/aws-sdk-2.529.0.min.js"></script>
-{% block extra_script %}
-{% endblock %}
+	<script src="{% static 'app/js/jquery-3.4.1.slim.min.js' %}"></script>
+	<script src="{% static 'app/js/bootstrap.bundle.min.js' %}"></script>
+	<script src="{% static 'app/js/vue.min.js' %}"></script>
+	<script src="https://momentjs.com/downloads/moment.js"></script>
+	<script src="https://unpkg.com/vuejs-paginate@latest"></script>
+	<script src="https://unpkg.com/vuejs-datepicker"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.529.0.min.js"></script>
+	{% block extra_script %}
+	{% endblock %}
 </body>
 </html>
