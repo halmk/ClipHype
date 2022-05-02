@@ -30,11 +30,30 @@ logger = logging.getLogger(__name__)
 '''
 
 def index(request):
+    context = {}
+    context['bucket_name'] = S3_BUCKET
+    user_pk = request.user.pk
+    username = request.user.username
+    logger.info(f'\nuser: {username}, request.user.pk: {request.user.pk}\n')
+
+    try:
+        twitch_account = SocialAccount.objects.get(
+            user=user_pk, provider="Twitch")
+        logger.info(f'\ntwitch_account: {twitch_account}\n{twitch_account.extra_data}\n')
+        extra_data = twitch_account.extra_data
+        context['twitch_account'] = extra_data
+    except Exception as e:
+        logger.warning(f'\nTwitch {e}')
+
+    if request.method == "GET":
+        return render(request, 'app/index.html', context)
+
     # ダイジェスト動画作成リクエスト
-    if request.method == "POST" and request.body:
+    elif request.method == "POST" and request.body:
+        response = {}
+        response['notes'] = []
         # request.bodyのJSONをDictに変換する
         data = json.loads(request.body)['data']
-
         if data['creator'] != request.user.username:
             logger.warning(f"\nDifferent user requests a highlight: {request.user.username}, {data['creator']}")
 
@@ -62,30 +81,16 @@ def index(request):
 
         result = AsyncResult(task_id)
         logger.info(
-            f'\nresult: {result} result.state: {result.state} : {result.ready()}\n')
+            f'\nresult: {result} result.state: {result.state} : {result.ready()}\n'
+        )
+        response['notes'].append(
+            {
+                'message': 'Your highlights video successfully requested!! You can check it in the highlights video area below',
+                'status':'success'
+            }
+        )
 
-        return HttpResponseRedirect(reverse('index'))
-
-    # GETリクエスト
-    elif request.method == 'GET':
-        context = {}
-        s3_data = []
-        digests = []
-        user_pk = request.user.pk
-        username = request.user.username
-        logger.info(f'\nuser: {username}, request.user.pk: {request.user.pk}\n')
-
-        context['bucket_name'] = S3_BUCKET
-        try:
-            twitch_account = SocialAccount.objects.get(
-                user=user_pk, provider="Twitch")
-            logger.info(f'\ntwitch_account: {twitch_account}\n{twitch_account.extra_data}\n')
-            extra_data = twitch_account.extra_data
-            context['twitch_account'] = extra_data
-        except Exception as e:
-            logger.warning(f'\nTwitch {e}')
-
-        return render(request, 'app/index.html', context)
+        return JsonResponse(response)
 
 
 '''
