@@ -476,6 +476,7 @@ var app = new Vue({
       //console.log(response);
       let cont = response['data'];
       let clip_ids = [];
+      let autoClips = [];
       for(let i=0; i<cont.length; i++) {
         clip_ids.push(cont[i]['clip_id']);
       }
@@ -495,10 +496,11 @@ var app = new Vue({
           data[i]['created_epoch'] = app.getEpochTime(data[i]['created_at']);
           data[i]['hype'] = cont.find(el => el['clip_id'] == data[i]['id'])['hype'];
           if (data[i]['hype']) data[i]['hype'] = data[i]['hype'].toFixed(2);
-          app.autoClips.push(data[i]);
+          autoClips.push(data[i]);
         }
         start += c;
       }
+      app.autoClips = autoClips;
       app.autoClips.sort((a, b) => b['created_epoch'] - a['created_epoch']);
       this.clipsCurrentPage = 1;
     },
