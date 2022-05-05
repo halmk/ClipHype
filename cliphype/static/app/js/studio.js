@@ -789,8 +789,15 @@ var app = new Vue({
       this.totalClipSeconds = total;
     },
 
+    defaultDigestInfo: function() {
+      this.timelineClips = [];
+      this.title = "";
+      this.totalClipSeconds = 0;
+    },
+
     /* ダイジェスト動画の情報をDjangoに渡す */
     postDigestInfo: function() {
+      this.disabledCreateButton = true;
       //console.log(csrftoken);
       data = {
         "creator": username,
@@ -813,13 +820,19 @@ var app = new Vue({
           'X-CSRFToken': csrftoken,
         },
       }).then(function(response) {
-          //console.log(response);
-          window.location.href = studio_url;
-        })
-        .catch(function(error) {
-          //console.log(error);
-          //console.log(error.response);
-        });
+        console.log(response);
+        app.defaultDigestInfo();
+        note.notes = response.data.notes;
+        note.setClasses();
+        app.getHighlights();
+        app.evalCanCreateHighlights();
+        window.scroll({top: 0, behavior: 'smooth'});
+        //window.location.href = studio_url;
+      })
+      .catch(function(error) {
+        //console.log(error);
+        //console.log(error.response);
+      });
     },
 
     setDigestURL: function(taskId){
