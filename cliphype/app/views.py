@@ -1,7 +1,5 @@
 import json
 import logging
-import time
-from datetime import datetime
 import ast
 from django_filters import rest_framework as filters
 from rest_framework import viewsets
@@ -16,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django_celery_results.models import TaskResult
 from cliphype.settings import S3_BUCKET
-from app import aws_api, twitch_api
+from app import aws_api, twitch_api, google_api
 from app.models import Contact, Digest, AutoClip
 from app.tasks import concat_clips_lambda, upload_highlight_info
 from app.serializers import DigestSerializer, TaskResultSerializer, AutoClipSerializer
@@ -161,7 +159,7 @@ class AutoClipViewSet(viewsets.ReadOnlyModelViewSet):
 
 def download_clip(request):
     clip_id = request.POST['id']
-    logger.info(f"\nクリップダウンロードリクエストを受け取りました　CLIP ID: {clip_id}")
+    logger.info(f"\nクリップダウンロードリクエストを受け取りました CLIP ID: {clip_id}")
 
     clip_file = twitch_api.downloadClip(clip_id, None)
 
@@ -239,3 +237,27 @@ def unlink(request):
 
 def policy(request):
     return render(request, 'privacy/policy.html')
+
+
+'''
+GoogleAPIのリクエスト結果を返す
+'''
+def googleAPIRequest(request):
+    if request.method == 'GET':
+        logger.info(f"\n{request.GET}\n")
+        print(request.GET.dict())
+        options = {
+            "file": "/root/cliphype/cliphype/app/output/test.mp4",
+            "keywords": "",
+            "title": "ClipHype | Youtube video insert test",
+            "description": "test",
+            "category": "",
+            "privacyStatus": "private",
+        }
+        response = google_api.uploadVideo(request.user, options)
+
+        return JsonResponse(response)
+
+
+def googleAPITest(request):
+    return render(request, 'app/googleapitest.html')

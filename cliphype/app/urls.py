@@ -15,4 +15,6 @@ urlpatterns = [
     path('report', views.report, name='report'),
     path('unlink', views.unlink, name='unlink'),
     path('policy', views.policy, name='policy'),
+    path('googleapi', views.googleAPIRequest, name='google_api_request'),
+    path('googleapitest', views.googleAPITest, name='google_api_test'),
 ]
