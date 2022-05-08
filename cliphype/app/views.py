@@ -16,7 +16,7 @@ from django_celery_results.models import TaskResult
 from cliphype.settings import S3_BUCKET
 from app import aws_api, twitch_api, google_api
 from app.models import Contact, Digest, AutoClip
-from app.tasks import concat_clips_lambda, upload_highlight_info
+from app.tasks import upload_highlight_info, upload_youtube_submission_info
 from app.serializers import DigestSerializer, TaskResultSerializer, AutoClipSerializer
 
 
@@ -248,18 +248,21 @@ def policy(request):
 GoogleAPIのリクエスト結果を返す
 '''
 def googleAPIRequest(request):
-    if request.method == 'GET':
-        logger.info(f"\n{request.GET}\n")
-        print(request.GET.dict())
-        options = {
-            "file": "/root/cliphype/cliphype/app/output/test.mp4",
-            "keywords": "",
-            "title": "ClipHype | Youtube video insert test",
-            "description": "test",
-            "category": "",
-            "privacyStatus": "private",
-        }
-        response = google_api.uploadVideo(request.user, options)
+    if request.method == 'POST':
+        data = json.loads(request.body)['data']
+        print(data)
+        # タスクを非同期処理で実行する
+        task_id = upload_youtube_submission_info.delay(data)
+        print(task_id)
+        response = {}
+        response['task_id'] = str(task_id)
+        response['notes'] = []
+        response['notes'].append(
+            {
+                'message': 'Successfully requested!',
+                'status':'success'
+            }
+        )
 
         return JsonResponse(response)
 
