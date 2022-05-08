@@ -70,6 +70,14 @@ var app = new Vue({
     borderw: 1,
     position: "top-left",
     isFLTransition: false,
+    youtubeOptions: {
+      'taskId': '',
+      'title': '',
+      'keywords': '',
+      'description': '',
+      'category': '',
+      'privacyStatus': '',
+    }
   },
 
   computed: {
@@ -836,6 +844,31 @@ var app = new Vue({
         //console.log(error.response);
       });
     },
+    /* Youtubeに投稿する動画の情報をDjangoに渡す */
+    postYoutubeSubmissionInfo: function() {
+      data = {
+        "creator": username,
+        "taskId": this.youtubeOptions.taskId,
+        "title": this.youtubeOptions.title,
+        "keywords": this.youtubeOptions.keywords,
+        "description": this.youtubeOptions.description,
+        "category": this.youtubeOptions.category,
+        "privacyStatus": this.youtubeOptions.privacyStatus,
+      }
+      axios.post(youtube_submission_url, {data}, {
+        headers: {
+          'X-CSRFToken': csrftoken,
+        },
+      }).then(function(response) {
+        console.log(response);
+        note.notes = response.data.notes;
+        note.setClasses();
+        window.scroll({top: 0, behavior: 'smooth'});
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
+    },
 
     setDigestURL: function(taskId){
       // S3のダイジェスト動画が保存されているフォルダ名
@@ -1001,6 +1034,11 @@ var app = new Vue({
       $('#digestModal').modal();
     },
 
+    openYoutubeFormModal: function(taskId) {
+      //console.log(task_id);
+      this.youtubeOptions.taskId = taskId;
+      $('#youtubeFormModal').modal();
+    },
   },
 
   created() {
