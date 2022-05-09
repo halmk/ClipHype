@@ -67,6 +67,7 @@ def get_credentials(creator):
 def func():
   # SQSからメッセージを受信する
   ## bucket名は環境変数で取得する
+  print("Receiving a message from SQS...")
   sqs_client = boto3.client('sqs',
     aws_access_key_id=ACCESS_KEY_ID,
     aws_secret_access_key=SECRET_ACCESS_KEY,
@@ -81,12 +82,14 @@ def func():
   yt_task_id = message.split('_')[1]
 
   # SQSからメッセージを削除
+  print("Deleting the message from SQS...")
   response = sqs_client.delete_message(
     QueueUrl = SQS_URL,
     ReceiptHandle = response['Messages'][0]['ReceiptHandle'],
   )
 
   # S3から動画投稿情報を取得する
+  print("Getting youtube options object from S3...")
   s3_client = boto3.client('s3',
     aws_access_key_id=ACCESS_KEY_ID,
     aws_secret_access_key=SECRET_ACCESS_KEY,
@@ -117,6 +120,7 @@ def func():
   bucket.download_file(video_key, video_path)
 
   # RDSと接続してトークン情報を取得する
+  print("Getting credentials from RDS...")
   credentials = get_credentials(creator)
   print(credentials)
 
@@ -124,6 +128,7 @@ def func():
   google_api.uploadVideo(credentials, youtube_options)
 
   # 自分自身のインスタンスを停止する
+  print("Terminating self instance...")
   instance_id = subprocess.run(["curl", "http://169.254.169.254/latest/meta-data/instance-id"], capture_output=True)
   instance_id = instance_id.stdout.decode()
   ec2_client = boto3.client('ec2',
