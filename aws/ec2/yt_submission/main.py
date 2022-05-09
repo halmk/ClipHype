@@ -1,8 +1,10 @@
 import os
 import json
+import subprocess
 import boto3
 import dj_database_url
 import pymysql.cursors
+import google_api
 
 
 def connect_to_database():
@@ -103,8 +105,16 @@ def func():
   print(credentials)
 
   # APIを用いて動画をYoutubeにアップロードする
+  google_api.uploadVideo(credentials, youtube_options)
 
   # 自分自身のインスタンスを停止する
+  instance_id = subprocess.run(["curl", "http://169.254.169.254/latest/meta-data/instance-id"], capture_output=True)
+  instance_id = instance_id.stdout.decode()
+  ec2_client = boto3.client('ec2')
+  response = ec2_client.terminate_instances(
+    InstanceIds = [instance_id],
+    DryRun = False
+  )
 
 
 def main():
