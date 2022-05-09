@@ -64,7 +64,7 @@ def get_credentials(creator):
     return credentials
 
 
-def func():
+def main():
   # SQSからメッセージを受信する
   ## bucket名は環境変数で取得する
   print("Receiving a message from SQS...")
@@ -142,9 +142,6 @@ def func():
     DryRun = False
   )
 
-
-def main():
-  print('Hello')
 
 if __name__ == '__main__':
   main()

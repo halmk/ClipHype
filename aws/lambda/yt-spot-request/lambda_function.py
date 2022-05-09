@@ -32,18 +32,6 @@ def lambda_handler(event, context):
     yt_task_id = filename.split('.')[0]
     logger.info(yt_task_id)
 
-    s3_client = boto3.client('s3')
-    json_key = f'digest/yt_submission_info/{creator}/{yt_task_id}.json'
-    response = s3_client.get_object(
-        Bucket=bucket_name,
-        Key=json_key
-    )
-    data = response['Body'].read()
-    data = data.decode('utf-8')
-    data = json.loads(data)
-    logger.info(data)
-    task_id = data['task_id']
-
     # send a spot request
     response = spot_request()
 
@@ -51,7 +39,7 @@ def lambda_handler(event, context):
     sqs_client = boto3.client('sqs')
     response = sqs_client.send_message(
         QueueUrl=SQS_URL,
-        MessageBody=f'{creator}_{task_id}'
+        MessageBody=f'{creator}_{yt_task_id}'
     )
 
     return "Requested spot instance to submit a highlight video for Youtube."
