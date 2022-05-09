@@ -848,7 +848,7 @@ var app = new Vue({
     postYoutubeSubmissionInfo: function() {
       data = {
         "creator": username,
-        "taskId": this.youtubeOptions.taskId,
+        "task_id": this.youtubeOptions.taskId,
         "title": this.youtubeOptions.title,
         "keywords": this.youtubeOptions.keywords,
         "description": this.youtubeOptions.description,

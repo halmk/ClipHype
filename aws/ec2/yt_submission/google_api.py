@@ -62,7 +62,7 @@ def getCredentials(creds):
 def uploadVideo(creds, options):
   tags = None
   if options.get("keywords"):
-    tags = options.keywords.split(",")
+    tags = options["keywords"].split(",")
 
   body=dict(
     snippet=dict(
