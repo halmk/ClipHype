@@ -40,11 +40,11 @@ def buildYoutube(creds):
 
 def getCredentials(creds):
     creds = Credentials(
-        creds.access_token,
-        refresh_token=creds.refresh_token,
+        creds['access_token'],
+        refresh_token=creds['refresh_token'],
         token_uri=TOKEN_URI,
-        client_id=creds.client_id,
-        client_secret=creds.client_secret)
+        client_id=creds['client_id'],
+        client_secret=creds['client_secret'])
 
     print(creds, creds.valid, creds.expired)
     print(creds.token)
