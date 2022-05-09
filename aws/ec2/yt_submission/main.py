@@ -76,7 +76,7 @@ def func():
     QueueUrl = SQS_URL,
     MaxNumberOfMessages=1,
   )
-  message = response.Messages[0].Body
+  message = response['Messages'][0]['Body']
   creator = message.split('_')[0]
   yt_task_id = message.split('_')[1]
 
