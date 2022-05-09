@@ -30,28 +30,28 @@ def get_credentials(creator):
       sql = 'SELECT * FROM `socialaccount_socialapp` WHERE `provider`=%s'
       cursor.execute(sql, ('google',))
       result = cursor.fetchone()
-      credentials['client_id'] = result.client_id
-      credentials['client_secret'] = result.secret
       print(result)
+      credentials['client_id'] = result['client_id']
+      credentials['client_secret'] = result['secret']
       ## creatorでauth_user.usernameを指定してuser.idを取得する
       sql = 'SELECT * FROM `auth_user` WHERE `username`=%s'
       cursor.execute(sql, (creator,))
       result = cursor.fetchone()
-      user_id = result.user_id
       print(result)
+      user_id = result['id']
       ## providerとuser.idでsocialaccount.idを取得する
       sql = 'SELECT * FROM `socialaccount_socialaccount` WHERE `user_id`=%s AND `provider`=%s'
       cursor.execute(sql, (user_id,'google',))
       result = cursor.fetchone()
-      id = result.id
       print(result)
+      id = result['id']
       ## socialaccount.idでsocialtokenを取得する
       sql = 'SELECT * FROM `socialaccount_socialtoken` WHERE `id`=%s'
       cursor.execute(sql, (id,))
       result = cursor.fetchone()
-      credentials['access_token'] = result.token
-      credentials['refresh_token'] = result.token_secret
       print(result)
+      credentials['access_token'] = result['token']
+      credentials['refresh_token'] = result['token_secret']
 
     connection.commit()
 
