@@ -70,7 +70,6 @@ def upload_highlight_info(data):
 def upload_youtube_submission_info(data):
     task_id = upload_youtube_submission_info.request.id
     print(task_id)
-    data['task_id'] = task_id
 
     # JSONファイルに書き込み
     json_name = f"{data['creator']}_{task_id}.json"
