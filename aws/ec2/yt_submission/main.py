@@ -83,7 +83,7 @@ def func():
   # SQSからメッセージを削除
   response = sqs_client.delete_message(
     QueueUrl = SQS_URL,
-    ReceiptHandle = response.Messages[0].ReceiptHandle,
+    ReceiptHandle = response['Messages'][0]['ReceiptHandle'],
   )
 
   # S3から動画投稿情報を取得する
