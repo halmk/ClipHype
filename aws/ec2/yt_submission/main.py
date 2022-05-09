@@ -64,7 +64,7 @@ def func():
   bucket_name = os.environ['S3_BUCKET']
   sqs_url = os.environ['SQS_URL']
   sqs_client = boto3.client('sqs')
-  response = sqs_client.receice_message(
+  response = sqs_client.receive_message(
     QueueUrl = sqs_url,
     MaxNumberOfMessages=1,
   )
