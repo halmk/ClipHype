@@ -6,11 +6,11 @@ import dj_database_url
 import pymysql.cursors
 import google_api
 
-ACCESS_KEY_ID = os.environ('AWS_ACCESS_KEY_ID')
-SECRET_ACCESS_KEY = os.environ('AWS_SECRET_ACCESS_KEY')
-REGION_NAME = os.environ('REGION_NAME')
-SQS_URL = os.environ('SQS_URL')
-S3_BUCKET = os.environ('S3_BUCKET')
+ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+REGION_NAME = os.environ['REGION_NAME']
+SQS_URL = os.environ['SQS_URL']
+S3_BUCKET = os.environ['S3_BUCKET']
 
 
 def connect_to_database():
