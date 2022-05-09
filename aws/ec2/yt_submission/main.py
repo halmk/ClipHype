@@ -125,6 +125,7 @@ def func():
   print(credentials)
 
   # APIを用いて動画をYoutubeにアップロードする
+  youtube_options['file'] = video_path
   google_api.uploadVideo(credentials, youtube_options)
 
   # 自分自身のインスタンスを停止する
