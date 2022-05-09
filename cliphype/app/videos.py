@@ -35,6 +35,7 @@ def save_clip(file):
             shutil.copyfileobj(file.raw, f)
 
 
+# SRC_DIR/filenameにdataをjson形式にしたファイルを書き込む
 def save_json(filename, data):
     path = SRC_DIR + filename
     with open(path, 'w') as f:

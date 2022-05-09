@@ -575,6 +575,7 @@
                         <th>Status</th>
                         <th>Restore</th>
                         <th>Download</th>
+                        <th>Submit</th>
                     </tr>
                 </thead>
                     <tr v-for="highlight in getHighlightsItems">
@@ -620,21 +621,72 @@
                                 -
                             </div>
                         </td>
+                        <td>
+                            <div v-if="highlight.status == 'Available'">
+                                <button class="btn btn-danger" v-on:click="openYoutubeFormModal(highlight.task_id)">YT</button>
+                            </div>
+                            <div v-else>
+                                -
+                            </div>
+                        </td>
                     </tr>
             </table>
             </div>
             <!-- /DIGEST TABLE -->
         </div>
         <div class="modal fade" id="digestModal" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                    <div class="modal-content bg-dark">
-                        <div class="embed-responsive embed-responsive-16by9">
-                        <video class="embed-responsive-item" v-bind:src="digestUrl" controls>
-                        </video>
-                    </div>
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div class="modal-content bg-dark">
+                    <div class="embed-responsive embed-responsive-16by9">
+                    <video class="embed-responsive-item" v-bind:src="digestUrl" controls>
+                    </video>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="youtubeFormModal" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div class="modal-content bg-light">
+                    <div class="modal-header">
+                            <h5 class="modal-title">Youtube Submission Form</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                              <label for="">Title</label>
+                              <input v-model="youtubeOptions.title" type="text" name="" id="" class="form-control" placeholder="" aria-describedby="helpId">
+                            </div>
+                            <div class="form-group">
+                                <label for="">Description</label>
+                                <textarea v-model="youtubeOptions.description" class="form-control"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="">Keywords</label>
+                                <textarea v-model="youtubeOptions.keywords" id="" class="form-control" placeholder="" aria-describedby="helpId"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="">Category</label>
+                                <input v-model="youtubeOptions.category" type="text" name="" id="" class="form-control" placeholder="" aria-describedby="helpId">
+                            </div>
+                            <div class="form-group">
+                                <label for="">Privacy Status</label>
+                                <select v-model="youtubeOptions.privacyStatus">
+                                    <option value="public">public</option>
+                                    <option value="private">private</option>
+                                    <option value="listed">listed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" v-on:click="postYoutubeSubmissionInfo">Submit</button>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
     </section>
     <!-- /REQUESTED DIGEST AREA -->
 </div>
@@ -651,6 +703,7 @@
     const autoclip_url = "{% url 'autoclip-list' %}";
     const studio_url = "{% url 'index' %}";
     const api_url = "{% url 'twitch_api' %}";
+    const youtube_submission_url = "{% url 'google_api_request' %}";
 </script>
 <script src="{% static 'app/js/twitch-api.js' %}"></script>
 <script src="{% static 'app/js/studio.js' %}"></script>

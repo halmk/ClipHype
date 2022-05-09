@@ -66,3 +66,17 @@ def upload_highlight_info(data):
     print(f"Upload json file: {json_key}")
     aws_api.upload_file(json_key, json_path)
 
+@shared_task
+def upload_youtube_submission_info(data):
+    task_id = upload_youtube_submission_info.request.id
+    print(task_id)
+
+    # JSONファイルに書き込み
+    json_name = f"{data['creator']}_{task_id}.json"
+    json_path = f"{videos.SRC_DIR}{json_name}"
+    videos.save_json(json_name, data)
+
+    # JSONファイルをS3にアップロード
+    json_key = f"digest/yt_submission_info/{data['creator']}/{task_id}.json"
+    print(f"Upload json file: {json_key}")
+    aws_api.upload_file(json_key, json_path)
