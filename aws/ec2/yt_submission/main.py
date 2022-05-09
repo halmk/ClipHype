@@ -9,6 +9,8 @@ import google_api
 ACCESS_KEY_ID = os.environ('AWS_ACCESS_KEY_ID')
 SECRET_ACCESS_KEY = os.environ('AWS_SECRET_ACCESS_KEY')
 REGION_NAME = os.environ('REGION_NAME')
+SQS_URL = os.environ('SQS_URL')
+S3_BUCKET = os.environ('S3_BUCKET')
 
 
 def connect_to_database():
@@ -65,15 +67,13 @@ def get_credentials(creator):
 def func():
   # SQSからメッセージを受信する
   ## bucket名は環境変数で取得する
-  bucket_name = os.environ['S3_BUCKET']
-  sqs_url = os.environ['SQS_URL']
   sqs_client = boto3.client('sqs',
     aws_access_key_id=ACCESS_KEY_ID,
     aws_secret_access_key=SECRET_ACCESS_KEY,
     region_name=REGION_NAME
   )
   response = sqs_client.receive_message(
-    QueueUrl = sqs_url,
+    QueueUrl = SQS_URL,
     MaxNumberOfMessages=1,
   )
   message = response.Messages[0].Body
@@ -82,7 +82,7 @@ def func():
 
   # SQSからメッセージを削除
   response = sqs_client.delete_message(
-    QueueUrl = sqs_url,
+    QueueUrl = SQS_URL,
     ReceiptHandle = response.Messages[0].ReceiptHandle,
   )
 
@@ -94,7 +94,7 @@ def func():
   )
   json_key = f'digest/yt_submission_info/{creator}/{yt_task_id}.json'
   response = s3_client.get_object(
-      Bucket=bucket_name,
+      Bucket=S3_BUCKET,
       Key=json_key
   )
   data = response['Body'].read()
@@ -108,7 +108,7 @@ def func():
     aws_secret_access_key=SECRET_ACCESS_KEY,
     region_name=REGION_NAME
   )
-  bucket = s3.Bucket(bucket_name)
+  bucket = s3.Bucket(S3_BUCKET)
 
   os.makedirs('/tmp/src/', exist_ok=True)
   video_path = f'/tmp/src/video.mp4'
