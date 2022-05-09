@@ -6,6 +6,10 @@ import dj_database_url
 import pymysql.cursors
 import google_api
 
+ACCESS_KEY_ID = os.environ('AWS_ACCESS_KEY_ID')
+SECRET_ACCESS_KEY = os.environ('AWS_SECRET_ACCESS_KEY')
+REGION_NAME = os.environ('REGION_NAME')
+
 
 def connect_to_database():
   database = dj_database_url.parse(os.environ['DATABASE_URL'])
@@ -63,7 +67,11 @@ def func():
   ## bucket名は環境変数で取得する
   bucket_name = os.environ['S3_BUCKET']
   sqs_url = os.environ['SQS_URL']
-  sqs_client = boto3.client('sqs')
+  sqs_client = boto3.client('sqs',
+    aws_access_key_id=ACCESS_KEY_ID,
+    aws_secret_access_key=SECRET_ACCESS_KEY,
+    region_name=REGION_NAME
+  )
   response = sqs_client.receive_message(
     QueueUrl = sqs_url,
     MaxNumberOfMessages=1,
@@ -79,7 +87,11 @@ def func():
   )
 
   # S3から動画投稿情報を取得する
-  s3_client = boto3.client('s3')
+  s3_client = boto3.client('s3',
+    aws_access_key_id=ACCESS_KEY_ID,
+    aws_secret_access_key=SECRET_ACCESS_KEY,
+    region_name=REGION_NAME
+  )
   json_key = f'digest/yt_submission_info/{creator}/{yt_task_id}.json'
   response = s3_client.get_object(
       Bucket=bucket_name,
@@ -91,7 +103,11 @@ def func():
   task_id = youtube_options['task_id']
 
   # S3からハイライト動画をダウンロードする
-  s3 = boto3.resource('s3')
+  s3 = boto3.resource('s3',
+    aws_access_key_id=ACCESS_KEY_ID,
+    aws_secret_access_key=SECRET_ACCESS_KEY,
+    region_name=REGION_NAME
+  )
   bucket = s3.Bucket(bucket_name)
 
   os.makedirs('/tmp/src/', exist_ok=True)
@@ -110,7 +126,11 @@ def func():
   # 自分自身のインスタンスを停止する
   instance_id = subprocess.run(["curl", "http://169.254.169.254/latest/meta-data/instance-id"], capture_output=True)
   instance_id = instance_id.stdout.decode()
-  ec2_client = boto3.client('ec2')
+  ec2_client = boto3.client('ec2',
+    aws_access_key_id=ACCESS_KEY_ID,
+    aws_secret_access_key=SECRET_ACCESS_KEY,
+    region_name=REGION_NAME
+  )
   response = ec2_client.terminate_instances(
     InstanceIds = [instance_id],
     DryRun = False
