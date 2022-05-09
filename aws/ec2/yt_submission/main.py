@@ -19,7 +19,44 @@ def connect_to_database():
   return connection
 
 
-def main():
+def get_credentials(creator):
+  credentials = {}
+  connection = connect_to_database()
+  with connection:
+    with connection.cursor() as cursor:
+      ## Googleのクライアント情報を取得する
+      sql = 'SELECT * FROM `socialaccount_socialapp` WHERE `provider`=%s'
+      cursor.execute(sql, ('google',))
+      result = cursor.fetchone()
+      credentials['client_id'] = result.client_id
+      credentials['client_secret'] = result.secret
+      print(result)
+      ## creatorでauth_user.usernameを指定してuser.idを取得する
+      sql = 'SELECT * FROM `auth_user` WHERE `username`=%s'
+      cursor.execute(sql, (creator,))
+      result = cursor.fetchone()
+      user_id = result.user_id
+      print(result)
+      ## providerとuser.idでsocialaccount.idを取得する
+      sql = 'SELECT * FROM `socialaccount_socialaccount` WHERE `user_id`=%s AND `provider`=%s'
+      cursor.execute(sql, (user_id,'google',))
+      result = cursor.fetchone()
+      id = result.id
+      print(result)
+      ## socialaccount.idでsocialtokenを取得する
+      sql = 'SELECT * FROM `socialaccount_socialtoken` WHERE `id`=%s'
+      cursor.execute(sql, (id,))
+      result = cursor.fetchone()
+      credentials['access_token'] = result.token
+      credentials['refresh_token'] = result.token_secret
+      print(result)
+
+    connection.commit()
+
+    return credentials
+
+
+def func():
   # SQSからメッセージを受信する
   ## bucket名は環境変数で取得する
   bucket_name = os.environ['S3_BUCKET']
@@ -62,34 +99,16 @@ def main():
   bucket.download_file(video_key, video_path)
 
   # RDSと接続してトークン情報を取得する
-  connection = connect_to_database()
-  with connection:
-    with connection.cursor() as cursor:
-      ## Googleのクライアント情報を取得する
-      sql = 'SELECT * FROM `socialaccount_socialapp` WHERE `provider`=%s'
-      cursor.execute(sql, ('google',))
-      result = cursor.fetchone()
-      print(result)
-      ## creatorでauth_user.usernameを指定してuser.idを取得する
-      sql = 'SELECT * FROM `auth_user` WHERE `username`=%s'
-      cursor.execute(sql, (creator,))
-      result = cursor.fetchone()
-      user_id = result.user_id
-      print(result)
-      ## providerとuser.idでsocialaccount.idを取得する
-      sql = 'SELECT * FROM `socialaccount_socialaccount` WHERE `user_id`=%s AND `provider`=%s'
-      cursor.execute(sql, (user_id,'google',))
-      result = cursor.fetchone()
-      id = result.id
-      print(result)
-      ## socialaccount.idでsocialtokenを取得する
-      sql = 'SELECT * FROM `socialaccount_socialtoken` WHERE `id`=%s'
-      cursor.execute(sql, (id,))
-      result = cursor.fetchone()
-      print(result)
-
-    connection.commit()
+  credentials = get_credentials(creator)
+  print(credentials)
 
   # APIを用いて動画をYoutubeにアップロードする
 
   # 自分自身のインスタンスを停止する
+
+
+def main():
+  print('Hello')
+
+if __name__ == '__main__':
+  main()
