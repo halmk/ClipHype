@@ -16,6 +16,7 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # Install packages
+RUN apt install -y tzdata
 RUN apt install -y mysql-server mysql-client redis libmysqlclient-dev tmux vim git
 
 # Install Python3.8
