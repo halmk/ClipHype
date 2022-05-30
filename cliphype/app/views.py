@@ -43,6 +43,16 @@ def index(request):
     except Exception as e:
         logger.warning(f'\nTwitch {e}')
 
+    try:
+        google_account = SocialAccount.objects.get(
+            user=user_pk, provider="Google")
+        logger.info(f'\ngoogle_account: {google_account}\n{google_account.extra_data}\n')
+        extra_data = google_account.extra_data
+        context['google_account'] = extra_data
+    except Exception as e:
+        logger.warning(f'\nGoogle {e}')
+
+
     if request.method == "GET":
         return render(request, 'app/index.html', context)
 

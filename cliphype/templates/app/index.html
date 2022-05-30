@@ -1,5 +1,6 @@
 {% extends "app/base.html" %}
 {% load static %}
+{% load account %}
 {% load socialaccount %}
 
 {% block head_title %}{{ user.username }} | ClipHype{% endblock %}
@@ -299,13 +300,6 @@
                     Length : [[ getTotalClipSeconds ]]
                     </span>
                 </span>
-                <!--
-                {% if not isGoogleConnect %}
-                <a href="{% provider_login_url "google" process="connect" %}">
-                    <button type="button" class="btn btn-danger">Youtube Connect</button>
-                </a>
-                {% endif %}
-                -->
             </p>
             </div>
             <button type="button" class="btn btn-outline-dark mr-1 ml-4" v-on:click="prevClip">＜</button>
@@ -575,7 +569,7 @@
                         <th>Status</th>
                         <th>Restore</th>
                         <th>Download</th>
-                        <th>Submit</th>
+                        <th>Share</th>
                     </tr>
                 </thead>
                     <tr v-for="highlight in getHighlightsItems">
@@ -681,7 +675,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" v-on:click="postYoutubeSubmissionInfo">Submit</button>
+                            <button type="button" class="btn btn-primary" v-on:click="postYoutubeSubmissionInfo" v-bind:disabled="google_account.length == 0">Submit</button>
                         </div>
                     </div>
                 </div>
@@ -697,6 +691,8 @@
 <script>
     const user_pk = "{{ request.user.pk }}";
     const username = "{{ request.user.username }}";
+    const twitch_account = "{{ twitch_account.login }}"
+    const google_account = "{{ google_account.name }}"
     const bucket_name = "{{ bucket_name }}";
     const highlight_url = "{% url 'highlight-list' %}";
     const task_url = "{% url 'task-list' %}";
