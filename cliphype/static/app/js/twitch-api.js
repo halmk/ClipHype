@@ -90,6 +90,19 @@ var TwitchAPI = {
         return await this.getRequest(url, params);
     },
 
+    /* カテゴリのIDを指定してクリップを取得する */
+    getClipsByGameId: async function(category_id, datepickerStartedAt, datepickerEndedAt) {
+        let url = 'https://api.twitch.tv/helix/clips';
+        let params = {
+            'game_id': category_id,
+            'started_at': datepickerStartedAt, // RFC3339 format (ex:'2019-08-31T00:00:00Z')
+            'ended_at': datepickerEndedAt,     // RFC3339 format
+            'first': 27,
+        };
+
+        return await this.getRequest(url, params);
+    },
+
     /* afterで指定されているクリップデータを追加で読み込む */
     getAfterClips: async function(streamerId, datepickerStartedAt, datepickerEndedAt, clipsAfter) {
         let url = 'https://api.twitch.tv/helix/clips';
@@ -103,6 +116,21 @@ var TwitchAPI = {
 
         return await this.getRequest(url, params);
     },
+
+    /* afterで指定されているクリップデータを追加で読み込む */
+    getAfterClipsByGameId: async function(category_id, datepickerStartedAt, datepickerEndedAt, clipsAfter) {
+        let url = 'https://api.twitch.tv/helix/clips';
+        let params = {
+            'game_id': category_id,
+            'started_at': datepickerStartedAt, // RFC3339 format (ex:'2019-08-31T00:00:00Z')
+            'ended_at': datepickerEndedAt,     // RFC3339 format
+            'first': 27,
+            'after': clipsAfter,
+        };
+
+        return await this.getRequest(url, params);
+    },
+
 
     /* 配信アーカイブを取得する */
     getVideos: async function(streamerId) {
@@ -128,4 +156,14 @@ var TwitchAPI = {
 
         return await this.getRequest(url, params);
     },
+
+    /* カテゴリの検索クエリを指定して、カテゴリを検索する */
+    searchCategories: async function(categoryNameQuery) {
+        let url = 'https://api.twitch.tv/helix/search/categories';
+        let params = {
+            'query': categoryNameQuery,
+        };
+
+        return await this.getRequest(url, params);
+    }
 }
