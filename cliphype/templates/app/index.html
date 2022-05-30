@@ -11,11 +11,9 @@
     <!-- SEARCH STREAMER -->
     <div class="section" id="search">
         <label class="row mt-2 mb-3">
-            <div class="col-sm-2">
-                <h3 class="text-dark font-weight-bold">Streamer</h3>
-            </div>
-            <div class="col-sm">
-                <input type="text" v-model="streamerName" class="input-lg border rounded shadow-sm pl-2 py-1" placeholder="shroud" required>
+            <div class="col">
+                <h3 class="d-inline text-dark font-weight-bold">Streamer</h3>
+                <input type="text" v-model="streamerName" class="d-inline input-lg border rounded shadow-sm ml-2 pl-2 py-1" placeholder="shroud" required>
                 <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getStreamerId">
                     <i class="fas fa-search"></i>
                 </button>
@@ -23,7 +21,24 @@
         </label>
     </div>
     <!-- /SERACH STREAMER -->
-
+    <!-- SEARCH CATEGORY -->
+    <div class="section" id="search">
+        <label class="row mt-2 mb-3">
+            <div class="col">
+                <h3 class="d-inline text-dark font-weight-bold">Category</h3>
+                <input type="text" v-model="category.categoryNameQuery" class="d-inline input-lg border rounded shadow-sm ml-2 pl-2 py-1" placeholder="League of Legends" required>
+                <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="searchCategories">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </label>
+        <div v-show="category.results.length != 0">
+            <select v-model="category.categoryName" @change="getClipsByCategory">
+                <option v-for="category in category.results" v-bind:key="category.id">[[ category.name ]]</option>
+            </select>
+        </div>
+    </div>
+    <!-- /SERACH STREAMER -->
     <!-- FOLLOWS CHANNEL -->
     <div class="mt-2 section" id="follows" v-show="clientId.length !== 0">
         <h1>
@@ -82,7 +97,7 @@
     <!-- /FOLLOWS CHANNEL -->
 
     <!-- ARCHIVE AREA -->
-    <div class="p-3 shadow mt-4 mb-4 bg-white section" id="archive">
+    <div class="p-3 shadow mt-4 mb-4 bg-white section" id="archive" v-show="videos.length != 0">
         <h2>
             <a class="text-dark text-decoration-none font-weight-bold" role="button" href="#archive" data-toggle="tooltip" title="Click archive to show clips created during the stream" data-placement="right">
             Channel Archive
@@ -138,7 +153,7 @@
     <!-- /ARCHIVE AREA -->
 
     <!-- CLIPS AREA -->
-    <div class="shadow section bg-white" id="clips">
+    <div class="shadow section bg-white mt-3" id="clips">
         <div class="row m-1">
             <div class="col border-0">
                 <nav aria-label="Page navigation">
@@ -146,7 +161,12 @@
                         <div class="row">
                             <button class="btn btn-outline-primary font-weight-bold" data-toggle="button" v-on:click="published = !published">Published</button>
                             <button class="btn btn-outline-primary ml-2 font-weight-bold" data-toggle="button" v-on:click="autoclipped = !autoclipped">AutoClipped</button>
-                            <button type="button" class="btn btn-success ml-2 font-weight-bold" v-on:click="getAfterClips">More</button>
+                            <div v-if="streamerId.length != 0">
+                                <button type="button" class="btn btn-success ml-2 font-weight-bold" v-on:click="getAfterClips">More</button>
+                            </div>
+                            <div v-elif="category.categoryName.length != 0">
+                                <button type="button" class="btn btn-success ml-2 font-weight-bold" v-on:click="getAfterClipsByCategory">More</button>
+                            </div>
                         </div>
                         <div class="row py-2">
                             <datepicker
