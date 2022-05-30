@@ -161,10 +161,10 @@
                         <div class="row">
                             <button class="btn btn-outline-primary font-weight-bold" data-toggle="button" v-on:click="published = !published">Published</button>
                             <button class="btn btn-outline-primary ml-2 font-weight-bold" data-toggle="button" v-on:click="autoclipped = !autoclipped">AutoClipped</button>
-                            <div v-if="streamerId.length != 0">
+                            <div v-if="streamerName.length != 0">
                                 <button type="button" class="btn btn-success ml-2 font-weight-bold" v-on:click="getAfterClips">More</button>
                             </div>
-                            <div v-elif="category.categoryName.length != 0">
+                            <div v-else-if="category.categoryName.length != 0">
                                 <button type="button" class="btn btn-success ml-2 font-weight-bold" v-on:click="getAfterClipsByCategory">More</button>
                             </div>
                         </div>
