@@ -1,0 +1,22 @@
+{% extends "app/base.html" %}
+{% load static %}
+{% load socialaccount %}
+
+{% block head_title %}Report{% endblock %}
+
+{% block content %}
+<div class="container" id="apitest">
+    <div class="p-3 shadow bg-white text-center">
+        <h1>Google API Test</h1>
+        <input>
+        <button type="button" class="btn btn-primary" @click="request">Request</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+    const googleapirequest_url = "{% url 'google_api_request' %}";
+</script>
+<script src="{% static 'app/js/googleapitest.js' %}"></script>
+{% endblock %}

@@ -1,7 +1,5 @@
 import json
 import logging
-import time
-from datetime import datetime
 import ast
 from django_filters import rest_framework as filters
 from rest_framework import viewsets
@@ -16,9 +14,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django_celery_results.models import TaskResult
 from cliphype.settings import S3_BUCKET
-from app import aws_api, twitch_api
+from app import aws_api, twitch_api, google_api
 from app.models import Contact, Digest, AutoClip
-from app.tasks import concat_clips_lambda, upload_highlight_info
+from app.tasks import upload_highlight_info, upload_youtube_submission_info
 from app.serializers import DigestSerializer, TaskResultSerializer, AutoClipSerializer
 
 
@@ -30,11 +28,40 @@ logger = logging.getLogger(__name__)
 '''
 
 def index(request):
+    context = {}
+    context['bucket_name'] = S3_BUCKET
+    user_pk = request.user.pk
+    username = request.user.username
+    logger.info(f'\nuser: {username}, request.user.pk: {request.user.pk}\n')
+
+    try:
+        twitch_account = SocialAccount.objects.get(
+            user=user_pk, provider="Twitch")
+        logger.info(f'\ntwitch_account: {twitch_account}\n{twitch_account.extra_data}\n')
+        extra_data = twitch_account.extra_data
+        context['twitch_account'] = extra_data
+    except Exception as e:
+        logger.warning(f'\nTwitch {e}')
+
+    try:
+        google_account = SocialAccount.objects.get(
+            user=user_pk, provider="Google")
+        logger.info(f'\ngoogle_account: {google_account}\n{google_account.extra_data}\n')
+        extra_data = google_account.extra_data
+        context['google_account'] = extra_data
+    except Exception as e:
+        logger.warning(f'\nGoogle {e}')
+
+
+    if request.method == "GET":
+        return render(request, 'app/index.html', context)
+
     # ダイジェスト動画作成リクエスト
-    if request.method == "POST" and request.body:
+    elif request.method == "POST" and request.body:
+        response = {}
+        response['notes'] = []
         # request.bodyのJSONをDictに変換する
         data = json.loads(request.body)['data']
-
         if data['creator'] != request.user.username:
             logger.warning(f"\nDifferent user requests a highlight: {request.user.username}, {data['creator']}")
 
@@ -62,30 +89,16 @@ def index(request):
 
         result = AsyncResult(task_id)
         logger.info(
-            f'\nresult: {result} result.state: {result.state} : {result.ready()}\n')
+            f'\nresult: {result} result.state: {result.state} : {result.ready()}\n'
+        )
+        response['notes'].append(
+            {
+                'message': 'Your highlights video successfully requested!! You can check it in the highlights video area below',
+                'status':'success'
+            }
+        )
 
-        return HttpResponseRedirect(reverse('index'))
-
-    # GETリクエスト
-    elif request.method == 'GET':
-        context = {}
-        s3_data = []
-        digests = []
-        user_pk = request.user.pk
-        username = request.user.username
-        logger.info(f'\nuser: {username}, request.user.pk: {request.user.pk}\n')
-
-        context['bucket_name'] = S3_BUCKET
-        try:
-            twitch_account = SocialAccount.objects.get(
-                user=user_pk, provider="Twitch")
-            logger.info(f'\ntwitch_account: {twitch_account}\n{twitch_account.extra_data}\n')
-            extra_data = twitch_account.extra_data
-            context['twitch_account'] = extra_data
-        except Exception as e:
-            logger.warning(f'\nTwitch {e}')
-
-        return render(request, 'app/index.html', context)
+        return JsonResponse(response)
 
 
 '''
@@ -161,7 +174,7 @@ class AutoClipViewSet(viewsets.ReadOnlyModelViewSet):
 
 def download_clip(request):
     clip_id = request.POST['id']
-    logger.info(f"\nクリップダウンロードリクエストを受け取りました　CLIP ID: {clip_id}")
+    logger.info(f"\nクリップダウンロードリクエストを受け取りました CLIP ID: {clip_id}")
 
     clip_file = twitch_api.downloadClip(clip_id, None)
 
@@ -239,3 +252,30 @@ def unlink(request):
 
 def policy(request):
     return render(request, 'privacy/policy.html')
+
+
+'''
+GoogleAPIのリクエスト結果を返す
+'''
+def googleAPIRequest(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)['data']
+        print(data)
+        # タスクを非同期処理で実行する
+        task_id = upload_youtube_submission_info.delay(data)
+        print(task_id)
+        response = {}
+        response['task_id'] = str(task_id)
+        response['notes'] = []
+        response['notes'].append(
+            {
+                'message': 'Successfully requested!',
+                'status':'success'
+            }
+        )
+
+        return JsonResponse(response)
+
+
+def googleAPITest(request):
+    return render(request, 'app/googleapitest.html')

@@ -70,6 +70,20 @@ var app = new Vue({
     borderw: 1,
     position: "top-left",
     isFLTransition: false,
+    youtubeOptions: {
+      'taskId': '',
+      'title': '',
+      'keywords': '',
+      'description': '',
+      'category': '',
+      'privacyStatus': '',
+    },
+    category: {
+      'categoryNameQuery': '',
+      'categoryName': '',
+      'categoryId': '',
+      'results': [],
+    },
   },
 
   computed: {
@@ -155,11 +169,17 @@ var app = new Vue({
         this.getClips();
         this.getAutoClips();
       }
+      else if (this.category.categoryName.length != 0) {
+        this.getClipsByCategory();
+      }
     },
     datepickerEndedAt: function() {
       if (this.streamerId.length != 0) {
         this.getClips();
         this.getAutoClips();
+      }
+      else if (this.category.categoryName.length != 0) {
+        this.getClipsByCategory();
       }
     },
 
@@ -476,6 +496,7 @@ var app = new Vue({
       //console.log(response);
       let cont = response['data'];
       let clip_ids = [];
+      let autoClips = [];
       for(let i=0; i<cont.length; i++) {
         clip_ids.push(cont[i]['clip_id']);
       }
@@ -495,10 +516,11 @@ var app = new Vue({
           data[i]['created_epoch'] = app.getEpochTime(data[i]['created_at']);
           data[i]['hype'] = cont.find(el => el['clip_id'] == data[i]['id'])['hype'];
           if (data[i]['hype']) data[i]['hype'] = data[i]['hype'].toFixed(2);
-          app.autoClips.push(data[i]);
+          autoClips.push(data[i]);
         }
         start += c;
       }
+      app.autoClips = autoClips;
       app.autoClips.sort((a, b) => b['created_epoch'] - a['created_epoch']);
       this.clipsCurrentPage = 1;
     },
@@ -789,8 +811,15 @@ var app = new Vue({
       this.totalClipSeconds = total;
     },
 
+    defaultDigestInfo: function() {
+      this.timelineClips = [];
+      this.title = "";
+      this.totalClipSeconds = 0;
+    },
+
     /* ダイジェスト動画の情報をDjangoに渡す */
     postDigestInfo: function() {
+      this.disabledCreateButton = true;
       //console.log(csrftoken);
       data = {
         "creator": username,
@@ -813,13 +842,44 @@ var app = new Vue({
           'X-CSRFToken': csrftoken,
         },
       }).then(function(response) {
-          //console.log(response);
-          window.location.href = studio_url;
-        })
-        .catch(function(error) {
-          //console.log(error);
-          //console.log(error.response);
-        });
+        console.log(response);
+        app.defaultDigestInfo();
+        note.notes = response.data.notes;
+        note.setClasses();
+        app.getHighlights();
+        app.evalCanCreateHighlights();
+        window.scroll({top: 0, behavior: 'smooth'});
+        //window.location.href = studio_url;
+      })
+      .catch(function(error) {
+        //console.log(error);
+        //console.log(error.response);
+      });
+    },
+    /* Youtubeに投稿する動画の情報をDjangoに渡す */
+    postYoutubeSubmissionInfo: function() {
+      data = {
+        "creator": username,
+        "task_id": this.youtubeOptions.taskId,
+        "title": this.youtubeOptions.title,
+        "keywords": this.youtubeOptions.keywords,
+        "description": this.youtubeOptions.description,
+        "category": this.youtubeOptions.category,
+        "privacyStatus": this.youtubeOptions.privacyStatus,
+      }
+      axios.post(youtube_submission_url, {data}, {
+        headers: {
+          'X-CSRFToken': csrftoken,
+        },
+      }).then(function(response) {
+        console.log(response);
+        note.notes = response.data.notes;
+        note.setClasses();
+        window.scroll({top: 0, behavior: 'smooth'});
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
     },
 
     setDigestURL: function(taskId){
@@ -986,12 +1046,97 @@ var app = new Vue({
       $('#digestModal').modal();
     },
 
+    openYoutubeFormModal: function(taskId) {
+      //console.log(task_id);
+      this.youtubeOptions.taskId = taskId;
+      $('#youtubeFormModal').modal();
+    },
+
+    searchCategories: function() {
+      TwitchAPI.searchCategories(this.category.categoryNameQuery)
+        .then(function (response) {
+          //console.log(response);
+          app.category.results = response['data']['data'];
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+    },
+
+    setCategoryId: function() {
+      this.category.results.forEach((category) => {
+        if (this.category.categoryName == category.name) {
+          this.category.categoryId = category.id;
+        }
+      });
+    },
+
+    /* 配信者のIDを指定して、その配信のクリップを取得する */
+    getClipsByCategory: function() {
+      this.setCategoryId();
+      console.log("getClips params: ", this.category.categoryId, this.datepickerStartedAt, this.datepickerEndedAt);
+      TwitchAPI.getClipsByGameId(this.category.categoryId, this.datepickerStartedAt, this.datepickerEndedAt)
+        .then(function (response) {
+          //console.log("getClips↓:成功");
+          //console.log(response);
+          app.clips = response['data']['data'];
+          for(let i=0; i<response['data']['data'].length; i++){
+            app.clips[i]['modal_id'] = 'modal' + app.clips[i]['id'];
+            app.clips[i]['modal_target'] = '#' + app.clips[i]['modal_id'];
+            app.clips[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
+            app.clips[i]['modal'] = false;
+            app.clips[i]['created_date'] = app.customformat(app.clips[i]['created_at']);
+            app.clips[i]['created_epoch'] = app.getEpochTime(app.clips[i]['created_at']);
+          }
+          app.clipsAfter = response['data']['pagination']['cursor'];
+          if(app.published) app.getPublishedClips();
+        })
+        .catch(function (error) {
+          //console.log("getClips:失敗");
+          console.log(error);
+        })
+    },
+
+    /* afterで指定されているクリップデータを追加で読み込む */
+    getAfterClipsByCategory: function() {
+      //console.log("after : " + this.clipsAfter);
+      if(!this.clipsAfter){
+        alert("No more clips!");
+        return;
+      }
+      TwitchAPI.getAfterClipsByGameId(this.category.categoryId, this.datepickerStartedAt, this.datepickerEndedAt, this.clipsAfter)
+        .then(function (response) {
+          //console.log("getAfterClips↓:成功");
+          //console.log(response);
+          let data = response['data']['data'];
+
+          for(let i=0; i<response['data']['data'].length; i++){
+            data[i]['modal_id'] = 'modal' + data[i]['id'];
+            data[i]['modal_target'] = '#' + data[i]['modal_id'];
+            data[i]['embed_url'] += `&autoplay=false&parent=${app.siteUrl}`;
+            data[i]['modal'] = false;
+            data[i]['created_date'] = app.customformat(data[i]['created_at']);
+            data[i]['created_epoch'] = app.getEpochTime(data[i]['created_at']);
+          }
+          //Array.prototype.push.apply(app.clips, data);
+          for(let i=0; i<data.length; i++){
+            app.clips.push(data[i]);
+          }
+          app.clipsAfter = response['data']['pagination']['cursor'];
+          if(app.published) app.getPublishedClips();
+        })
+        .catch(function (error) {
+          //console.log("getAfterClips:失敗");
+          //console.log(error.response);
+        })
+    }
   },
 
   created() {
     // インスタンスを作成した後に、イベントリスナに登録
     window.addEventListener('resize', this.setWindowWidth, false);
   },
+
   mounted() {
     let m = moment();
     this.datepickerEndedAt = m.add(1,'days').toISOString();
