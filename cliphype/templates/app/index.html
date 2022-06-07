@@ -45,6 +45,7 @@
             <a class="text-dark text-decoration-none font-weight-bold" tabindex="-1" href="#follows" data-toggle="tooltip" title="Click icon to show selected streamer's clips" data-placement="right">
             Follow Channels
             </a>
+            <button type="button" @click="isFavorite = !isFavorite" class="btn btn-outline-primary" data-toggle="button">Favorite</button>
         </h2>
         <div class="row justify-content-center my-2">
             <paginate class="justify-content-center" v-model="followsCurrentPage"
@@ -63,19 +64,25 @@
         <div class="bg-lightdark rounded ml-1" v-for="item in getFollowsItems">
             <div class="card bg-lightdark border-0">
                 <a v-on:click="streamerName = item.to_login; streamerId = item.to_id;" style="cursor: pointer">
-                <div class="card-img">
-                    <img class="rounded-circle shadow-sm img-fluid" v-bind:src="item.profile_image_url" width="70">
-                </div>
-                <div class="card-img-overlay streamer-img">
-                    <div class="card-text">
-                        <button type="button" class="position-absolute channel-count badge badge-pill badge-secondary text-light" v-show="item.autoclip_count>0" data-toggle="tooltip" data-placement="right" title="The number of auto generated clips in 24 hours">
-                            [[ item.autoclip_count ]]
-                        </button>
-                        <span class="position-absolute w-100 channel-badge text-center text-dark badge badge-pill badge-light overflow-hidden font-weight-bold">
-                            [[ item.to_login ]]
-                        </span>
+                    <div class="card-img">
+                        <img class="rounded-circle shadow-sm img-fluid" v-bind:src="item.profile_image_url" width="70">
                     </div>
-                </div>
+                    <div class="card-img-overlay streamer-img">
+                        <div class="card-text">
+                            <button type="button" class="position-absolute channel-count badge badge-pill badge-secondary text-light" v-show="item.autoclip_count>0" data-toggle="tooltip" data-placement="right" title="The number of auto generated clips in 24 hours">
+                                [[ item.autoclip_count ]]
+                            </button>
+                            <button type="button" v-if="item.is_favorite" @click="removeFavoriteChannel(item.to_login)" class="position-absolute channel-favorite-active" data-toggle="tooltip" data-placement="right" title="Favorite">
+                                <i class="fas fa-star"></i>
+                            </button>
+                            <button type="button" v-else @click="setFavoriteChannel(item.to_login)" class="position-absolute channel-favorite" data-toggle="tooltip" data-placement="right" title="Favorite">
+                                <i class="far fa-star"></i>
+                            </button>
+                            <span class="position-absolute w-100 channel-badge text-center text-dark badge badge-pill badge-light overflow-hidden font-weight-bold">
+                                [[ item.to_login ]]
+                            </span>
+                        </div>
+                    </div>
                 </a>
             </div>
         </div>
