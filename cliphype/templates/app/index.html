@@ -3,18 +3,18 @@
 {% load account %}
 {% load socialaccount %}
 
-{% block head_title %}{{ user.username }} | ClipHype{% endblock %}
+{% block head_title %}ClipHype - Twitch Clips to Highlights Video{% endblock %}
 
 {% block content %}
 <div id="app" v-cloak>
 <div class="container">
     <!-- SEARCH STREAMER -->
     <div class="section" id="search">
-        <label class="row mt-2 mb-3">
-            <div class="col">
-                <h3 class="d-inline text-dark font-weight-bold">Streamer</h3>
-                <input type="text" v-model="streamerName" class="d-inline input-lg border rounded shadow-sm ml-2 pl-2 py-1" placeholder="shroud" required>
-                <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="getStreamerId">
+        <label class="row mt-3">
+            <div class="col mt-3">
+                <h4 class="d-inline text-dark font-weight-bolder">Streamer</h4>
+                <input type="text" v-model="streamerName" class="d-inline input-lg border rounded-0 ml-2 pl-2 py-1" placeholder="shroud" required>
+                <button class="btn btn-outline-primary px-2" v-on:click="getStreamerId">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
@@ -23,11 +23,11 @@
     <!-- /SERACH STREAMER -->
     <!-- SEARCH CATEGORY -->
     <div class="section" id="search">
-        <label class="row mt-2 mb-3">
+        <label class="row mt-2">
             <div class="col">
-                <h3 class="d-inline text-dark font-weight-bold">Category</h3>
-                <input type="text" v-model="category.categoryNameQuery" class="d-inline input-lg border rounded shadow-sm ml-2 pl-2 py-1" placeholder="League of Legends" required>
-                <button class="btn btn-outline-primary ml-2 px-2 shadow-sm" v-on:click="searchCategories">
+                <h4 class="d-inline text-dark font-weight-bolder">Category</h4>
+                <input type="text" v-model="category.categoryNameQuery" class="d-inline input-lg border rounded-0 ml-2 pl-2 py-1" placeholder="League of Legends" required>
+                <button class="btn btn-outline-primary px-2" v-on:click="searchCategories">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
@@ -40,12 +40,12 @@
     </div>
     <!-- /SERACH STREAMER -->
     <!-- FOLLOWS CHANNEL -->
-    <div class="mt-2 section" id="follows" v-show="clientId.length !== 0">
-        <h1>
+    <div class="mt-3 section" id="follows" v-show="clientId.length !== 0">
+        <h2>
             <a class="text-dark text-decoration-none font-weight-bold" tabindex="-1" href="#follows" data-toggle="tooltip" title="Click icon to show selected streamer's clips" data-placement="right">
             Follow Channels
             </a>
-        </h1>
+        </h2>
         <div class="row justify-content-center my-2">
             <paginate class="justify-content-center" v-model="followsCurrentPage"
                     :page-count="getFollowsPageCount"
@@ -57,21 +57,21 @@
                     :break-view-text="''"
                     :container-class="'pagination'"
                     :prev-class="'page-item'"
-                    :prev-link-class="'page-link rounded-circle mt-3 mr-2 bg-light shadow-sm'"
+                    :prev-link-class="'page-link rounded-circle mt-3 mr-2 bg-white shadow-sm'"
                     >
             </paginate>
-        <div class="bg-light rounded ml-1" v-for="item in getFollowsItems">
-            <div class="card bg-light border-0">
+        <div class="bg-lightdark rounded ml-1" v-for="item in getFollowsItems">
+            <div class="card bg-lightdark border-0">
                 <a v-on:click="streamerName = item.to_login; streamerId = item.to_id;" style="cursor: pointer">
                 <div class="card-img">
-                    <img class="rounded-circle img-fluid shadow" v-bind:src="item.profile_image_url" width="70">
+                    <img class="rounded-circle shadow-sm img-fluid" v-bind:src="item.profile_image_url" width="70">
                 </div>
                 <div class="card-img-overlay streamer-img">
                     <div class="card-text">
                         <button type="button" class="position-absolute channel-count badge badge-pill badge-secondary text-light" v-show="item.autoclip_count>0" data-toggle="tooltip" data-placement="right" title="The number of auto generated clips in 24 hours">
                             [[ item.autoclip_count ]]
                         </button>
-                        <span class="position-absolute w-100 channel-badge text-center text-secondary badge badge-pill badge-light shadow border border-secondary overflow-hidden font-weight-bold">
+                        <span class="position-absolute w-100 channel-badge text-center text-dark badge badge-pill badge-light overflow-hidden font-weight-bold">
                             [[ item.to_login ]]
                         </span>
                     </div>
@@ -89,7 +89,7 @@
                     :break-view-text="''"
                     :container-class="'pagination'"
                     :next-class="'page-item'"
-                    :next-link-class="'page-link rounded-circle mt-3 ml-2 bg-light shadow-sm'"
+                    :next-link-class="'page-link rounded-circle mt-3 ml-2 bg-white shadow-sm'"
                     >
             </paginate>
         </div>
@@ -97,7 +97,7 @@
     <!-- /FOLLOWS CHANNEL -->
 
     <!-- ARCHIVE AREA -->
-    <div class="p-3 shadow mt-4 mb-4 bg-white section" id="archive" v-show="videos.length != 0">
+    <div class="p-3 shadow-sm mt-4 mb-4 bg-white section" id="archive" v-show="videos.length != 0">
         <h2>
             <a class="text-dark text-decoration-none font-weight-bold" role="button" href="#archive" data-toggle="tooltip" title="Click archive to show clips created during the stream" data-placement="right">
             Channel Archive
@@ -118,7 +118,7 @@
                     >
             </paginate>
         <div class="bg-dark m-1" v-for="item in getVideosItems">
-            <div class="card border-0 shadow">
+            <div class="card border-0 shadow-sm">
                 <a href="#archive" v-on:click="setArchiveDate(item)">
                 <div class="card-img">
                     <img class="" v-bind:src="item.thumbnail_url" width="200">
@@ -153,7 +153,7 @@
     <!-- /ARCHIVE AREA -->
 
     <!-- CLIPS AREA -->
-    <div class="shadow section bg-white mt-3" id="clips">
+    <div class="shadow-sm section bg-white mt-3" id="clips">
         <div class="row m-1">
             <div class="col border-0">
                 <nav aria-label="Page navigation">
@@ -205,7 +205,7 @@
                     <div class="my-2 col-lg-6 col-xl-4" v-for="item in getClipsItems">
                         <form action="{% url 'download' %}" method="post">
                         {% csrf_token %}
-                        <div class="card border-0 rounded shadow bg-light">
+                        <div class="card border-0 shadow-sm bg-light">
                             <div class="card border-0">
                                 <a v-on:click="openClipModal(item.embed_url)" style="cursor: pointer">
                                     <img class="card-img" v-bind:src="item.thumbnail_url">
@@ -224,11 +224,11 @@
                                 </a>
                             </div>
                             <div class="card-body mt-1">
-                                <button type="submit" class="btn btn-outline-success rounded shadow-sm" name="id" v-bind:value="item.id"><i class="fas fa-download" style="font-size: 1.0em"></i></button>
-                                <button type="button" class="btn btn-outline-info rounded shadow-sm ml-2" v-on:click="appendClip(item)" v-if="!isSelectedClip(item)">
+                                <button type="submit" class="btn btn-outline-success rounded" name="id" v-bind:value="item.id"><i class="fas fa-download" style="font-size: 1.0em"></i></button>
+                                <button type="button" class="btn btn-outline-info rounded ml-2" v-on:click="appendClip(item)" v-if="!isSelectedClip(item)">
                                     <i class="fas fa-plus"></i>
                                 </button>
-                                <button type="button" class="btn btn-info rounded shadow-sm ml-2" v-on:click="deleteClip(item)" v-else>
+                                <button type="button" class="btn btn-info rounded ml-2" v-on:click="deleteClip(item)" v-else>
                                     <i class="fas fa-check"></i>
                                 </button>
                             </div>
@@ -272,26 +272,26 @@
 
     <!-- TIMELINE AREA -->
     <section id="timeline">
-    <div class="p-3 my-4 shadow section bg-white">
+    <div class="p-3 my-4 shadow-sm section bg-white">
     <div class="row pt-2">
         <div class="col pb-3">
             <h2>
                 <a class="text-dark text-decoration-none font-weight-bold" role="button" href="#timeline" data-toggle="tooltip" title="Create a video from inserted clips" data-placement="right">
-                Clips to Highlight
+                Edit Selected Clips
                 </a>
             </h2>
-            <span class="text-secondary ml-2 mb-1">
+            <div class="text-secondary">
                 Press
-                <span class="btn btn-sm btn-outline-info rounded shadow-sm mx-1"><i class="fas fa-plus" style="font-size: 0.9em"></i></span>
-                button to add a clip
-            </span>
-            <p class="text-secondary mt-2">
-                <button class="btn btn-secondary ml-2" data-toggle="collapse" data-target="#timelineNote"
+                <span class="btn btn-sm btn-outline-info rounded mx-1"><i class="fas fa-plus" style="font-size: 0.9em"></i></span>
+                button to select a clip
+            </div>
+            <div class="mt-2">
+                <button class="btn btn-secondary" data-toggle="collapse" data-target="#timelineNote"
                         aria-expand="false" aria-controls="digestNote">
-                    <i class="fas fa-exclamation-circle pt-1" style="font-size: 1.3em"></i>
+                    <i class="fas fa-exclamation-circle" style="font-size: 1.3em"></i>
                     <span class="ml-1">Note</span>
                 </button>
-                <div class="collapse shadow-sm p-3 bg-light" id="timelineNote">
+                <div class="collapse shadow-sm mt-1 p-2 bg-light" id="timelineNote">
                     <span class="d-block">
                         ・The highlights video can be up to 10 minutes long.
                     </span>
@@ -299,7 +299,7 @@
                         ・This process which create a highlights video takes more than 10 minutes.
                     </span>
                 </div>
-            </p>
+            </div>
             <div class="mt-2">
                 <button class="btn btn-info" v-on:click="sortTimelineClipsByDatetime">
                     <i class="fas fa-sort-amount-down-alt"></i>
@@ -308,7 +308,7 @@
             </div>
         </div>
     </div>
-        <div class="row px-3 pt-2 pb-3 m-1 shadow-sm rounded-lg bg-light">
+        <div class="row px-2 pt-2 pb-3 m-1 shadow-sm bg-light">
             <div class="col-12">
             <p class="text-dark font-weight-bold">
                 <span>
@@ -316,12 +316,12 @@
                 </span>
                 <span class="ml-2">
                     <span v-bind:class="{ 'text-danger': playTimeExceeded }">
-                    Length : [[ getTotalClipSeconds ]]
+                    Duration : [[ getTotalClipSeconds ]]
                     </span>
                 </span>
             </p>
             </div>
-            <button type="button" class="btn btn-outline-dark mr-1 ml-4" v-on:click="prevClip">＜</button>
+            <button type="button" class="btn btn-outline-dark mr-1 ml-4" v-on:click="prevClip"><</button>
             <div v-for="(item, index) in getTimelineItems" class="border border-secondary">
                 <div class="card border-0" v-on:mouseover="item.isHover = true" v-on:mouseleave="item.isHover = false">
                     <div class="card-img">
@@ -345,7 +345,7 @@
                     </span>
                 </div>
             </div>
-            <button type="button" class="btn btn-outline-dark ml-1" v-on:click="nextClip">＞</button>
+            <button type="button" class="btn btn-outline-dark ml-1" v-on:click="nextClip">></button>
 
             <div class="modal fade" id="timelineModal" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -387,7 +387,7 @@
     <!-- /TIMELINE AREA -->
     <!-- DIGEST OPTION -->
     <section id="options">
-        <div class="p-3 my-4 shadow section bg-white">
+        <div class="p-3 my-4 shadow-sm section bg-white">
             <div class="row p-3">
                 <div class="col-lg-8">
                 <div class="bg-light p-3 rounded shadow-sm">
@@ -490,7 +490,7 @@
                 <div class="custom-control custom-checkbox">
                     <input class="custom-control-input" type="checkbox" id="drawtext" v-model="isDrawText">
                     <label class="custom-control-label" for="drawtext">
-                        <h4 class="text-dark font-weight-bold">Draw Text</h4>
+                        <h4 class="text-dark font-weight-bold">Draw clip titles</h4>
                     </label>
                 </div>
                 <div class="mt-3">
@@ -556,18 +556,18 @@
 
     <!-- REQUESTED DIGEST AREA -->
     <section id="digest">
-        <div class="row p-3 shadow section  bg-white">
+        <div class="row p-3 shadow-sm section  bg-white">
             <div class="col-12">
                 <h2 class="text-dark font-weight-bold">Highlight Videos</h2>
             </div>
             <div class="col-12">
-                <p class="text-secondary mt-2">
-                    <button class="btn btn-secondary ml-2" data-toggle="collapse" data-target="#digestNote"
+                <div>
+                    <button class="btn btn-secondary" data-toggle="collapse" data-target="#digestNote"
                             aria-expand="false" aria-controls="digestNote">
-                        <i class="fas fa-exclamation-circle pt-1" style="font-size: 1.3em"></i>
+                        <i class="fas fa-exclamation-circle" style="font-size: 1.3em"></i>
                         <span class="ml-1">Note</span>
                     </button>
-                    <div class="collapse shadow-sm p-3 bg-light" id="digestNote">
+                    <div class="collapse shadow-sm p-2 bg-light" id="digestNote">
                         <span class="d-block">
                             ・This process which create a highlights video takes more than 10 minutes.
                         </span>
@@ -575,8 +575,8 @@
                             ・The highlights video is available for 7 days after requested.
                         </span>
                     </div>
-                </p>
-                <button class="btn btn-info" v-on:click="getHighlights"><i class="fas fa-sync"></i></button>
+                </div>
+                <button class="mt-2 btn btn-info" v-on:click="getHighlights"><i class="fas fa-sync"></i></button>
             </div>
             <!-- DIGEST TABLE -->
             <div class="table-responsive">
@@ -586,9 +586,9 @@
                         <th>Title</th>
                         <th>Requested</th>
                         <th>Status</th>
-                        <th>Restore</th>
                         <th>Download</th>
                         <th>Share</th>
+                        <th>Restore</th>
                     </tr>
                 </thead>
                     <tr v-for="highlight in getHighlightsItems">
@@ -620,11 +620,6 @@
                             </div>
                         </td>
                         <td>
-                            <button class="btn btn-outline-success" v-on:click="restoreDigest(highlight)">
-                                <i class="fas fa-wrench"></i>
-                            </button>
-                        </td>
-                        <td>
                             <div class="" v-if="highlight.status == 'Available'">
                                 <a v-on:click="openDigestModal(highlight.task_id)" style="cursor: pointer">
                                     <i class="fas fa-file-video faa-float animated shadow-sm text-twitch" style="font-size: 1.5em"></i>
@@ -641,6 +636,11 @@
                             <div v-else>
                                 -
                             </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-outline-success" v-on:click="restoreDigest(highlight)">
+                                <i class="fas fa-wrench"></i>
+                            </button>
                         </td>
                     </tr>
             </table>
