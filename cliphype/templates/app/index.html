@@ -3,7 +3,7 @@
 {% load account %}
 {% load socialaccount %}
 
-{% block head_title %}{{ user.username }} | ClipHype{% endblock %}
+{% block head_title %}ClipHype - Twitch Clips to Highlights Video{% endblock %}
 
 {% block content %}
 <div id="app" v-cloak>
@@ -60,8 +60,8 @@
                     :prev-link-class="'page-link rounded-circle mt-3 mr-2 bg-white shadow-sm'"
                     >
             </paginate>
-        <div class="bg-light rounded ml-1" v-for="item in getFollowsItems">
-            <div class="card bg-light border-0">
+        <div class="bg-lightdark rounded ml-1" v-for="item in getFollowsItems">
+            <div class="card bg-lightdark border-0">
                 <a v-on:click="streamerName = item.to_login; streamerId = item.to_id;" style="cursor: pointer">
                 <div class="card-img">
                     <img class="rounded-circle shadow-sm img-fluid" v-bind:src="item.profile_image_url" width="70">
