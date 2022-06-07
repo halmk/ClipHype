@@ -84,6 +84,8 @@ var app = new Vue({
       'categoryId': '',
       'results': [],
     },
+    favoriteFollows: [],
+    isFavorite: false,
   },
 
   computed: {
@@ -91,11 +93,13 @@ var app = new Vue({
     getFollowsItems: function() {
       let current = this.followsCurrentPage * this.followsParPage;
       let start = current - this.followsParPage;
+      if(this.isFavorite) return this.favoriteFollows.slice(start, current);
       return this.follows.slice(start, current);
     },
 
     /* ページングのページ数を返す */
     getFollowsPageCount: function() {
+      if(this.isFavorite) return Math.ceil(this.favoriteFollows.length / this.followsParPage);
       return Math.ceil(this.follows.length / this.followsParPage);
     },
 
@@ -325,6 +329,7 @@ var app = new Vue({
       requested_at.add(-1, "Day");
       requested_at = requested_at.format("YYYY-MM-DDTHH:mm");
       this.getCountAutoClips(requested_at);
+      this.updateFavoriteFollows();
     },
 
 
@@ -1129,7 +1134,44 @@ var app = new Vue({
           //console.log("getAfterClips:失敗");
           //console.log(error.response);
         })
-    }
+    },
+
+    // localStorageにお気に入りチャンネルを登録する
+    setFavoriteChannel: function(streamer_name) {
+      let favorites = localStorage.getItem('favorites');
+      favorites = (favorites == null) ? "" : favorites;
+      favorites = favorites.split(',');
+      console.log(favorites);
+      favorites.push(streamer_name);
+      localStorage.setItem('favorites', favorites.join(','));
+      this.updateFavoriteFollows();
+    },
+
+    removeFavoriteChannel: function(streamer_name) {
+      let favorites = localStorage.getItem('favorites');
+      favorites = (favorites == null) ? "" : favorites;
+      favorites = favorites.split(',');
+      favorites = favorites.filter(favorite => favorite !== streamer_name);
+      localStorage.setItem('favorites', favorites.join(','));
+      this.updateFavoriteFollows();
+    },
+
+    updateFavoriteFollows: function() {
+      let favorites = localStorage.getItem('favorites');
+      favorites = (favorites == null) ? "" : favorites;
+      favorites = favorites.split(',');
+      this.favoriteFollows = [];
+      this.follows.forEach(follow => {
+        this.$set(follow, 'is_favorite', false);
+        favorites.forEach(favorite => {
+          if (follow['to_login'] == favorite) {
+            this.favoriteFollows.push(follow);
+            this.$set(follow, 'is_favorite', true);
+            return;
+          }
+        })
+      });
+    },
   },
 
   created() {
