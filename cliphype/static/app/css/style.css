@@ -71,11 +71,25 @@
     padding: 0;
 }
 .channel-count {
-    right: 0rem;
+    left: 0rem;
+    background-color: rgba(255,255,255,0);
 }
 .channel-badge {
     background-color: rgba(255,255,255,0.8);
     bottom: 0rem;
+}
+.channel-favorite {
+    background-color: rgba(255,255,255,0);
+    right: -0.3rem;
+    top: -0.3rem;
+    border: rgba(255,255,255,0);
+}
+.channel-favorite-active {
+    color: rgba(221, 221, 5, 0.9);
+    background-color: rgba(255,255,255,0);
+    right: -0.3rem;
+    top: -0.3rem;
+    border: rgba(255,255,255,0);
 }
 .page-link {
     border: 10px;
