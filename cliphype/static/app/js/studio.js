@@ -37,7 +37,7 @@ var app = new Vue({
     datepickerEndedAt: '2019-09-03',
     DatePickerFormat: 'yyyy-MM-dd',
     clipsAfter: '',
-    username: '',
+    userName: '',
     streamerName: '',
     streamerId: '',
     videos: [],
@@ -1141,7 +1141,7 @@ var app = new Vue({
       let favorites = localStorage.getItem('favorites');
       favorites = (favorites == null) ? "" : favorites;
       favorites = favorites.split(',');
-      console.log(favorites);
+      //console.log(favorites);
       favorites.push(streamer_name);
       localStorage.setItem('favorites', favorites.join(','));
       this.updateFavoriteFollows();
