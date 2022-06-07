@@ -45,6 +45,7 @@
             <a class="text-dark text-decoration-none font-weight-bold" tabindex="-1" href="#follows" data-toggle="tooltip" title="Click icon to show selected streamer's clips" data-placement="right">
             Follow Channels
             </a>
+            <button type="button" @click="isFavorite = !isFavorite" class="btn btn-outline-primary" data-toggle="button">Favorite</button>
         </h2>
         <div class="row justify-content-center my-2">
             <paginate class="justify-content-center" v-model="followsCurrentPage"
@@ -63,19 +64,25 @@
         <div class="bg-lightdark rounded ml-1" v-for="item in getFollowsItems">
             <div class="card bg-lightdark border-0">
                 <a v-on:click="streamerName = item.to_login; streamerId = item.to_id;" style="cursor: pointer">
-                <div class="card-img">
-                    <img class="rounded-circle shadow-sm img-fluid" v-bind:src="item.profile_image_url" width="70">
-                </div>
-                <div class="card-img-overlay streamer-img">
-                    <div class="card-text">
-                        <button type="button" class="position-absolute channel-count badge badge-pill badge-secondary text-light" v-show="item.autoclip_count>0" data-toggle="tooltip" data-placement="right" title="The number of auto generated clips in 24 hours">
-                            [[ item.autoclip_count ]]
-                        </button>
-                        <span class="position-absolute w-100 channel-badge text-center text-dark badge badge-pill badge-light overflow-hidden font-weight-bold">
-                            [[ item.to_login ]]
-                        </span>
+                    <div class="card-img">
+                        <img class="rounded-circle shadow-sm img-fluid" v-bind:src="item.profile_image_url" width="70">
                     </div>
-                </div>
+                    <div class="card-img-overlay streamer-img">
+                        <div class="card-text">
+                            <button type="button" class="position-absolute channel-count badge badge-pill badge-secondary text-light" v-show="item.autoclip_count>0" data-toggle="tooltip" data-placement="right" title="The number of auto generated clips in 24 hours">
+                                [[ item.autoclip_count ]]
+                            </button>
+                            <button type="button" v-if="item.is_favorite" @click="removeFavoriteChannel(item.to_login)" class="position-absolute channel-favorite-active" data-toggle="tooltip" data-placement="right" title="Favorite">
+                                <i class="fas fa-star"></i>
+                            </button>
+                            <button type="button" v-else @click="setFavoriteChannel(item.to_login)" class="position-absolute channel-favorite" data-toggle="tooltip" data-placement="right" title="Favorite">
+                                <i class="far fa-star"></i>
+                            </button>
+                            <span class="position-absolute w-100 channel-badge text-center text-dark badge badge-pill badge-light overflow-hidden font-weight-bold">
+                                [[ item.to_login ]]
+                            </span>
+                        </div>
+                    </div>
                 </a>
             </div>
         </div>
@@ -556,96 +563,98 @@
 
     <!-- REQUESTED DIGEST AREA -->
     <section id="digest">
-        <div class="row p-3 shadow-sm section  bg-white">
-            <div class="col-12">
-                <h2 class="text-dark font-weight-bold">Highlight Videos</h2>
-            </div>
-            <div class="col-12">
-                <div>
-                    <button class="btn btn-secondary" data-toggle="collapse" data-target="#digestNote"
-                            aria-expand="false" aria-controls="digestNote">
-                        <i class="fas fa-exclamation-circle" style="font-size: 1.3em"></i>
-                        <span class="ml-1">Note</span>
-                    </button>
-                    <div class="collapse shadow-sm p-2 bg-light" id="digestNote">
-                        <span class="d-block">
-                            ・This process which create a highlights video takes more than 10 minutes.
-                        </span>
-                        <span class="d-block">
-                            ・The highlights video is available for 7 days after requested.
-                        </span>
-                    </div>
+        <div class="p-3 shadow-sm section  bg-white">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="text-dark font-weight-bold">Highlight Videos</h2>
                 </div>
-                <button class="mt-2 btn btn-info" v-on:click="getHighlights"><i class="fas fa-sync"></i></button>
+                <div class="col-12">
+                    <div>
+                        <button class="btn btn-secondary" data-toggle="collapse" data-target="#digestNote"
+                                aria-expand="false" aria-controls="digestNote">
+                            <i class="fas fa-exclamation-circle" style="font-size: 1.3em"></i>
+                            <span class="ml-1">Note</span>
+                        </button>
+                        <div class="collapse shadow-sm p-2 bg-light" id="digestNote">
+                            <span class="d-block">
+                                ・This process which create a highlights video takes more than 10 minutes.
+                            </span>
+                            <span class="d-block">
+                                ・The highlights video is available for 7 days after requested.
+                            </span>
+                        </div>
+                    </div>
+                    <button class="mt-2 btn btn-info" v-on:click="getHighlights"><i class="fas fa-sync"></i></button>
+                </div>
+                <!-- DIGEST TABLE -->
+                <div class="col-12 table-responsive">
+                <table class="table my-2 table-hover shadow-sm">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>Requested</th>
+                            <th>Status</th>
+                            <th>Download</th>
+                            <th>Share</th>
+                            <th>Restore</th>
+                        </tr>
+                    </thead>
+                        <tr v-for="highlight in getHighlightsItems">
+                            <td>
+                                [[ highlight.title ]]
+                            </td>
+                            <td>
+                                [[ formatRequested(highlight.created) ]]
+                            </td>
+                            <td>
+                                <div class="text-secondary" v-if="highlight.status == 'Pending'">
+                                    <i class="fas fa-spinner faa-spin animated mr-1"></i>
+                                    [[ highlight.status ]]
+                                </div>
+                                <div class="text-secondary" v-else-if="highlight.status == 'Processing'">
+                                    <i class="fas fa-spinner faa-spin animated mr-1"></i>
+                                    [[ highlight.status ]]
+                                </div>
+                                <div class="text-dark" v-else-if="highlight.status == 'Expired'">
+                                    [[ highlight.status ]]
+                                </div>
+                                <div class="text-success font-weight-bold" v-else-if="highlight.status == 'Available'">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    [[ highlight.status ]]
+                                </div>
+                                <div class="text-secondary" v-else>
+                                    <i class="fas fa-spinner faa-spin animated mr-1"></i>
+                                    [[ highlight.status ]]
+                                </div>
+                            </td>
+                            <td>
+                                <div class="" v-if="highlight.status == 'Available'">
+                                    <a v-on:click="openDigestModal(highlight.task_id)" style="cursor: pointer">
+                                        <i class="fas fa-file-video faa-float animated shadow-sm text-twitch" style="font-size: 1.5em"></i>
+                                    </a>
+                                </div>
+                                <div class="" v-else>
+                                    -
+                                </div>
+                            </td>
+                            <td>
+                                <div v-if="highlight.status == 'Available'">
+                                    <button class="btn btn-danger" v-on:click="openYoutubeFormModal(highlight.task_id)">YT</button>
+                                </div>
+                                <div v-else>
+                                    -
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-outline-success" v-on:click="restoreDigest(highlight)">
+                                    <i class="fas fa-wrench"></i>
+                                </button>
+                            </td>
+                        </tr>
+                </table>
+                </div>
+                <!-- /DIGEST TABLE -->
             </div>
-            <!-- DIGEST TABLE -->
-            <div class="table-responsive">
-            <table class="table m-2 table-hover shadow-sm">
-                <thead class="thead-light">
-                    <tr>
-                        <th>Title</th>
-                        <th>Requested</th>
-                        <th>Status</th>
-                        <th>Download</th>
-                        <th>Share</th>
-                        <th>Restore</th>
-                    </tr>
-                </thead>
-                    <tr v-for="highlight in getHighlightsItems">
-                        <td>
-                            [[ highlight.title ]]
-                        </td>
-                        <td>
-                            [[ formatRequested(highlight.created) ]]
-                        </td>
-                        <td>
-                            <div class="text-secondary" v-if="highlight.status == 'Pending'">
-                                <i class="fas fa-spinner faa-spin animated mr-1"></i>
-                                [[ highlight.status ]]
-                            </div>
-                            <div class="text-secondary" v-else-if="highlight.status == 'Processing'">
-                                <i class="fas fa-spinner faa-spin animated mr-1"></i>
-                                [[ highlight.status ]]
-                            </div>
-                            <div class="text-dark" v-else-if="highlight.status == 'Expired'">
-                                [[ highlight.status ]]
-                            </div>
-                            <div class="text-success font-weight-bold" v-else-if="highlight.status == 'Available'">
-                                <i class="fas fa-check-circle mr-1"></i>
-                                [[ highlight.status ]]
-                            </div>
-                            <div class="text-secondary" v-else>
-                                <i class="fas fa-spinner faa-spin animated mr-1"></i>
-                                [[ highlight.status ]]
-                            </div>
-                        </td>
-                        <td>
-                            <div class="" v-if="highlight.status == 'Available'">
-                                <a v-on:click="openDigestModal(highlight.task_id)" style="cursor: pointer">
-                                    <i class="fas fa-file-video faa-float animated shadow-sm text-twitch" style="font-size: 1.5em"></i>
-                                </a>
-                            </div>
-                            <div class="" v-else>
-                                -
-                            </div>
-                        </td>
-                        <td>
-                            <div v-if="highlight.status == 'Available'">
-                                <button class="btn btn-danger" v-on:click="openYoutubeFormModal(highlight.task_id)">YT</button>
-                            </div>
-                            <div v-else>
-                                -
-                            </div>
-                        </td>
-                        <td>
-                            <button class="btn btn-outline-success" v-on:click="restoreDigest(highlight)">
-                                <i class="fas fa-wrench"></i>
-                            </button>
-                        </td>
-                    </tr>
-            </table>
-            </div>
-            <!-- /DIGEST TABLE -->
         </div>
         <div class="modal fade" id="digestModal" tabindex="-1" role="dialog" aria-labelledby="label1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
