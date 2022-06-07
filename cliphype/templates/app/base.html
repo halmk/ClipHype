@@ -18,7 +18,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 	<title>{% block head_title %}{% endblock %}</title>
-	<link href="https://fonts.googleapis.com/css?family=M+PLUS+1p|Notable|Poppins&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Roboto:wght@900|Noto+Sans+JP|Righteous&display=swap" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="{% static 'app/css/bootstrap.min.css' %}">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.2/css/all.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome-animation/0.2.1/font-awesome-animation.min.css">
@@ -26,18 +26,18 @@
 	<link rel="shortcut icon" type="image/png" href="{% static 'app/favicon.ico' %}"/>
 	<style>
 		body {
-			font-family: 'Poppins', sans-serif;
+			font-family: 'Roboto', 'Noto Sans JP', sans-serif;
 		}
     </style>
     {% block extra_head %}
     {% endblock %}
 </head>
-<body class="bg-light">
+<body class="bg-lightdark">
 	<!-- HEADER -->
-	<nav class="navbar navbar-expand navbar-white bg-white navbar-clip shadow-sm">
+	<nav class="navbar navbar-expand navbar-white bg-twitch-dark navbar-clip shadow-sm">
     <div class="container">
 		<div class="mr-1 rounded">
-			<a class="navbar-brand font-weight-bold text-dark" href="/">CLIPHYPE<small class="ml-1 badge badge-light text-secondary shadow-sm">beta</small></a>
+			<a class="navbar-brand text-light font-weight-bold" style="font-family: 'Righteous'" href="/">ClipHype<small class="ml-1 badge badge-light text-secondary">beta</small></a>
 		</div>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-content">
             <span class="navbar-toggler-icon"></span>
@@ -50,9 +50,9 @@
 						{% if user.is_authenticated %}
 						<div class="font-weight-bold text-dark">
 							<div class="btn-group">
-								<button type="button" class="btn btn-sm btn-default border dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									<img src="{{ twitch_account.profile_image_url }}" class="rounded-circle" width="25">
-									<span class="caret"></span>
+									<span class="caret text-light"></span>
 								</button>
 								<ul class="dropdown-menu">
 									<li><a class="ml-3 text-dark" href="{% url 'report' %}">Report</a></li>
@@ -88,14 +88,14 @@
 	<!-- /NOTES -->
 
 	<!-- MAIN -->
-	<main class="bg-light my-3">
+	<main class="bg-lightdark my-3">
 	{% block content %}
 	{% endblock %}
 	</main>
 	<!-- /MAIN -->
 
 	<!-- FOOTER -->
-	<footer class="py-4 bg-dark text-light">
+	<footer class="py-4 bg-twitch-dark text-light">
 		<div class="container text-center">
 			<p><small class="font-weight-bold">Contact @</small>
 				<a href="https://twitter.com/hrmk_code" target="_blank"><i class="fab fa-twitter-square ml-1" style="color:white; font-size: 1.5em"></i></a>

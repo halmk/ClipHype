@@ -3,20 +3,25 @@
 }
 
 .section {
-    border-radius: 20px;
+    border-radius: 8px;
 }
 
 .bg-twitch {
     background: #772CE8;
 }
 .bg-twitch-light {
-    background: #9147FF;
+    background: #ede1ff;
 }
 .bg-twitch-dark {
     background: #2b2b5f;
+    background: #7855ab;
+    background: #6e4e9d;
 }
 .bg-black {
     background: #000000;
+}
+.bg-lightdark {
+   background: #efedf6;
 }
 .text-twitch-light {
     color: #9147FF;
@@ -60,17 +65,31 @@
 }
 .navbar-clip {
     border-top: solid 0px #2b2b5f;
-    border-bottom: solid 1px #2b2b5f;
+    border-bottom: solid 0px #2b2b5f;
 }
 .streamer-img {
     padding: 0;
 }
 .channel-count {
-    right: 0rem;
+    left: 0rem;
+    background-color: rgba(255,255,255,0);
 }
 .channel-badge {
     background-color: rgba(255,255,255,0.8);
     bottom: 0rem;
+}
+.channel-favorite {
+    background-color: rgba(255,255,255,0);
+    right: -0.3rem;
+    top: -0.3rem;
+    border: rgba(255,255,255,0);
+}
+.channel-favorite-active {
+    color: rgba(221, 221, 5, 0.9);
+    background-color: rgba(255,255,255,0);
+    right: -0.3rem;
+    top: -0.3rem;
+    border: rgba(255,255,255,0);
 }
 .page-link {
     border: 10px;
