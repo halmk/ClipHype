@@ -12,6 +12,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('twitchapi', views.twitch_api_request, name='twitch_api'),
     path('download', views.download_clip, name='download'),
+    path('downloadclips', views.download_clips, name='download_clips'),
     path('report', views.report, name='report'),
     path('unlink', views.unlink, name='unlink'),
     path('policy', views.policy, name='policy'),
