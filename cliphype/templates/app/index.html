@@ -307,11 +307,18 @@
                     </span>
                 </div>
             </div>
-            <div class="mt-2">
-                <button class="btn btn-info" v-on:click="sortTimelineClipsByDatetime">
-                    <i class="fas fa-sort-amount-down-alt"></i>
-                    <i class="far fa-clock"></i>
+            <div class="btn-group mt-2">
+                <button class="btn btn-info" @click="isSortDesc = !isSortDesc">
+                    <i v-if="isSortDesc" class="fas fa-sort-numeric-down" style="font-size: 1.2em"></i>
+                    <i v-else class="fas fa-sort-numeric-down-alt" style="font-size: 1.2em"></i>
+                    <i class="ml-1 fas fa-arrows-alt-v"></i>
                 </button>
+                <button class="btn btn-info dropdown-toggle dropdown-toggle-split" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                </button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" @click="sortTimelineClipsByCreated" style="cursor: pointer">Created</a>
+                    <a class="dropdown-item" @click="sortTimelineClipsByViewCount" style="cursor: pointer">View count</a>
+                </div>
             </div>
         </div>
     </div>
