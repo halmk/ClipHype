@@ -86,6 +86,7 @@ var app = new Vue({
     },
     favoriteFollows: [],
     isFavorite: false,
+    isSortDesc: true,
   },
 
   computed: {
@@ -644,16 +645,6 @@ var app = new Vue({
       return cmp;
     },
 
-    timelineCmpByEpoch: function(a, b) {
-      let cmp = 0;
-      if(a.created_epoch >= b.created_epoch) {
-        cmp = 1;
-      } else {
-        cmp = -1;
-      }
-      return cmp;
-    },
-
     appendClip: function(clip) {
       let timelineClip = JSON.parse(JSON.stringify(clip));
       let index = 0;
@@ -804,8 +795,28 @@ var app = new Vue({
       }
     },
 
-    sortTimelineClipsByDatetime: function() {
-      this.timelineClips.sort(this.timelineCmpByEpoch);
+    sortTimelineClipsByCreated: function() {
+      if(this.isSortDesc) {
+        this.timelineClips.sort((a,b) => {
+          return a.created_epoch - b.created_epoch;
+        });
+      } else {
+        this.timelineClips.sort((a,b) => {
+          return b.created_epoch - a.created_epoch;
+        })
+      }
+    },
+
+    sortTimelineClipsByViewCount: function() {
+      if(this.isSortDesc) {
+        this.timelineClips.sort((a,b) => {
+          return a.view_count - b.view_count;
+        });
+      } else {
+        this.timelineClips.sort((a,b) => {
+          return b.view_count - a.view_count;
+        })
+      }
     },
 
     calcTotalClipSeconds: function() {
