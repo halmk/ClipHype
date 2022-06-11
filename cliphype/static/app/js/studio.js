@@ -1233,7 +1233,7 @@ var app = new Vue({
         //console.log(error.response);
       });
     },
-    
+
     calcRemainingTimeTillNextClip: function() {
       let current = moment().valueOf();
       let elapsed = (current - this.selectedClipStart) / 1000.0;
