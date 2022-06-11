@@ -55,6 +55,7 @@ var app = new Vue({
     selectedClipEditURL: '',
     selectedClipEditableTime: '',
     selectedClipTitle: '',
+    selectedClipDuration: 0,
     totalClipSeconds: 0,
     playTimeExceeded: false,
     highlights: [],
@@ -87,6 +88,11 @@ var app = new Vue({
     favoriteFollows: [],
     isFavorite: false,
     isSortDesc: true,
+    autoplayTimer: -1,
+    remainingTimeTillNextClip: -1,
+    selectedClipStart: 0,
+    isAutoplaying: false,
+    additionalTime: 0,
   },
 
   computed: {
@@ -164,6 +170,11 @@ var app = new Vue({
       let minutes = Math.floor((this.selectedClipEditableTime%(60*60))/60);
       let seconds = Math.floor(this.selectedClipEditableTime%60);
       return ('00' + hours).slice(-2) + 'h' + ('00' + minutes).slice(-2) + 'm' + ('00' + seconds).slice(-2) + 's';
+    },
+
+    additionalTimeStr: function() {
+      if(this.additionalTime >= 0) return '+' + this.additionalTime;
+      else return this.additionalTime;
     }
   },
 
@@ -704,6 +715,8 @@ var app = new Vue({
       this.selectedClipModalIndex = index;
       this.selectedClipTitle = this.timelineClips[this.selectedClipModalIndex].title;
       this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
+      this.selectedClipDuration = this.timelineClips[this.selectedClipModalIndex].duration;
+      this.selectedClipStart = moment().valueOf();
       $('#timelineModal').modal();
     },
 
@@ -711,12 +724,16 @@ var app = new Vue({
       this.selectedClipModalIndex = Math.max(0, this.selectedClipModalIndex-1);
       this.timelineEmbedUrl = this.timelineClips[this.selectedClipModalIndex].embed_url;
       this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
+      this.selectedClipDuration = this.timelineClips[this.selectedClipModalIndex].duration;
+      this.selectedClipStart = moment().valueOf();
     },
 
     openNextSelectedClip: function() {
       this.selectedClipModalIndex = Math.min(this.timelineClips.length-1, this.selectedClipModalIndex+1);
       this.timelineEmbedUrl = this.timelineClips[this.selectedClipModalIndex].embed_url;
       this.selectedClipEditURL = this.timelineClips[this.selectedClipModalIndex].url + "/edit";
+      this.selectedClipDuration = this.timelineClips[this.selectedClipModalIndex].duration;
+      this.selectedClipStart = moment().valueOf();
     },
 
     calcEditableTime: function() {
@@ -776,6 +793,8 @@ var app = new Vue({
         index = Math.min(this.timelineClips.length-1, index);
         this.selectedClipModalIndex = index;
         this.selectedClipTitle = this.timelineClips[index]['title'];
+        this.selectedClipDuration = this.timelineClips[index]['duration'];
+        this.selectedClipStart = moment().valueOf();
         this.timelineEmbedUrl = this.timelineClips[index]['embed_url'];
       }
       this.calcTotalClipSeconds();
@@ -1183,6 +1202,32 @@ var app = new Vue({
         })
       });
     },
+
+    calcRemainingTimeTillNextClip: function() {
+      let current = moment().valueOf();
+      let elapsed = (current - this.selectedClipStart) / 1000.0;
+      let remainingTime = this.selectedClipDuration + this.additionalTime - elapsed;
+      this.remainingTimeTillNextClip = Math.floor(remainingTime);
+      if(this.remainingTimeTillNextClip <= 0) {
+        this.openNextSelectedClip();
+      }
+    },
+
+    calcRemainingTimeTillNextClipInterval: function() {
+      this.selectedClipStart = moment().valueOf();
+      this.autoplayTimer = setInterval(this.calcRemainingTimeTillNextClip, 200);
+    },
+
+    startAutoplay: function() {
+      this.isAutoplaying = true;
+      this.selectedClipStart = moment().valueOf();
+      this.calcRemainingTimeTillNextClipInterval();
+    },
+
+    stopAutoplay: function() {
+      this.isAutoplaying = false;
+      clearInterval(this.autoplayTimer);
+    }
   },
 
   created() {
