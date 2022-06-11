@@ -1,6 +1,7 @@
 import json
 import logging
 import ast
+from zipfile import ZipFile, ZIP_DEFLATED
 from django_filters import rest_framework as filters
 from rest_framework import viewsets
 
@@ -181,6 +182,27 @@ def download_clip(request):
     response = HttpResponse(clip_file['file'], content_type='video/mp4')
     response['Content-Disposition'] = f'attachment; filename="{clip_file["name"]}"'
     return response
+
+
+'''
+ダウンロードクリップページ
+    クリップをダウンロードする
+'''
+
+
+def download_clips(request):
+    if request.method == "POST":
+        clips = json.loads(request.body)['clips']
+        logger.info(f"\nReceived download clips request: {clips}")
+        response = HttpResponse(content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=cliphype_clips.zip'
+        with ZipFile(response, 'w', compression=ZIP_DEFLATED) as zf:
+            for i, clip in enumerate(clips):
+                filename = f"{i+1:03}_{clip}.mp4"
+                clip_file = twitch_api.downloadClip(clip, filename)
+                zf.writestr(filename, clip_file['file'].content)
+
+        return response
 
 
 '''

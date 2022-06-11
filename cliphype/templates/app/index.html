@@ -315,6 +315,10 @@
                 </button>
                 <button class="btn btn-info dropdown-toggle dropdown-toggle-split" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 </button>
+                <button class="btn btn-success" @click="postDownloadClips" :disabled="isDownloadingClips">
+                    <i v-if="isDownloadingClips" class="fas fa-spinner fa-spin" style="font-size: 1.0em"></i>
+                    <i v-else class="fas fa-download" style="font-size: 1.0em"></i>
+                </button>
                 <div class="dropdown-menu">
                     <a class="dropdown-item" @click="sortTimelineClipsByCreated" style="cursor: pointer">Created</a>
                     <a class="dropdown-item" @click="sortTimelineClipsByViewCount" style="cursor: pointer">View count</a>
@@ -741,6 +745,7 @@
     const task_url = "{% url 'task-list' %}";
     const autoclip_url = "{% url 'autoclip-list' %}";
     const studio_url = "{% url 'index' %}";
+    const download_clips_url = "{% url 'download_clips' %}";
     const api_url = "{% url 'twitch_api' %}";
     const youtube_submission_url = "{% url 'google_api_request' %}";
 </script>

@@ -87,6 +87,7 @@ var app = new Vue({
     },
     favoriteFollows: [],
     isFavorite: false,
+    isDownloadingClips: false,
     isSortDesc: true,
     autoplayTimer: -1,
     remainingTimeTillNextClip: -1,
@@ -1203,6 +1204,36 @@ var app = new Vue({
       });
     },
 
+    postDownloadClips: function() {
+      this.isDownloadingClips = true;
+      data = {
+        "clips": this.timelineClips.map((clip) => clip['id'])
+      }
+      axios({
+          url: download_clips_url,
+          method: 'POST',
+          responseType: 'blob',
+          data: data,
+          headers: {
+            'X-CSRFToken': csrftoken,
+          },
+      }).then(function(response) {
+        //console.log(response);
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        filename = 'clips-cliphype_' + moment().format('YYYYMMDDHHmmSS') + '.zip'
+        link.setAttribute('download', filename)
+        document.body.appendChild(link);
+        link.click();
+        app.isDownloadingClips = false;
+      })
+      .catch(function(error) {
+        console.log(error);
+        //console.log(error.response);
+      });
+    },
+    
     calcRemainingTimeTillNextClip: function() {
       let current = moment().valueOf();
       let elapsed = (current - this.selectedClipStart) / 1000.0;
