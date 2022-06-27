@@ -35,12 +35,24 @@ class Digest(models.Model):
     # 最初と最後にトランジションをつけるかどうか
     fl_transition = models.BooleanField(blank=True, null=True)
 
+    def __str__(self):
+        try:
+            return self.creator.username + ' | ' + self.title + ' (' + self.status + ')'
+        except:
+            return self.title
+
 
 class Contact(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=128)
     content = models.CharField(max_length=1024)
     pub_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        try:
+            return self.user.username + ' | ' + self.title
+        except:
+            return self.title
 
 
 class SocialAppToken(models.Model):
@@ -60,3 +72,6 @@ class AutoClip(models.Model):
     creator_name = models.CharField(max_length=128)
     requested_at = models.DateTimeField(auto_now_add=True)
     hype = models.FloatField(blank=True, null=True)
+
+    def __str__(self):
+        return self.broadcaster_name + '(' + self.requested_at + ')'
